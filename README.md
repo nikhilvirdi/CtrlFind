@@ -4,7 +4,7 @@ Given a programming problem written in English, find the Python code that solves
 
 This repo is the working record: every measurement, every source, every idea kept or dropped. Not a showcase. The shipped solution lives elsewhere.
 
----
+Full problem statement: [Problem Statement.pdf](./Problem%20Statement.pdf)
 
 ## The problem
 
@@ -18,8 +18,6 @@ Two further requirements beyond raw accuracy:
 - **Bonus, evolutionary retrieval.** Search across all versions at once. Hard because versions of the same snippet look nearly identical, so ranking between them is delicate.
 
 Scored by NDCG@10 and MRR, through MTEB, on the test split.
-
----
 
 ## The dataset
 
@@ -75,8 +73,6 @@ The I/O sections are boilerplate. Compressing a query down to its spec would dis
 
 **Metadata leaks.** `meta_information` holds the source URL for both queries and corpus, and gold pairs match on URL 100% of the time. MTEB passes only `text` to the encoder, so it isn't exploitable, and using it would be cheating. Noted so nobody builds on it by accident.
 
----
-
 ## What the field already found
 
 From the CoIR paper (ACL 2025), Table 3. NDCG@10:
@@ -109,8 +105,6 @@ Sources:
 - CoIR repo: https://github.com/CoIR-team/coir
 - Dataset: https://huggingface.co/datasets/CoIR-Retrieval/apps
 
----
-
 ## Ideas
 
 ### Alive
@@ -133,8 +127,6 @@ Sources:
 
 **LLM query rewriting.** Considered for the truncation problem. Truncation turned out to be second-order at 512 tokens, and the cost lands on the query path where speed is judged.
 
----
-
 ## Open questions
 
 - **Recall@50 for a small model on the test split.** The number that decides whether execution reranking is viable. Nobody publishes it.
@@ -142,8 +134,6 @@ Sources:
 - **How long does executing N candidates take?** Most wrong programs should fail fast, but that is an assumption, not a measurement.
 - **Which small model performs best here now?** The CoIR numbers are from 2024.
 - **Does the JavaScript/Python conflict between the overview deck and the theme PDF matter?** Unresolved. Overview says JavaScript, sample codebase, precision and recall. Theme PDF says Python, CoIR, NDCG and MRR.
-
----
 
 ## Experiment log
 
