@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import ast
 import random
+import warnings
 from typing import Callable
 
 SWAPS = {
@@ -32,10 +33,17 @@ SWAPS = {
 }
 
 
+def _parse(code: str) -> ast.Module:
+    # dataset snippets contain regex strings like "\d" that trigger harmless warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", SyntaxWarning)
+        return ast.parse(code)
+
+
 def reformat(code: str) -> str | None:
     """Same behaviour, different text: normalised layout, comments dropped."""
     try:
-        out = ast.unparse(ast.parse(code))
+        out = ast.unparse(_parse(code))
     except Exception:
         return None
     return out if out.strip() != code.strip() else "# tidied\n" + out
@@ -44,7 +52,7 @@ def reformat(code: str) -> str | None:
 def inject_bug(code: str, rng: random.Random) -> str | None:
     """Change one operator or integer constant. None if nothing to change."""
     try:
-        tree = ast.parse(code)
+        tree = _parse(code)
     except Exception:
         return None
     sites = []

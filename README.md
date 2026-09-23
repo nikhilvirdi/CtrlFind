@@ -1,167 +1,131 @@
-# Execution-verified code retrieval
+# Stenod
 
-Given a programming problem in English, find the Python code that solves it. Built for the CoIR APPS benchmark: 3,765 test problems searched against 8,765 solutions, on CPU.
+<p align="center">
+  <img width="480" alt="Stenod — a black box recorder for your AI coding sessions" src="https://github.com/user-attachments/assets/de2bdd63-0cb7-447a-a2cb-f1ac3525748d" />
+</p>
 
-Most retrieval systems guess which code matches a question by measuring how similar the two look. This one also checks. Contest problems ship an example input and its expected output, so the top candidates are run on that example, and any that print the right answer move to the top.
+<p align="center">
 
-## Results
+[![CI](https://github.com/nikhilvirdi/stenod/actions/workflows/ci.yml/badge.svg)](https://github.com/nikhilvirdi/stenod/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/steno-daemon.svg)](https://www.npmjs.com/package/steno-daemon)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![SQLite](https://img.shields.io/badge/SQLite-WAL%20mode-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![better-sqlite3](https://img.shields.io/badge/better--sqlite3-driver-003B57)](https://github.com/WiseLibs/better-sqlite3)
+[![Commander.js](https://img.shields.io/badge/CLI-commander.js-black)](https://github.com/tj/commander.js)
+[![chokidar](https://img.shields.io/badge/fs%20watching-chokidar-blue)](https://github.com/paulmillr/chokidar)
+[![node-pty](https://img.shields.io/badge/terminal-node--pty-blue)](https://github.com/microsoft/node-pty)
+[![web-tree-sitter](https://img.shields.io/badge/AST%20parsing-web--tree--sitter-orange)](https://github.com/tree-sitter/tree-sitter)
+[![wink-nlp](https://img.shields.io/badge/text%20analysis-wink--nlp-teal)](https://github.com/winkjs/wink-nlp)
+[![mockttp](https://img.shields.io/badge/HTTPS%20interception-mockttp-purple)](https://github.com/httptoolkit/mockttp)
+[![node-forge](https://img.shields.io/badge/CA%20generation-node--forge-purple)](https://github.com/digitalbazaar/forge)
+[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-5A67D8)](https://modelcontextprotocol.io/)
+[![Vitest](https://img.shields.io/badge/tested%20with-Vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![ESLint](https://img.shields.io/badge/lint-ESLint-4B32C3?logo=eslint&logoColor=white)](https://eslint.org/)
+[![Prettier](https://img.shields.io/badge/code%20style-Prettier-F7B93E?logo=prettier&logoColor=black)](https://prettier.io/)
 
-AppsRetrieval test split, scored through MTEB.
+</p>
 
-| Model | Size | NDCG@10 |
+A black box recorder for your AI coding sessions — now watching more than one at a time.
+
+AI-assisted coding sessions collapse at boundaries: rate limits, provider outages, context-window exhaustion, a developer switching tools mid-task. What's lost at that moment isn't just chat history. It's the *reasoning* — which decisions were made and why, which approaches were tried and rejected, and what you were in the middle of doing.
+
+Stenod is a local, deterministic daemon that watches your files, your terminal, and — where a tool allows it — the reasoning behind what an AI agent just did, and compiles all of it into a Handoff Manifest the moment you need to resume, in any AI tool, cold. It's out-of-band by design: it never depends on an AI being alive or reachable, because it was never inside that AI to begin with. That also means it doesn't care whether one agent is working your project or three of them are, at once, in different windows — it watches the shared ground under all of them.
+
+**Stenod 1.0** was filesystem and terminal capture for a single project. **Stenod 2.0**, described below, adds structured capture from the coding agents themselves — Claude Code, Codex, Kiro, Google Antigravity, Cursor — merged into one shared graph and interpreted as a current-truth scoreboard rather than a raw log. Full reasoning for both: [ARCHITECTURE.md](./ARCHITECTURE.md). Exactly what's captured and how: [SECURITY.md](./SECURITY.md).
+
+---
+
+## Install
+
+```
+npm install -g steno-daemon
+```
+
+The package on npm is named `steno-daemon` (a naming-availability adjustment); the command you run is `stenod`.
+
+## Quick Start
+
+```
+stenod init
+stenod start
+```
+
+> [!IMPORTANT]
+> `stenod start` alone only captures **filesystem** events — it never spawns a shell itself, since the daemon runs fully detached. To also capture a **terminal** session, run `stenod attach` in each interactive shell you want captured, once per session. To capture an AI tool's own reasoning, see [Supported Tools](#supported-tools) below.
+
+Work normally: save files, run commands, let your AI agent do its thing. When you need to hand off:
+
+```
+stenod handoff
+```
+
+The compiled Handoff Manifest — current decisions, plus everything tried and rejected along the way, with the reasons — is copied to your clipboard. Paste it into any AI tool to resume where you left off.
+
+## Supported Tools
+
+Stenod's filesystem and terminal capture works underneath any tool, automatically, with no setup — that's the baseline every project gets. On top of that, some tools expose enough of their own internals for Stenod to also capture *why* a change was made, not just that it happened. Where that's available, turn it on with:
+
+```
+stenod integrate <tool>
+```
+
+| Tool | What gets captured | Setup |
 |---|---|---|
-| BM25 | | 0.95 |
-| UniXcoder | 123M | 1.36 |
-| E5-base | 110M | 11.52 |
-| **E5-base + execution verification (this repo)** | **110M** | **19.96** |
-| E5-Mistral | 7B | 21.33 |
-| Voyage-Code-002 | API | 26.52 |
+| Claude Code | Full reasoning, via the tool's own hook system | `stenod integrate claude-code` |
+| Codex | Full reasoning, via hooks | `stenod integrate codex` |
+| Kiro | Full reasoning, via hooks, plus its own spec files | `stenod integrate kiro` |
+| Google Antigravity | Full reasoning, read from its session files directly | `stenod integrate antigravity` |
+| Cursor | Tool-call and file-edit reasoning, via its agent hooks | `stenod integrate cursor` |
+| VS Code + GitHub Copilot, Windsurf | Filesystem and terminal only — neither exposes anything more stable to build against yet | none needed, works by default |
 
-Reference rows are from the CoIR paper (ACL 2025, Table 3). Our E5-base baseline reproduces its 11.52 exactly.
+`stenod integrate` only ever adds to a tool's own configuration, never touches what's already there, and prints exactly what it changed. `stenod detach <tool>` undoes it and confirms the removal.
 
-| | Baseline | With verification |
-|---|---|---|
-| NDCG@10 | 11.52 | **19.96** |
-| MRR@10 | 9.88 | **19.05** |
+## Command Reference
 
-Across the 3,765 test queries, verification improved 420, made 10 worse, and left 3,335 unchanged.
-
-## How it works
-
-**Stage 1, meaning.** E5-base-v2 embeds the problem and every snippet, and cosine similarity picks the 50 closest. Keyword search is useless here: a problem about accordions and the code that solves it share almost no words, which is why BM25 scores 0.95.
-
-**Stage 2, verification.** The example input and expected output are parsed out of the problem. Each of the 50 candidates runs in its own Python process, in a throwaway directory, with a one-second limit. Candidates that print the expected output move above the rest, and both groups keep their stage 1 order.
-
-Collecting every passing candidate matters. Similar problems often share the same input format and a small integer answer, so a wrong snippet sometimes passes too. Stopping at the first pass picked the wrong one 7 times out of 15 in an early test. Ranking all passers by similarity puts the right one first or second instead.
-
-**Why stage 2 has limits.** It only helps when the right answer is already in the top 50, which happens for 31% of queries, and when the problem includes a parseable example, which 78% do. Everything else keeps its stage 1 rank. A stronger stage 1 model is the biggest remaining lever.
-
-## Speed
-
-Measured on Colab's free tier, 2 CPU cores for execution.
-
-| Step | Time |
+| Command | Description |
 |---|---|
-| Encode one query, CPU | a fraction of a second |
-| Search 8,765 snippets | a few milliseconds |
-| Run 50 candidates on the example | about 3.6 s |
-| Build the full index, T4 GPU | 134 s |
+| `stenod init [--reset]` | Set up the daemon + database for the current project. `--reset` rotates the local auth token. |
+| `stenod start [--project-root <path>] [--foreground]` | Start the ingestion daemon (filesystem capture by default). `--foreground` runs it attached to your terminal instead of detached. |
+| `stenod stop` | Stop the daemon cleanly. |
+| `stenod status` | Show daemon health, node count, last event timestamp, and any stale rule files or flagged conflicts. |
+| `stenod attach` | Bridge the current interactive shell's terminal activity to the daemon. Run once per terminal session you want captured. |
+| `stenod integrate <tool>` | Turn on structured capture for a supported tool. See [Supported Tools](#supported-tools). |
+| `stenod detach <tool>` | Remove exactly what `integrate` added for that tool. |
+| `stenod handoff [--full \| --new] [--worked \| --failed] [--token-budget <n>]` | Compile and copy the Handoff Manifest to your clipboard. `--full` (the default) gives the complete current picture; `--new` gives just what's changed since your last handoff. `--worked`/`--failed` tags the outcome of the most recent manifest. `--token-budget` overrides the default packing budget. |
+| `stenod anchor "<text>"` | Create a `CONSTRAINT` node directly — a decision or rule you want the compiler to always include. |
+| `stenod reject --since <duration>` | Mark nodes from a time window (e.g. `15m`) as rejected, excluded from all future manifests. |
+| `stenod enable-network-capture` | Opt in to capturing AI-provider network traffic (installs a local CA, starts a local proxy). Unix/Mac only. |
+| `stenod disable-network-capture` | Fully revert the network-capture tier: removes the CA from the OS trust store, reverts proxy settings. |
+| `stenod mcp` | Run as an MCP server over stdio, exposing the handoff manifest as a resource for MCP-connected clients. |
 
-Verification cost grows linearly with the number of candidates, at roughly 60 ms each, almost all of it Python interpreter startup. More threads than CPU cores makes it slower, not faster: starved processes hit the timeout even when they only needed 60 ms of work.
+## How It Works
 
-## Retrieval across versions (P1)
+`chokidar` watches your project's files, `stenod attach` bridges in terminal activity, and — for tools you've integrated — hooks or session files bring in the reasoning behind what an agent did. All of it feeds one causal graph in local SQLite, using typed edges instead of a vector store, so the system tracks which decisions are still true rather than which ones merely sound similar.
 
-CoIR APPS is a single snapshot, so `versions.py build` generates a history:
+Every decision lands on a scoreboard with one of three states: **settled** (the current answer), **rejected** (tried and abandoned, with the reason kept permanently next to it), or **open** (raised, not yet resolved). Nothing is ever deleted — a rejected idea stays visible so a fresh agent can't quietly re-propose it. Turning raw reasoning text into scoreboard entries runs through deterministic rules first, and only reaches for an optional AI assist — your own API key, never Stenod's, and only when you explicitly run a handoff — for genuinely ambiguous cases. Without that key configured, Stenod still works in full; the rare ambiguous item just gets flagged instead of auto-sorted.
 
-| Version | What changed |
-|---|---|
-| v1 | the original snippets |
-| v2 | some snippets reformatted, behaviour unchanged; some given a one-token bug (`<` to `<=`, `+` to `-`, `n` to `n + 1`) |
-| v3 | some bugs fixed, some new ones introduced, more reformatting |
+A deterministic compiler then packs the highest-value entries into a token budget with greedy-by-ratio knapsack packing, structures the output U-shaped (settled decisions and constraints first, causal history in the middle, next steps last) to work with how transformers attend to context, and delivers it via clipboard or, optionally, as an MCP resource or a local dashboard.
 
-Versions are stored the way git stores files. Each distinct snippet text is saved once, keyed by its hash, and a version is a list of doc ids pointing at those hashes. Embeddings and execution results are cached by the same hashes, so moving to a new version only encodes and runs the snippets that changed. Everything unchanged is reused.
+Full detail: [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-```
-python versions.py build          generate v1, v2, v3 and index each one
-python versions.py list
-python versions.py diff v1 v2
-python index.py --simulate-edits 100   time an incremental rebuild
-```
+## Companion Site
 
-## Searching all versions at once (bonus)
+A small documentation site covers the architecture, install steps, and command reference in one place, alongside this README. There's also an optional local dashboard — run from your own machine, showing your own handoffs update in real time — that never leaves your machine and requires no login, because it's never reachable from anywhere but `localhost`. Neither replaces the CLI; both are read-only companions to it. Details in [ARCHITECTURE.md](./ARCHITECTURE.md#12-companion-website).
 
-All versions share one pool. A snippet that did not change between versions is one entry, embedded once and run once.
+## Security & Privacy
 
-The hard part is ranking. A working version and a buggy version of the same snippet differ by a single token, so their embeddings are almost identical and similarity cannot tell them apart. Running them can: the buggy version prints the wrong answer on the problem's example. So the same verification step that lifts P0 also separates good versions from broken ones.
+Zero telemetry, always. Local-only storage, including anything captured from an integrated AI tool. Stenod reads a tool's own rule and instruction files to flag when they've gone stale against current decisions, but never edits them. The optional AI tie-breaker spends nothing on Stenod's behalf — it runs on your own key, only when you ask for a handoff. The network-capture tier is opt-in, allowlists exactly three known AI-provider domains, and ships with a full, confirmed-clean uninstall path — the same pattern `stenod integrate`/`detach` follow for AI-tool hooks.
 
-When a buggy version happens to pass the example too, the two stay in similarity order, so verification never ranks worse than similarity alone.
+Full detail: [SECURITY.md](./SECURITY.md).
 
-`evaluate_versions.py` measures this against two baselines: similarity alone, and similarity with the newest version preferred. For the tracked problems, whether the newest version is the buggy one is a coin flip, so "always pick the newest" cannot game the test.
+## Platform Support
 
-```
-python evaluate_versions.py       writes artifacts/versions_report.json
-```
+Filesystem capture and the core CLI work on Windows, Linux, and Mac. Terminal capture (`stenod attach`) and the network-capture tier depend on Unix/Mac-only mechanisms (`node-pty`, OS trust-store APIs) and aren't available on Windows. Tool integrations follow the same split: Claude Code, Codex, Kiro, and Antigravity integrations work wherever those tools run; Cursor's hook-based capture is Unix/Mac only, matching the rest of the terminal-dependent tier.
 
-## Running it
+## License & Contributing
 
-Python 3.10 or newer.
+MIT © Nikhil Virdi — see [LICENSE](./LICENSE) for details.
 
-```
-pip install -r requirements.txt
-```
-
-Download the release artifacts into `artifacts/`:
-
-| File | What it is |
-|---|---|
-| `emb_cache.npz` | precomputed embeddings, so nothing needs encoding on first run |
-| `exec_results.jsonl` | stage 2 verdicts for all 3,765 test queries |
-| `doc_ids.npy` | document order used by `exec_results.jsonl` |
-| `appsretrieval_results.json` | the submitted MTEB results |
-
-Without `emb_cache.npz` everything still works, but the first run encodes all 8,765 snippets, which is slow on CPU.
-
-### Demo
-
-```
-python demo.py
-```
-
-Open http://127.0.0.1:7860. Paste a problem or load one from the test set. The page shows each result, whether it produced the expected output, how far it moved, and where the known answer landed.
-
-With a version history built, a selector switches between v1, v2, v3 and all versions at once. Snippets carrying an injected bug are labelled, so you can watch them drop below the working versions.
-
-### Reproduce the score
-
-```
-python evaluate.py --mode cached     # stage 2 verdicts from exec_results.jsonl
-python evaluate.py --mode full       # run stage 2 live, resumable, hours on CPU
-python evaluate.py --mode baseline   # stage 1 only, should print 11.52
-```
-
-Each writes `artifacts/appsretrieval_results.json`.
-
-### Docker
-
-```
-docker build -t code-retrieval .
-docker run -p 7860:7860 -v "$(pwd)/artifacts:/app/artifacts" code-retrieval
-```
-
-Then open http://localhost:7860.
-
-## Layout
-
-```
-src/
-  config.py          paths and constants
-  data.py            loads CoIR APPS from HuggingFace
-  cache.py           content-addressed embedding cache
-  encoder.py         stage 1, E5-base-v2
-  execute.py         stage 2, example parsing and sandboxed runs
-  rerank.py          merges stage 1 order with stage 2 verdicts
-  mteb_wrappers.py   plugs the two stages into MTEB
-  versions.py        content-addressed version store
-  history.py         generates the v1, v2, v3 history
-  evolution.py       one index across versions, and the three rankings
-demo.py              web demo
-evaluate.py          produces the MTEB results file
-evaluate_versions.py measures P1 and the bonus
-versions.py          builds and inspects versions
-index.py             builds and refreshes the index
-```
-
-## Integrating with MTEB
-
-MTEB calls an encoder and computes similarity itself, so a reranker cannot sit inside the encoder. It sits one level up. MTEB uses any model that already satisfies `SearchProtocol` without wrapping it, so `src/mteb_wrappers.py` subclasses `SearchEncoderWrapper` and reorders results after the embedding search.
-
-Two things that cost time to find, in MTEB 2.21:
-
-- the model needs a `ModelMeta`, including `loader` and `memory_usage_mb`, or evaluation finishes and then crashes while caching the result
-- the results contain datetimes, so saving them needs `json.dump(..., default=str)`
-
-## Limitations
-
-- Only the first example in a problem is used. Problems with several examples could be checked more strictly.
-- 27% of known answers fail their own example in a sampled check. The causes are not yet diagnosed; likely candidates are output formatting (trailing spaces, float precision) and multi-case inputs. Each one fixed converts directly into score.
-- Snippets run as plain subprocesses with a timeout and a temporary working directory. Docker adds container isolation, but this is not a hardened sandbox for untrusted code.
+This project isn't yet accepting external contributions; no `CONTRIBUTING.md` exists yet. That's a deliberate early-stage choice, not an oversight. Contribution infrastructure may be added later.

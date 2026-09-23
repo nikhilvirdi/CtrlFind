@@ -1,0 +1,35 @@
+{
+  "entries": 10819,
+  "p1": {
+    "v1": {
+      "ndcg_at_10": 11.52,
+      "search_seconds": 4.35
+    },
+    "v2": {
+      "ndcg_at_10": 11.32,
+      "search_seconds": 6.55
+    },
+    "v3": {
+      "ndcg_at_10": 11.3,
+      "search_seconds": 4.23
+    }
+  },
+  "bonus": {
+    "similarity": {
+      "working_version_first_pct": 72.7,
+      "ndcg_at_10": 11.88
+    },
+    "similarity + newest": {
+      "working_version_first_pct": 68.2,
+      "ndcg_at_10": 11.83
+    },
+    "similarity + execution": {
+      "working_version_first_pct": 100.0,
+      "ndcg_at_10": 23.03
+    },
+    "problems": 191,
+    "contested_problems": 22,
+    "buggy_versions_caught_by_example": "22/22",
+    "seconds": 530.0
+  }
+}
