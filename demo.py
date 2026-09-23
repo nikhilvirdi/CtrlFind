@@ -21,8 +21,21 @@ from src.encoder import E5
 from src.evolution import History, rank_verified
 from src.execute import parse_example, verify
 from src.versions import VersionStore
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import PythonLexer
+from pygments.styles import get_all_styles
 
-SHOW = 10          # results rendered on the page
+_STYLE = "github-dark" if "github-dark" in set(get_all_styles()) else "monokai"
+_LEXER = PythonLexer()
+_FMT = HtmlFormatter(style=_STYLE, noclasses=True, nowrap=True)
+
+
+def _highlight(code: str) -> str:
+    return highlight(code, _LEXER, _FMT)
+
+
+SHOW = 10         # results rendered on the page
 CODE_LINES = 40    # lines of code shown per result
 ALL = "All versions"
 
@@ -87,7 +100,7 @@ def _card(rank, i, score, verdict, was, gold_id) -> str:
         f'<header><span class="rank">{rank}</span>'
         f'<span class="verdict">{VERDICT_TEXT[verdict]}</span>{"".join(tags)}'
         f'<span class="meta">{where}, similarity {score:.3f}</span></header>'
-        f'<pre><code>{html.escape(code)}</code></pre></article>'
+        f'<pre><code>{_highlight(code)}</code></pre></article>'
     )
 
 
@@ -170,21 +183,23 @@ def random_example():
 
 
 CSS = """
-.hit { border-left: 3px solid #94A3B8; padding: 0.6rem 0.9rem; margin: 0 0 1rem;
-       background: #FFFFFF; }
-.hit.passed { border-left-color: #0F766E; }
-.hit.failed { border-left-color: #CBD5E1; }
+.hit { background: #111827; color: #E5E7EB; border-left: 3px solid #4B5563;
+       border-radius: 4px; padding: 0.7rem 0.9rem; margin: 0 0 1rem; }
+.hit.passed { border-left-color: #2DD4BF; }
+.hit.failed { border-left-color: #374151; }
 .hit header { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: baseline;
               margin-bottom: 0.4rem; font-size: 0.92rem; }
-.hit .rank { font-weight: 600; font-size: 1.15rem; color: #1E2A32; min-width: 1.6rem; }
-.hit.passed .verdict { color: #0F766E; font-weight: 600; }
-.hit.failed .verdict, .hit.skipped .verdict { color: #64748B; }
-.hit .moved { color: #64748B; }
-.hit .gold { background: #FEF3C7; color: #78350F; padding: 0 0.4rem; border-radius: 3px; }
-.hit .bug { background: #FEE2E2; color: #7F1D1D; padding: 0 0.4rem; border-radius: 3px; }
-.hit .meta { color: #94A3B8; margin-left: auto; }
-.hit pre { margin: 0; max-height: 22rem; overflow: auto; font-size: 0.82rem;
-           background: #F8FAFC; padding: 0.6rem; }
+.hit .rank { font-weight: 600; font-size: 1.15rem; color: #F9FAFB; min-width: 1.6rem; }
+.hit.passed .verdict { color: #2DD4BF; font-weight: 700; }
+.hit.failed .verdict, .hit.skipped .verdict { color: #9CA3AF; }
+.hit .moved { color: #9CA3AF; }
+.hit .gold { background: #78350F; color: #FEF3C7; padding: 0 0.45rem; border-radius: 3px; }
+.hit .bug { background: #7F1D1D; color: #FEE2E2; padding: 0 0.45rem; border-radius: 3px; }
+.hit .meta { color: #6B7280; margin-left: auto; }
+.hit pre { background: #0D1117; color: #E6EDF3; line-height: 1.5; font-size: 0.84rem;
+           padding: 0.75rem 0.9rem; border-radius: 4px; max-height: 22rem;
+           overflow: auto; margin: 0; }
+.hit pre code { background: transparent; color: inherit; font-family: inherit; }
 """
 
 
