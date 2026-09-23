@@ -1,0 +1,7 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+artifacts/emb_cache.npz
+artifacts/emb_cache.tmp.npz
+artifacts/exec_results_live.jsonl
