@@ -149,11 +149,25 @@ Measured on the CoIR APPS test split.
 | E5-base-v2, hand-rolled eval | 3,765 | 13.11 | 12.10 |
 | E5-base-v2, through MTEB | 8,765 | **11.52** | 9.88 |
 | CoIR paper, E5-base | 8,765 | 11.52 | — |
-| Execution rerank, 150-query sample | 3,765 | **30.74** | 30.28 |
+| Execution rerank, 150-query sample | 3,765 | 30.74 | 30.28 |
+| **Execution rerank, full test split** | **8,765** | **19.96** | **19.43** |
 
 The MTEB baseline reproduces the published figure exactly, which validates the integration.
 
-The 30.74 is a sample, not the final number. Full-test-split scoring is pending.
+**The final number is 19.96**, up from 11.52. Across all 3,765 test queries, 420 improved, 10 got worse, and 3,335 were unchanged.
+
+Against the CoIR table:
+
+| Model | Size | NDCG@10 |
+|---|---|---|
+| E5-base | 110M | 11.52 |
+| **E5-base + execution rerank** | **110M** | **19.96** |
+| E5-Mistral | 7B | 21.33 |
+| Voyage-Code-002 | API | 26.52 |
+
+Close to a model 65 times larger, on CPU.
+
+The 150-query sample overstated the gain. It used the smaller 3,765-document corpus and included only queries with a parseable example. Over the full split, the 22% with no example and every query whose gold sits outside the top 50 get no lift at all. Stage 1 recall caps the result.
 
 **Recall for Stage 1** (E5-base-v2, 3,765-document corpus):
 
@@ -196,6 +210,7 @@ That last row killed early exit. Among top-ranked candidates the false positive 
 | Gold among the passers | 555 (60% of those) |
 | Gold was the only passer | 454 (49% of those) |
 | Total runtime | 143 minutes, 2 cores |
+| Queries improved / hurt / unchanged | 420 / 10 / 3,335 |
 
 **Timing**, Colab free tier, 2 vCPUs:
 
@@ -217,7 +232,7 @@ Cost is linear in K at roughly 60ms per candidate, which matches the 57ms median
 
 **Execution-based reranking.** Confirmed working, with all passers collected rather than stopping at the first.
 
-**Better Stage 1 model.** The largest remaining lever. Recall@50 at 31% caps everything.
+**Better Stage 1 model.** The largest remaining lever, now confirmed by the full run. Recall@50 at 31% means the reranker only ever gets a chance on about a third of queries.
 
 **Fixing the 27% of gold snippets that fail their own example.** Likely whitespace, float formatting, or multi-case example blocks. Each fix converts directly into score.
 
@@ -241,7 +256,6 @@ Cost is linear in K at roughly 60ms per candidate, which matches the 57ms median
 
 ## Open questions
 
-- **Final NDCG@10 on the full test split.** Execution results are complete; scoring is pending.
 - **Which small model performs best here now?** The CoIR numbers are from 2024, and Stage 1 recall is the binding constraint.
 - **What breaks the 27% of gold snippets that fail their own example?** Diagnosis not yet done.
 - **How does the pipeline handle P1 and the bonus goal?** Untouched so far.
@@ -258,4 +272,7 @@ E5-base-v2 over the 3,765-document test corpus scores 13.11 NDCG@10. Recall@50 i
 `SearchProtocol` accepts a `SearchEncoderWrapper` subclass directly, so reranking needs no monkey-patching. The plain encoder through MTEB scores 11.52 NDCG@10 over the full 8,765-document corpus, matching the CoIR paper exactly. A 20-query smoke test of the reranker improved 2 and hurt 0.
 
 **Full execution pass.**
-All 3,765 test queries at K=50, 143 minutes on 2 cores. 924 queries had at least one passing snippet. Gold was among the passers in 555 cases and was the only passer in 454 of those. Final scoring pending.
+All 3,765 test queries at K=50, 143 minutes on 2 cores. 924 queries had at least one passing snippet. Gold was among the passers in 555 cases and was the only passer in 454 of those.
+
+**Final scoring.**
+Applied the execution results to the embedding ranking over the full 8,765-document corpus. Baseline reproduced at 11.52, confirming the ranking matched the one the execution pass used. With reranking, NDCG@10 rose to 19.96 and MRR to 19.43. 420 queries improved, 10 got worse, 3,335 unchanged. Lower than the 30.74 sample projected, because the sample excluded queries without examples and used a smaller corpus.
