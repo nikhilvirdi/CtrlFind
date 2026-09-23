@@ -1,278 +1,191 @@
-# Text-to-Code-Retrieval-CoIR-APPS
+# Execution-verified code retrieval
 
-Given a programming problem written in English, find the Python code that solves it. Ranking 3,765 candidate solutions, CPU-only.
+Given a programming problem in English, find the Python code that solves it. Built for the CoIR APPS benchmark: 3,765 test problems searched against 8,765 solutions, on CPU.
 
-This repo is the working record: every measurement, every source, every idea kept or dropped. Not a showcase. The shipped solution lives elsewhere.
-
-Full problem statement: [Problem Statement.pdf](./Problem%20Statement.pdf)
-
-## The problem
-
-A query comes in as English prose. A corpus of Python snippets sits in an index. The job is to rank the snippets so the correct one lands as high as possible.
-
-Retrieval only. No answer generation, no explanation of results. Anything after the ranking is out of scope.
-
-Two further requirements beyond raw accuracy:
-
-- **P1, retrieval across versions.** Code changes. Indexes and caches must rebuild for a new version in reasonable time.
-- **Bonus, evolutionary retrieval.** Search across all versions at once. Hard because versions of the same snippet look nearly identical, so ranking between them is delicate.
-
-Scored by NDCG@10 and MRR, through MTEB, on the test split.
-
-## The dataset
-
-`CoIR-Retrieval/apps` on HuggingFace. Built from the APPS dataset, which scrapes Codeforces, CodeWars, CodeChef, LeetCode and AtCoder.
-
-**Queries are full contest problem statements.** Not developer questions. A typical one runs 1,300 characters and describes accordions or sofas before stating input and output format. The hackathon doc's example ("How is the input preprocessed before the main function?") does not resemble the real data.
-
-**Corpus is accepted Python solutions.** Median 21 lines.
-
-| | Value |
-|---|---|
-| Corpus | 8,765 total, 3,765 test |
-| Queries | 8,765 total, 3,765 test |
-| Gold answers per query | exactly 1 |
-| Relevance scores | all 1, binary |
-| Language | 100% Python |
-| Title field | empty, unusable |
-
-MTEB indexes the full 8,765-document corpus when evaluating, including the train partition, while scoring only test queries. So any number measured against 3,765 documents reads higher than the same method scored through MTEB.
-
-### Measurements
-
-**Qrels are strictly one-to-one.** `q5001 → d5001`, always, no exceptions. No query shares a problem with another. No false negatives. With one binary-relevant document per query, NDCG@10 and MRR become functions of the gold document's rank alone, so the two metrics move together and Recall@k is binary.
-
-**Lengths run opposite to expectation.**
-
-| | Median | p95 | Max |
-|---|---|---|---|
-| Query, chars | 1,316 | 2,903 | 13,955 |
-| Code, chars | 332 | 1,560 | 289,048 |
-
-Queries are roughly four times longer than the code. At a 512-token cap, 27% of queries truncate. At 256 tokens, 81% do. Model choice decides how bad this gets.
-
-**Vocabulary overlap carries almost no signal.**
-
-| Comparison | Shared words |
-|---|---|
-| Query vs its gold code | 2.48 |
-| Query vs a random code | 2.18 |
-
-The shared words are `print` (98% of docs), `input` (93%), `split` (77%). Every document has them.
-
-**The corpus is homogeneous.** 97% use `print(`, 92% use `input()`. Only 34% define a function, 4% define a class. Snippets read alike.
-
-**Signal sits in the narrative, not the spec.** Measuring vocabulary similarity between two random queries:
-
-| Section | Similarity |
-|---|---|
-| Story and description | 0.063 |
-| Input/Output spec | 0.166 |
-
-The I/O sections are boilerplate. Compressing a query down to its spec would discard the distinguishing half.
-
-**Example blocks parse at 78%.** 2,936 of 3,765 test queries yield a clean input and expected output pair. Format inside the block is `-----Examples-----` then `Input`, newline, data, then `Output`, newline, data.
-
-**Metadata leaks.** `meta_information` holds the source URL for both queries and corpus, and gold pairs match on URL 100% of the time. MTEB passes only `text` to the encoder, so it isn't exploitable, and using it would be cheating. Noted so nobody builds on it by accident.
-
-## What the field already found
-
-From the CoIR paper (ACL 2025), Table 3. NDCG@10:
-
-| Model | APPS | Avg across all 10 CoIR datasets |
-|---|---|---|
-| BM25 | 0.95 | 29.79 |
-| UniXcoder (123M) | 1.36 | 37.33 |
-| GTE-Base (110M) | 3.24 | 36.75 |
-| BGE-Base (110M) | 4.05 | 42.77 |
-| Contriever (110M) | 5.14 | 36.40 |
-| BGE-M3 (567M) | 7.37 | 39.31 |
-| OpenAI-Ada-002 | 8.70 | 45.59 |
-| E5-base (110M) | 11.52 | 50.90 |
-| E5-Mistral (7B) | 21.33 | 55.18 |
-| Voyage-Code-002 | 26.52 | 56.26 |
-
-APPS is the hardest of the ten by a wide margin. Models scoring 50 to 70 elsewhere drop to single digits here. The paper names it as such.
-
-Three things worth carrying forward:
-
-1. **BM25 scores 0.95.** Keyword matching is dead, not weak. Matches the overlap measurement above.
-2. **UniXcoder, a code-specific model, scores 1.36.** Worse than generic text models. Code embedders train on docstring-to-function pairs; contest problems are a different distribution. Reaching for a code model here is wrong.
-3. **Scale wins.** E5-Mistral at 7B reaches 21.33 where 110M models sit between 3 and 11. Not available to us on CPU.
-
-Long context barely helps. Table 5 in the same paper: GTE moving from 512 to 4,096 tokens lifts APPS from 3.24 to 5.08.
-
-Sources:
-- CoIR paper: https://aclanthology.org/2025.acl-long.1072.pdf
-- CoIR repo: https://github.com/CoIR-team/coir
-- Dataset: https://huggingface.co/datasets/CoIR-Retrieval/apps
-
-## The approach
-
-Two stages.
-
-**Stage 1, embedding retrieval.** E5-base-v2 with `query:` and `passage:` prefixes, 512 token cap, cosine similarity over normalised vectors. Pulls the top K candidates. Cheap, and it sets the ceiling for everything after it.
-
-**Stage 2, execution verification.** Parse the example input and expected output out of the query. Run each of the K candidates against that input in a subprocess with a timeout. Every snippet producing the expected output moves above the rest, keeping embedding order within each group.
-
-Stage 2 is not similarity. A snippet that produces the right answer on the problem's own test case is almost certainly the right snippet. That sidesteps the semantic gap entirely, and it is engineering rather than modelling.
-
-Queries with no parseable example keep Stage 1's ordering untouched.
-
-### Why the reranker is not an encoder
-
-MTEB calls `encode()`, gets vectors, and computes similarity itself. Execution reranking has to happen after similarity, and the encoder interface has no hook there.
-
-The hook is one level up. `mteb/abstasks/retrieval.py` picks the search model by type, and anything already satisfying `SearchProtocol` gets used as-is rather than being wrapped:
-
-```python
-if isinstance(model, EncoderProtocol) and not isinstance(model, SearchProtocol):
-    search_model = SearchEncoderWrapper(model)
-...
-elif isinstance(model, SearchProtocol):
-    search_model = model
-```
-
-So a subclass of `SearchEncoderWrapper` passes straight through. It inherits `index()` and `search()`, and `search()` returns a plain dict of query ID to document ID and score, which is exactly the level reranking needs. No monkey-patching.
-
-Two traps worth recording:
-
-- `search()` sets `self.task_corpus = None` before returning, so a subclass has to keep its own copy of the corpus during `index()`.
-- `ModelMeta` is required. Leaving `mteb_model_meta` as `None` lets the evaluation run and then crashes in the result cache, which builds its folder path from the model name. In MTEB 2.21 the meta also requires `loader` and `memory_usage_mb`.
+Most retrieval systems guess which code matches a question by measuring how similar the two look. This one also checks. Contest problems ship an example input and its expected output, so the top candidates are run on that example, and any that print the right answer move to the top.
 
 ## Results
 
-Measured on the CoIR APPS test split.
-
-| Setup | Corpus | NDCG@10 | MRR |
-|---|---|---|---|
-| E5-base-v2, hand-rolled eval | 3,765 | 13.11 | 12.10 |
-| E5-base-v2, through MTEB | 8,765 | **11.52** | 9.88 |
-| CoIR paper, E5-base | 8,765 | 11.52 | — |
-| Execution rerank, 150-query sample | 3,765 | 30.74 | 30.28 |
-| **Execution rerank, full test split** | **8,765** | **19.96** | **19.43** |
-
-The MTEB baseline reproduces the published figure exactly, which validates the integration.
-
-**The final number is 19.96**, up from 11.52. Across all 3,765 test queries, 420 improved, 10 got worse, and 3,335 were unchanged.
-
-Against the CoIR table:
+AppsRetrieval test split, scored through MTEB.
 
 | Model | Size | NDCG@10 |
 |---|---|---|
+| BM25 | | 0.95 |
+| UniXcoder | 123M | 1.36 |
 | E5-base | 110M | 11.52 |
-| **E5-base + execution rerank** | **110M** | **19.96** |
+| **E5-base + execution verification (this repo)** | **110M** | **19.96** |
 | E5-Mistral | 7B | 21.33 |
 | Voyage-Code-002 | API | 26.52 |
 
-Close to a model 65 times larger, on CPU.
+Reference rows are from the CoIR paper (ACL 2025, Table 3). Our E5-base baseline reproduces its 11.52 exactly.
 
-The 150-query sample overstated the gain. It used the smaller 3,765-document corpus and included only queries with a parseable example. Over the full split, the 22% with no example and every query whose gold sits outside the top 50 get no lift at all. Stage 1 recall caps the result.
-
-**Recall for Stage 1** (E5-base-v2, 3,765-document corpus):
-
-| K | Recall |
-|---|---|
-| 1 | 8.50% |
-| 5 | 14.85% |
-| 10 | 19.04% |
-| 50 | 31.29% |
-| 100 | 38.57% |
-| 200 | 48.07% |
-| 500 | 62.82% |
-
-Median gold rank is 228. Recall gates everything Stage 2 can do, so this is the number to improve.
-
-**Ceiling if execution worked perfectly**, promoting gold to rank 1 whenever it sits inside the top K and the query has an example:
-
-| K | Ceiling NDCG@10 | Fires on |
+| | Baseline | With verification |
 |---|---|---|
-| 50 | 26.28 | 21.3% |
-| 100 | 31.86 | 26.9% |
-| 200 | 39.43 | 34.4% |
-| 500 | 51.33 | 46.3% |
+| NDCG@10 | 11.52 | **19.96** |
+| MRR@10 | 9.88 | **19.05** |
 
-**Execution behaviour:**
+Across the 3,765 test queries, verification improved 420, made 10 worse, and left 3,335 unchanged.
 
-| | |
+## How it works
+
+**Stage 1, meaning.** E5-base-v2 embeds the problem and every snippet, and cosine similarity picks the 50 closest. Keyword search is useless here: a problem about accordions and the code that solves it share almost no words, which is why BM25 scores 0.95.
+
+**Stage 2, verification.** The example input and expected output are parsed out of the problem. Each of the 50 candidates runs in its own Python process, in a throwaway directory, with a one-second limit. Candidates that print the expected output move above the rest, and both groups keep their stage 1 order.
+
+Collecting every passing candidate matters. Similar problems often share the same input format and a small integer answer, so a wrong snippet sometimes passes too. Stopping at the first pass picked the wrong one 7 times out of 15 in an early test. Ranking all passers by similarity puts the right one first or second instead.
+
+**Why stage 2 has limits.** It only helps when the right answer is already in the top 50, which happens for 31% of queries, and when the problem includes a parseable example, which 78% do. Everything else keeps its stage 1 rank. A stronger stage 1 model is the biggest remaining lever.
+
+## Speed
+
+Measured on Colab's free tier, 2 CPU cores for execution.
+
+| Step | Time |
 |---|---|
-| Gold passes its own example | 22/30 (73%) |
-| Wrong snippets passing, sampled at random | 0.3 per 100 |
-| Wrong snippet passing before gold, top-200 early exit | 7/15 (47%) |
+| Encode one query, CPU | a fraction of a second |
+| Search 8,765 snippets | a few milliseconds |
+| Run 50 candidates on the example | about 3.6 s |
+| Build the full index, T4 GPU | 134 s |
 
-That last row killed early exit. Among top-ranked candidates the false positive rate is roughly 150x the random rate, because semantically similar problems share input format and output shape, so coincidental matches are common. Random snippets crash instead. Running the full candidate set and collecting every passer avoids the problem: gold lands at rank 2 or 3 rather than 1, which still beats rank 25.
+Verification cost grows linearly with the number of candidates, at roughly 60 ms each, almost all of it Python interpreter startup. More threads than CPU cores makes it slower, not faster: starved processes hit the timeout even when they only needed 60 ms of work.
 
-**Full execution pass** over all 3,765 test queries at K=50:
+## Retrieval across versions (P1)
 
-| | |
+CoIR APPS is a single snapshot, so `versions.py build` generates a history:
+
+| Version | What changed |
 |---|---|
-| Queries where something passed | 924 (24.5%) |
-| Gold among the passers | 555 (60% of those) |
-| Gold was the only passer | 454 (49% of those) |
-| Total runtime | 143 minutes, 2 cores |
-| Queries improved / hurt / unchanged | 420 / 10 / 3,335 |
+| v1 | the original snippets |
+| v2 | some snippets reformatted, behaviour unchanged; some given a one-token bug (`<` to `<=`, `+` to `-`, `n` to `n + 1`) |
+| v3 | some bugs fixed, some new ones introduced, more reformatting |
 
-**Timing**, Colab free tier, 2 vCPUs:
+Versions are stored the way git stores files. Each distinct snippet text is saved once, keyed by its hash, and a version is a list of doc ids pointing at those hashes. Embeddings and execution results are cached by the same hashes, so moving to a new version only encodes and runs the snippets that changed. Everything unchanged is reused.
 
-| Stage | Cost |
+```
+python versions.py build          generate v1, v2, v3 and index each one
+python versions.py list
+python versions.py diff v1 v2
+python index.py --simulate-edits 100   time an incremental rebuild
+```
+
+Measured on a T4:
+
+| Build | Snippets changed | Encoded | Time |
+|---|---|---|---|
+| Full index, from nothing | 8,765 | 8,754 | 128 s |
+| v1 to v2 | 1,353 | 1,353 | 20 s |
+| v2 to v3 | 701 | 701 | 11 s |
+
+Rebuild cost tracks what changed, not the size of the codebase. Retrieval runs on every version (stage 1 NDCG@10: v1 11.52, v2 11.32, v3 11.30; the small drop comes from the broken and reformatted snippets).
+
+## Searching all versions at once (bonus)
+
+All versions share one pool. A snippet that did not change between versions is one entry, embedded once and run once.
+
+The hard part is ranking. A working version and a buggy version of the same snippet differ by a single token, so their embeddings are almost identical and similarity cannot tell them apart. Running them can: the buggy version prints the wrong answer on the problem's example. So the same verification step that lifts P0 also separates good versions from broken ones.
+
+When a buggy version happens to pass the example too, the two stay in similarity order, so verification never ranks worse than similarity alone.
+
+`evaluate_versions.py` measures this against two baselines: similarity alone, and similarity with the newest version preferred. For the tracked problems, whether the newest version is the buggy one is a coin flip, so "always pick the newest" cannot game the test.
+
+```
+python evaluate_versions.py       writes artifacts/versions_report.json
+```
+
+Results over 191 test problems with a usable example, searching all three versions at once (10,819 distinct entries):
+
+| Ranking | Working version ranked first | NDCG@10 |
+|---|---|---|
+| Similarity | 72.7% | 11.88 |
+| Similarity, newest version preferred | 68.2% | 11.83 |
+| **Similarity + execution** | **100%** | **23.03** |
+
+Every buggy version that reached the top 50 failed the example, 22 out of 22. Preferring the newest version did slightly worse than similarity alone, which confirms the test does not reward recency.
+
+Two caveats. The 100% comes from the 22 problems where a buggy version competed in the top 50, a small sample. And the NDCG column mixes two effects: execution lifting the right snippet in general, as in P0, and picking the right version. The version-specific result is the first column.
+
+## Running it
+
+Python 3.10 or newer.
+
+```
+pip install -r requirements.txt
+```
+
+Download the release artifacts into `artifacts/`:
+
+| File | What it is |
 |---|---|
-| Encode 8,765 documents, T4 | 134s |
-| Encode 3,765 queries, T4 | 116s |
-| Execution rerank, K=50 | 3.6s per query |
-| Execution rerank, K=100 | 6.1s per query |
-| Execution rerank, K=200 | 12s per query |
+| `emb_cache.npz` | precomputed embeddings for every version and query, release only (59 MB) |
+| `exec_results.jsonl` | stage 2 verdicts for all 3,765 test queries |
+| `doc_ids.npy` | document order used by `exec_results.jsonl` |
+| `appsretrieval_results.json` | the submitted MTEB results |
+| `versions/` | the v1, v2, v3 history, already in the repo |
+| `versions_report.json` | P1 and bonus measurements, already in the repo |
 
-Cost is linear in K at roughly 60ms per candidate, which matches the 57ms median snippet runtime. The bottleneck is Python interpreter startup serialised across two cores, so no parameter fixes it. Raising thread count past the core count actively hurts: with 32 threads on 2 cores, healthy snippets get starved enough that wall-clock exceeds the timeout and they are killed despite needing only 57ms of CPU.
+Without `emb_cache.npz` everything still works, but the first run encodes all 8,765 snippets, which is slow on CPU.
 
-## Ideas
+### Demo
 
-### Alive
+```
+python demo.py
+```
 
-**Two-stage retrieval.** Confirmed working. Stage 1 recall is the binding constraint.
+Open http://127.0.0.1:7860. Paste a problem or load one from the test set. The page shows each result, whether it produced the expected output, how far it moved, and where the known answer landed.
 
-**Execution-based reranking.** Confirmed working, with all passers collected rather than stopping at the first.
+With a version history built, a selector switches between v1, v2, v3 and all versions at once. Snippets carrying an injected bug are labelled, so you can watch them drop below the working versions.
 
-**Better Stage 1 model.** The largest remaining lever, now confirmed by the full run. Recall@50 at 31% means the reranker only ever gets a chance on about a third of queries.
+### Reproduce the score
 
-**Fixing the 27% of gold snippets that fail their own example.** Likely whitespace, float formatting, or multi-case example blocks. Each fix converts directly into score.
+```
+python evaluate.py --mode cached     # stage 2 verdicts from exec_results.jsonl
+python evaluate.py --mode full       # run stage 2 live, resumable, hours on CPU
+python evaluate.py --mode baseline   # stage 1 only, should print 11.52
+```
 
-**Query preprocessing.** Dropping example blocks before embedding buys room under the token cap. Cheap, no model needed. Untested.
+Each writes `artifacts/appsretrieval_results.json`.
 
-**Code-to-English at index time.** Generate a description per snippet, embed that alongside the code. Costs nothing at query time. Risk: descriptions may flatten an already homogeneous corpus. Untested.
+### Docker
 
-### Dropped
+```
+docker build -t code-retrieval .
+docker run -p 7860:7860 -v "$(pwd)/artifacts:/app/artifacts" code-retrieval
+```
 
-**BM25 or any lexical method as a primary signal.** Measured near-random on this data, confirmed by the paper's 0.95.
+Then open http://localhost:7860.
 
-**Code-specific embedding models.** UniXcoder at 1.36. Evidence is unambiguous.
+## Layout
 
-**HyDE, generating code from the query and searching with it.** Expensive, needs a generative model on the query path, and execution verification does the same job with a stronger guarantee.
+```
+src/
+  config.py          paths and constants
+  data.py            loads CoIR APPS from HuggingFace
+  cache.py           content-addressed embedding cache
+  encoder.py         stage 1, E5-base-v2
+  execute.py         stage 2, example parsing and sandboxed runs
+  rerank.py          merges stage 1 order with stage 2 verdicts
+  mteb_wrappers.py   plugs the two stages into MTEB
+  versions.py        content-addressed version store
+  history.py         generates the v1, v2, v3 history
+  evolution.py       one index across versions, and the three rankings
+demo.py              web demo
+evaluate.py          produces the MTEB results file
+evaluate_versions.py measures P1 and the bonus
+versions.py          builds and inspects versions
+index.py             builds and refreshes the index
+```
 
-**LLM query rewriting.** Considered for the truncation problem. Truncation turned out to be second-order at 512 tokens, and the cost lands on the query path where speed is judged.
+## Integrating with MTEB
 
-**Early exit on first passing snippet.** Fails 47% of the time among top-ranked candidates. Collect all passers instead.
+MTEB calls an encoder and computes similarity itself, so a reranker cannot sit inside the encoder. It sits one level up. MTEB uses any model that already satisfies `SearchProtocol` without wrapping it, so `src/mteb_wrappers.py` subclasses `SearchEncoderWrapper` and reorders results after the embedding search.
 
-**More worker threads than cores.** Oversubscription causes timeouts rather than speedups.
+Two things that cost time to find, in MTEB 2.21:
 
-## Open questions
+- the model needs a `ModelMeta`, including `loader` and `memory_usage_mb`, or evaluation finishes and then crashes while caching the result
+- the results contain datetimes, so saving them needs `json.dump(..., default=str)`
 
-- **Which small model performs best here now?** The CoIR numbers are from 2024, and Stage 1 recall is the binding constraint.
-- **What breaks the 27% of gold snippets that fail their own example?** Diagnosis not yet done.
-- **How does the pipeline handle P1 and the bonus goal?** Untouched so far.
-- **Does the JavaScript/Python conflict between the overview deck and the theme PDF matter?** Unresolved. Overview says JavaScript, sample codebase, precision and recall. Theme PDF says Python, CoIR, NDCG and MRR.
+## Limitations
 
-## Experiment log
-
-Append-only. Date, what ran, what came back, what it means.
-
-**Notebook 01, baseline recall and execution validation.**
-E5-base-v2 over the 3,765-document test corpus scores 13.11 NDCG@10. Recall@50 is 31.29%, recall@200 is 48.07%, median gold rank 228. Gold snippets pass their own example 22 times out of 30. Random wrong snippets pass 0.3 times per 100, but among top-200 candidates a wrong snippet passes before gold 47% of the time, which rules out early exit. Collecting all passers and keeping embedding order within groups lifts a 150-query sample from 12.78 to 30.74, improving 34 and hurting 1.
-
-**Notebook 02, MTEB integration.**
-`SearchProtocol` accepts a `SearchEncoderWrapper` subclass directly, so reranking needs no monkey-patching. The plain encoder through MTEB scores 11.52 NDCG@10 over the full 8,765-document corpus, matching the CoIR paper exactly. A 20-query smoke test of the reranker improved 2 and hurt 0.
-
-**Full execution pass.**
-All 3,765 test queries at K=50, 143 minutes on 2 cores. 924 queries had at least one passing snippet. Gold was among the passers in 555 cases and was the only passer in 454 of those.
-
-**Final scoring.**
-Applied the execution results to the embedding ranking over the full 8,765-document corpus. Baseline reproduced at 11.52, confirming the ranking matched the one the execution pass used. With reranking, NDCG@10 rose to 19.96 and MRR to 19.43. 420 queries improved, 10 got worse, 3,335 unchanged. Lower than the 30.74 sample projected, because the sample excluded queries without examples and used a smaller corpus.
+- Only the first example in a problem is used. Problems with several examples could be checked more strictly.
+- 27% of known answers fail their own example in a sampled check. The causes are not yet diagnosed; likely candidates are output formatting (trailing spaces, float precision) and multi-case inputs. Each one fixed converts directly into score.
+- Snippets run as plain subprocesses with a timeout and a temporary working directory. Docker adds container isolation, but this is not a hardened sandbox for untrusted code.
