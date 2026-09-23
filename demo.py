@@ -183,6 +183,7 @@ def random_example():
 
 
 CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&display=swap');
 .hit { background: #111827; color: #E5E7EB; border-left: 3px solid #4B5563;
        border-radius: 4px; padding: 0.7rem 0.9rem; margin: 0 0 1rem; }
 .hit.passed { border-left-color: #2DD4BF; }
@@ -198,8 +199,12 @@ CSS = """
 .hit .meta { color: #6B7280; margin-left: auto; }
 .hit pre { background: #0D1117; color: #E6EDF3; line-height: 1.5; font-size: 0.84rem;
            padding: 0.75rem 0.9rem; border-radius: 4px; max-height: 22rem;
-           overflow: auto; margin: 0; }
+           overflow: auto; margin: 0;
+           font-family: "JetBrains Mono", ui-monospace, monospace;
+           font-variant-ligatures: none; }
 .hit pre code { background: transparent; color: inherit; font-family: inherit; }
+#intro h1 { font-family: "Jost", system-ui, sans-serif;
+            font-weight: 600; letter-spacing: -0.01em; }
 """
 
 
@@ -208,8 +213,8 @@ def build_ui():
 
     theme = gr.themes.Base(
         primary_hue="teal", neutral_hue="slate",
-        font=[gr.themes.GoogleFont("IBM Plex Sans"), "system-ui", "sans-serif"],
-        font_mono=[gr.themes.GoogleFont("IBM Plex Mono"), "ui-monospace", "monospace"],
+        font=[gr.themes.GoogleFont("Manrope"), "system-ui", "sans-serif"],
+        font_mono=[gr.themes.GoogleFont("JetBrains Mono"), "ui-monospace", "monospace"],
     )
     scopes = list(SCOPES)
     default_scope = scopes[-2] if HIST else scopes[0]   # the original version
@@ -218,7 +223,8 @@ def build_ui():
             "# Find the code that solves it\n"
             "Paste a programming problem. Python solutions are ranked by meaning first, "
             "then the top candidates are run on the problem's own example, and any that "
-            "print the expected output move to the top."
+            "print the expected output move to the top.",
+            elem_id="intro",
         )
         with gr.Row():
             with gr.Column(scale=5):
