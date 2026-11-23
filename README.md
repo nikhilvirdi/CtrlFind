@@ -6,6 +6,16 @@ Most retrieval systems guess which code matches a question by measuring how simi
 
 ## Results
 
+### Baseline
+
+- **NDCG@10**: 19.96
+- **MRR@10**: 19.05
+- **Settings**: K=50, 1.0 s timeout, MTEB 2.21.0
+- **Reproduction**:
+  ```
+  python evaluate.py --mode cached
+  ```
+
 AppsRetrieval test split, scored through MTEB.
 
 | Model | Size | NDCG@10 |

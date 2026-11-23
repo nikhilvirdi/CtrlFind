@@ -150,7 +150,7 @@ Measured on the CoIR APPS test split.
 | E5-base-v2, through MTEB | 8,765 | **11.52** | 9.88 |
 | CoIR paper, E5-base | 8,765 | 11.52 | — |
 | Execution rerank, 150-query sample | 3,765 | 30.74 | 30.28 |
-| **Execution rerank, full test split** | **8,765** | **19.96** | **19.43** |
+| **Execution rerank, full test split** | **8,765** | **19.96** | **19.05** |
 
 The MTEB baseline reproduces the published figure exactly, which validates the integration.
 
@@ -275,4 +275,4 @@ E5-base-v2 over the 3,765-document test corpus scores 13.11 NDCG@10. Recall@50 i
 All 3,765 test queries at K=50, 143 minutes on 2 cores. 924 queries had at least one passing snippet. Gold was among the passers in 555 cases and was the only passer in 454 of those.
 
 **Final scoring.**
-Applied the execution results to the embedding ranking over the full 8,765-document corpus. Baseline reproduced at 11.52, confirming the ranking matched the one the execution pass used. With reranking, NDCG@10 rose to 19.96 and MRR to 19.43. 420 queries improved, 10 got worse, 3,335 unchanged. Lower than the 30.74 sample projected, because the sample excluded queries without examples and used a smaller corpus.
+Applied the execution results to the embedding ranking over the full 8,765-document corpus. Baseline reproduced at 11.52, confirming the ranking matched the one the execution pass used. With reranking, NDCG@10 rose to 19.96 and MRR to 19.05. 420 queries improved, 10 got worse, 3,335 unchanged. Lower than the 30.74 sample projected, because the sample excluded queries without examples and used a smaller corpus.
