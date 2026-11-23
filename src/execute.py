@@ -25,6 +25,22 @@ EXAMPLE_RE = re.compile(
     r"-----Examples?-----\s*Input\s*\n(.*?)\n\s*Output\s*\n(.*?)(?:\n\s*Input\s*\n|\n-----|\Z)",
     re.S,
 )
+_OUTPUT_DECLARATION = re.compile(r"^-----Output-----[ \t]*\r?\n(.*?)(?=^-----|\Z)", re.M | re.S)
+_SEPARATED_INTEGERS = re.compile(
+    r"\b(?:space|whitespace)[ -]separated (?:integers?|numbers?)\b"
+    r"|\b(?:separate (?:the )?(?:integers|numbers)|(?:integers|numbers) (?:are )?separated)"
+    r" (?:by|with) (?:a )?(?:single )?(?:white)?spaces?\b",
+    re.I,
+)
+_LAYOUT_REQUIRED = re.compile(
+    r"\b(?:ascii|visual pattern|width|wide|padded|padding|leading|trailing|indent(?:ed|ation)?"
+    r"|align(?:ed|ment)?|exactly one space"
+    r"|(?:exactly|at least) \d+ (?:digits?|characters?|spaces?)|format(?:ted)? exactly"
+    r"|(?:spaces?|blanks?|tabs?) (?:at the (?:start|end)|after (?:each|every|the last|the final))"
+    r"|(?:start|end|finish) (?:each|every) (?:line|row) with)\b",
+    re.I,
+)
+_INTEGER_ROW = re.compile(r"[ \t]*(?:[+-]?[0-9]+(?:[ \t]+[+-]?[0-9]+)*[ \t]*)?")
 
 
 def parse_example(query: str) -> tuple[str, str] | None:
@@ -38,30 +54,37 @@ def parse_example(query: str) -> tuple[str, str] | None:
     return inp, exp
 
 
+def allows_trailing_padding(query: str) -> bool:
+    """Opt in only when the output section explicitly specifies separated numbers."""
+    match = _OUTPUT_DECLARATION.search(query.partition("-----Example")[0])
+    if match is None:
+        return False
+    declaration = " ".join(match.group(1).split())
+    return bool(_SEPARATED_INTEGERS.search(declaration) and not _LAYOUT_REQUIRED.search(declaration))
+
+
+def _trim_line_ends(output: str) -> str:
+    return "\n".join(line.rstrip(" \t") for line in output.split("\n"))
+
+
 def run_snippet(code: str, stdin_data: str, timeout: float = EXEC_TIMEOUT) -> str | None:
     """Run code with stdin_data, return stripped stdout, or None on failure."""
-    workdir = tempfile.mkdtemp(prefix="cand_")
-    path = os.path.join(workdir, "solution.py")
     try:
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(code)
-        r = subprocess.run(
-            [sys.executable, path],
-            input=stdin_data,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            cwd=workdir,
-        )
-        return r.stdout.strip()
+        with tempfile.TemporaryDirectory(prefix="cand_", ignore_cleanup_errors=True) as workdir:
+            path = os.path.join(workdir, "solution.py")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(code)
+            r = subprocess.run(
+                [sys.executable, path],
+                input=stdin_data,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=workdir,
+            )
+            return r.stdout.strip() if r.returncode == 0 else None
     except Exception:
         return None
-    finally:
-        try:
-            os.remove(path)
-            os.rmdir(workdir)
-        except OSError:
-            pass
 
 
 def verify(
@@ -69,6 +92,8 @@ def verify(
     example: tuple[str, str],
     timeout: float = EXEC_TIMEOUT,
     workers: int | None = None,
+    *,
+    allow_trailing_padding: bool = False,
 ) -> list[bool]:
     """Run every candidate against the example. Returns a pass flag per candidate.
 
@@ -79,4 +104,7 @@ def verify(
     workers = workers or os.cpu_count() or 2
     with ThreadPoolExecutor(max_workers=workers) as pool:
         outs = list(pool.map(lambda c: run_snippet(c, inp + "\n", timeout), codes))
+    if allow_trailing_padding and all(_INTEGER_ROW.fullmatch(line) for line in exp.split("\n")):
+        exp = _trim_line_ends(exp)
+        return [o is not None and _trim_line_ends(o) == exp for o in outs]
     return [o is not None and o == exp for o in outs]

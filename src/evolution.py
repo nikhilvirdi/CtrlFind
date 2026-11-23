@@ -50,7 +50,7 @@ class History:
         e5.save()
         self.order = {n: i for i, n in enumerate(self.names)}
         self.build_seconds = time.perf_counter() - t0
-        self._verdicts: dict[tuple[str, str], bool] = {}
+        self._verdicts: dict[tuple[str, str, str, bool], bool] = {}
 
     def newest(self, i: int) -> int:
         return max(self.order[v] for v in self.entries[i].versions)
@@ -62,15 +62,17 @@ class History:
         top = np.argsort(-sims)[:k]
         return [int(rows[j]) for j in top], {int(rows[j]): float(sims[j]) for j in top}
 
-    def verify(self, cands: list[int], example) -> dict[int, bool]:
+    def verify(self, cands: list[int], example, *, allow_trailing_padding: bool = False) -> dict[int, bool]:
         """Run candidates on the example, reusing verdicts for code already run."""
-        ex_key = content_hash(example[0] + "\x00" + example[1])
-        todo = [i for i in cands if (content_hash(self.entries[i].text), ex_key) not in self._verdicts]
+        ex_key = (*example, allow_trailing_padding)
+        keys = {i: (content_hash(self.entries[i].text), *ex_key) for i in cands}
+        todo = [i for i in cands if keys[i] not in self._verdicts]
         if todo:
-            flags = verify([self.entries[i].text for i in todo], example)
+            flags = verify([self.entries[i].text for i in todo], example,
+                           allow_trailing_padding=allow_trailing_padding)
             for i, ok in zip(todo, flags):
-                self._verdicts[(content_hash(self.entries[i].text), ex_key)] = ok
-        return {i: self._verdicts[(content_hash(self.entries[i].text), ex_key)] for i in cands}
+                self._verdicts[keys[i]] = ok
+        return {i: self._verdicts[keys[i]] for i in cands}
 
 
 def rank_similarity(cands, scores):

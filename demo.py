@@ -19,7 +19,7 @@ from src.config import DEFAULT_K, VERSIONS_DIR
 from src.data import load_apps
 from src.encoder import E5
 from src.evolution import History, rank_verified
-from src.execute import parse_example, verify
+from src.execute import allows_trailing_padding, parse_example, verify
 from src.versions import VersionStore
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -68,7 +68,7 @@ else:
     print(f"index: {len(POOL_IDS)} snippets, no version history")
 print(f"device {E.device}")
 
-_VERDICTS: dict[tuple[int, str], bool] = {}   # (entry, example) -> passed
+_VERDICTS: dict[tuple[int, str, str, str, bool], bool] = {}
 
 VERDICT_TEXT = {
     "passed": "Produced the expected output",
@@ -128,14 +128,18 @@ def search(query: str, scope: str, k: int, do_verify: bool):
     if do_verify and example is None:
         note = "No example input and output found in the query, so results keep the similarity order."
     if example:
-        ex_key = example[0] + "\x00" + example[1]
-        todo = [i for i in cand if (i, ex_key) not in _VERDICTS]
+        padding = allows_trailing_padding(query)
+        ex_key = (*example, padding)
+        cache_keys = {i: (i, POOL_TEXT[i], *ex_key) for i in cand}
+        todo = [i for i in cand if cache_keys[i] not in _VERDICTS]
         reused = len(cand) - len(todo)
-        t = time.perf_counter()
-        for i, ok in zip(todo, verify([POOL_TEXT[i] for i in todo], example)):
-            _VERDICTS[(i, ex_key)] = ok
-        t_verify = time.perf_counter() - t
-        passed = {i: _VERDICTS[(i, ex_key)] for i in cand}
+        if todo:
+            t = time.perf_counter()
+            flags = verify([POOL_TEXT[i] for i in todo], example, allow_trailing_padding=padding)
+            for i, ok in zip(todo, flags):
+                _VERDICTS[cache_keys[i]] = ok
+            t_verify = time.perf_counter() - t
+        passed = {i: _VERDICTS[cache_keys[i]] for i in cand}
         verdicts = {i: ("passed" if ok else "failed") for i, ok in passed.items()}
         ranked = rank_verified(cand, score, passed)
     else:

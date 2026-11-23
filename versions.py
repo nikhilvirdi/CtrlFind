@@ -18,7 +18,7 @@ from src.versions import VersionStore
 def build(tracked_n: int, seed: int) -> None:
     from src.data import load_apps
     from src.encoder import E5
-    from src.execute import parse_example, verify
+    from src.execute import allows_trailing_padding, parse_example, verify
     from src.history import make_history
 
     if VERSIONS_DIR.exists() and any(VERSIONS_DIR.iterdir()):
@@ -33,11 +33,17 @@ def build(tracked_n: int, seed: int) -> None:
 
     # example for each tracked snippet, taken from the problem it answers
     q_text = dict(zip(apps.query_ids, apps.query_texts))
-    example = {apps.gold[q]: ex for q in tracked_q if (ex := parse_example(q_text[q]))}
+    cases = {
+        apps.gold[q]: (ex, allows_trailing_padding(q_text[q]))
+        for q in tracked_q if (ex := parse_example(q_text[q]))
+    }
 
     def observable(doc_id: str, code: str) -> bool:
-        ex = example.get(doc_id)
-        return ex is not None and not verify([code], ex)[0]
+        case = cases.get(doc_id)
+        if case is None:
+            return False
+        ex, padding = case
+        return not verify([code], ex, allow_trailing_padding=padding)[0]
 
     print(f"generating history, {len(tracked_docs)} tracked snippets")
     versions, bugs = make_history(base, tracked_docs, seed=seed, observable=observable)

@@ -17,7 +17,7 @@ from src.config import DEFAULT_K, VERSIONS_DIR, VERSIONS_REPORT
 from src.data import load_apps
 from src.encoder import E5
 from src.evolution import History, rank_newest, rank_similarity, rank_verified
-from src.execute import parse_example, verify
+from src.execute import allows_trailing_padding, parse_example, verify
 from src.versions import VersionStore
 
 
@@ -85,8 +85,9 @@ def main() -> None:
             continue
         # keep problems whose original answer passes its own example,
         # otherwise working and buggy versions cannot be told apart by anyone
-        if verify([store.text(store.manifest("v1")[apps.gold[q]])], ex)[0]:
-            usable.append((q, ex))
+        padding = allows_trailing_padding(q_text[q])
+        if verify([store.text(store.manifest("v1")[apps.gold[q]])], ex, allow_trailing_padding=padding)[0]:
+            usable.append((q, ex, padding))
         if len(usable) >= args.n:
             break
     print(f"   {len(usable)} problems with a usable example")
@@ -95,9 +96,9 @@ def main() -> None:
     ndcg = {m: [] for m in methods}
     detected, total_bug = 0, 0
     t0 = time.perf_counter()
-    for n, (q, ex) in enumerate(usable, 1):
+    for n, (q, ex, padding) in enumerate(usable, 1):
         cands, scores = hist.search(q_vec[q], None, args.k)
-        passed = hist.verify(cands, ex)
+        passed = hist.verify(cands, ex, allow_trailing_padding=padding)
         fam = {i for i in cands if hist.entries[i].doc_id == apps.gold[q]}
         good = {i for i in fam if not buggy(i)}
         for i in fam - good:

@@ -8,7 +8,11 @@ embedding search.
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import locale
+import os
+import sys
 from pathlib import Path
 
 from mteb.models.abs_encoder import AbsEncoder
@@ -16,9 +20,10 @@ from mteb.models.model_meta import ModelMeta
 from mteb.models.search_wrappers import SearchEncoderWrapper
 from mteb.types import PromptType
 
+from . import execute
 from .config import DEFAULT_K, EXEC_TIMEOUT
 from .encoder import E5
-from .execute import parse_example, verify
+from .execute import allows_trailing_padding, parse_example, verify
 
 
 def make_meta(name: str) -> ModelMeta:
@@ -98,24 +103,51 @@ class LiveExecReranker(SearchEncoderWrapper):
 
         done: dict[str, list[str]] = {}
         if self.checkpoint.exists():
-            for line in self.checkpoint.open(encoding="utf-8"):
-                rec = json.loads(line)
-                done[rec["qid"]] = rec["passer_ids"]
+            with self.checkpoint.open(encoding="utf-8", errors="replace") as saved:
+                for line in saved:
+                    try:
+                        rec = json.loads(line)
+                    except ValueError:
+                        continue
+                    if not isinstance(rec, dict):
+                        continue
+                    key, ids = rec.get("verification_key"), rec.get("passer_ids")
+                    if isinstance(key, str) and isinstance(ids, list) and all(isinstance(d, str) for d in ids):
+                        done[key] = ids
 
+        workers = os.cpu_count() or 2
+        settings = (
+            hashlib.sha256(Path(execute.__file__).read_bytes()).hexdigest(),
+            self.timeout, workers, sys.executable, sys.version, sys.platform,
+            locale.getpreferredencoding(False),
+            [os.environ.get(name) for name in ("PYTHONIOENCODING", "PYTHONUTF8", "PYTHONHASHSEED")],
+        )
         total = len(results)
+        appended = False
         with self.checkpoint.open("a", encoding="utf-8") as out:
             for n, (qid, hits) in enumerate(results.items(), 1):
-                if qid not in done:
-                    passed_ids: list[str] = []
-                    ex = parse_example(qtext[qid])
-                    if ex:
-                        cand = [d for d, _ in sorted(hits.items(), key=lambda x: -x[1])[: self.k]]
-                        flags = verify([self.doc_text[d] for d in cand], ex, self.timeout)
-                        passed_ids = [d for d, ok in zip(cand, flags) if ok]
-                    done[qid] = passed_ids
-                    out.write(json.dumps({"qid": qid, "passer_ids": passed_ids}) + "\n")
+                ex = parse_example(qtext[qid])
+                if ex is None or not hits:
+                    continue
+                padding = allows_trailing_padding(qtext[qid])
+                cand = [d for d, _ in sorted(hits.items(), key=lambda x: -x[1])[: self.k]]
+                codes = [self.doc_text[d] for d in cand]
+                payload = json.dumps((qid, ex, padding, settings, list(zip(cand, codes))))
+                key = hashlib.sha256(payload.encode("ascii")).hexdigest()
+                if key not in done or not set(done[key]).issubset(cand):
+                    flags = verify(codes, ex, self.timeout, workers=workers,
+                                   allow_trailing_padding=padding)
+                    passed_ids = [d for d, ok in zip(cand, flags) if ok]
+                    done[key] = passed_ids
+                    if not appended:
+                        # Delimit a previous interrupted write before appending usable records.
+                        out.write("\n")
+                        appended = True
+                    out.write(json.dumps({"qid": qid, "passer_ids": passed_ids,
+                                          "allow_trailing_padding": padding,
+                                          "verification_key": key}) + "\n")
                     out.flush()
                 if n % 100 == 0:
                     print(f"  stage 2: {n}/{total}")
-                _boost(hits, set(done[qid]))
+                _boost(hits, set(done[key]))
         return results

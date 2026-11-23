@@ -1,6 +1,6 @@
 """Produce the MTEB results file for AppsRetrieval.
 
-  python evaluate.py --mode cached     stage 2 verdicts from artifacts/exec_results.jsonl
+  python evaluate.py --mode cached     replay historical verdicts without exit-code provenance
   python evaluate.py --mode full       run stage 2 live (hours on CPU, resumable)
   python evaluate.py --mode baseline   stage 1 only
 
@@ -39,7 +39,7 @@ def load_cached_verdicts() -> dict[str, set[str]]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["cached", "full", "baseline"], default="cached")
+    ap.add_argument("--mode", choices=["cached", "full", "baseline"], required=True)
     ap.add_argument("--k", type=int, default=DEFAULT_K)
     args = ap.parse_args()
 
@@ -55,15 +55,17 @@ def main() -> None:
         model = E5Encoder(e5, "prism/e5-base-v2-baseline")
     elif args.mode == "cached":
         verdicts = load_cached_verdicts()
-        print(f"verdicts loaded: {len(verdicts)} queries with passing snippets")
+        print(f"historical replay without exit-code provenance: {len(verdicts)} queries with passing snippets")
         model = CachedExecReranker(E5Encoder(e5, "prism/e5-base-v2-exec-rerank"), verdicts)
     else:
         model = LiveExecReranker(E5Encoder(e5, "prism/e5-base-v2-exec-rerank-live"),
                                  ARTIFACTS / "exec_results_live.jsonl", k=args.k)
 
     t0 = time.time()
+    # Full mode resumes candidate checks from its own checkpoint, not an old MTEB score.
+    cache_options = {"cache": None} if args.mode == "full" else {}
     result = mteb.evaluate(model, [mteb.get_task("AppsRetrieval")],
-                           encode_kwargs={"batch_size": e5.batch_size})
+                           encode_kwargs={"batch_size": e5.batch_size}, **cache_options)
     elapsed = time.time() - t0
 
     out = list(result.task_results)[0].to_dict()
