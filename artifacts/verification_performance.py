@@ -131,7 +131,7 @@ def performance(path, plan_path, repeats, queries, docs, gold, examples):
                 launches = {key: [] for key in ("timeout", "launch_error", "other_error", "exit_zero", "nonzero")}
                 verdicts = {}
                 qids = iter(plan)
-                runner = execute.subprocess.run
+                runner = execute._run_candidate
                 verify = execute.verify
 
                 def run(*args, **kwargs):
@@ -163,7 +163,7 @@ def performance(path, plan_path, repeats, queries, docs, gold, examples):
                 with (
                     patch.object(SearchEncoderWrapper, "search", return_value=timed),
                     patch("src.mteb_wrappers.verify", side_effect=capture),
-                    patch.object(execute, "subprocess", SimpleNamespace(run=run)),
+                    patch.object(execute, "_run_candidate", run),
                 ):
                     start = perf_counter()
                     results = live.search(batch)

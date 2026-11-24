@@ -116,8 +116,10 @@ class LiveExecReranker(SearchEncoderWrapper):
                         done[key] = ids
 
         workers = os.cpu_count() or 2
+        verifier = Path(execute.__file__)
         settings = (
-            hashlib.sha256(Path(execute.__file__).read_bytes()).hexdigest(),
+            hashlib.sha256(verifier.read_bytes()).hexdigest(),
+            hashlib.sha256(verifier.with_name("_windows_job.py").read_bytes()).hexdigest() if os.name == "nt" else None,
             self.timeout, workers, sys.executable, sys.version, sys.platform,
             locale.getpreferredencoding(False),
             [os.environ.get(name) for name in ("PYTHONIOENCODING", "PYTHONUTF8", "PYTHONHASHSEED")],

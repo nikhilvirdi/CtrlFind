@@ -13,7 +13,6 @@ import statistics
 import subprocess
 import threading
 import time
-from types import SimpleNamespace
 from unittest.mock import patch
 
 from verification_research import SNAPSHOT, WORKERS, decode, load_train, sample
@@ -79,6 +78,7 @@ def observe(sources, example):
     observations = {}
     active = threading.local()
     runner = execute.run_snippet
+    launch = execute._run_candidate
 
     def run_snippet(code, *args):
         active.record = observations[id(code)] = {}
@@ -88,7 +88,7 @@ def observe(sources, example):
         start = time.perf_counter()
         obs = active.record
         try:
-            result = subprocess.run(args, **kwargs)
+            result = launch(args, **kwargs)
             obs.update(returncode=result.returncode, stdout=result.stdout, stderr=result.stderr)
             return result
         except subprocess.TimeoutExpired as exc:
@@ -101,7 +101,7 @@ def observe(sources, example):
             obs["seconds"] = round(time.perf_counter() - start, 4)
 
     with (
-        patch.object(execute, "subprocess", SimpleNamespace(run=run)),
+        patch.object(execute, "_run_candidate", run),
         patch.object(execute, "run_snippet", side_effect=run_snippet),
     ):
         exact = execute.verify(sources, example, timeout=EXEC_TIMEOUT, workers=WORKERS)

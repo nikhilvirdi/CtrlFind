@@ -61,6 +61,33 @@ class CandidateExecutionTests(unittest.TestCase):
 
 
 class LiveCheckpointTests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == "win32", "requires Windows runner fingerprint")
+    def test_windows_runner_change_misses_old_checkpoint_key(self):
+        from src.mteb_wrappers import LiveExecReranker, SearchEncoderWrapper
+
+        query = {"id": ["q"], "text": ["-----Example-----\nInput\nx\nOutput\n1"]}
+        read_bytes = Path.read_bytes
+
+        def previous_source(path):
+            contents = read_bytes(path)
+            return contents + b"\n# previous runner" if path.name == "_windows_job.py" else contents
+
+        with tempfile.TemporaryDirectory() as directory:
+            live = LiveExecReranker.__new__(LiveExecReranker)
+            live.checkpoint = Path(directory) / "verdicts.jsonl"
+            live.k, live.timeout, live.doc_text = 1, 1, {"a": "print(1)"}
+            with patch.object(SearchEncoderWrapper, "search", side_effect=lambda *a, **kw: {"q": {"a": .8}}):
+                with patch.object(Path, "read_bytes", previous_source), patch("src.mteb_wrappers.verify", return_value=[False]):
+                    self.assertEqual(live.search(query), {"q": {"a": .8}})
+                current = live.search(query)
+                self.assertGreater(current["q"]["a"], .8)
+                with patch("src.mteb_wrappers.verify", side_effect=AssertionError("cache miss")):
+                    self.assertEqual(live.search(query), current)
+            records = [json.loads(line) for line in live.checkpoint.read_text(encoding="utf-8").splitlines() if line]
+            self.assertEqual([record["passer_ids"] for record in records], [[], ["a"]])
+            self.assertEqual(records[0].keys(), records[1].keys())
+            self.assertNotEqual(records[0]["verification_key"], records[1]["verification_key"])
+
     def test_legacy_and_interrupted_records_are_ignored_and_new_results_resume(self):
         from datasets import Dataset
         import numpy as np

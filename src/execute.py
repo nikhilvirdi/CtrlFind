@@ -20,6 +20,9 @@ from typing import Sequence
 
 from .config import EXEC_TIMEOUT
 
+if os.name == "nt":
+    from . import _windows_job
+
 # Same pattern used for the reported evaluation run. Takes the first example.
 EXAMPLE_RE = re.compile(
     r"-----Examples?-----\s*Input\s*\n(.*?)\n\s*Output\s*\n(.*?)(?:\n\s*Input\s*\n|\n-----|\Z)",
@@ -67,6 +70,12 @@ def _trim_line_ends(output: str) -> str:
     return "\n".join(line.rstrip(" \t") for line in output.split("\n"))
 
 
+def _run_candidate(args, *, input, timeout, cwd):
+    if os.name == "nt":
+        return _windows_job.run(args, input=input, timeout=timeout, cwd=cwd)
+    return subprocess.run(args, input=input, capture_output=True, text=True, timeout=timeout, cwd=cwd)
+
+
 def run_snippet(code: str, stdin_data: str, timeout: float = EXEC_TIMEOUT) -> str | None:
     """Run code with stdin_data, return stripped stdout, or None on failure."""
     try:
@@ -74,11 +83,9 @@ def run_snippet(code: str, stdin_data: str, timeout: float = EXEC_TIMEOUT) -> st
             path = os.path.join(workdir, "solution.py")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(code)
-            r = subprocess.run(
+            r = _run_candidate(
                 [sys.executable, path],
                 input=stdin_data,
-                capture_output=True,
-                text=True,
                 timeout=timeout,
                 cwd=workdir,
             )
@@ -103,7 +110,12 @@ def verify(
     inp, exp = example
     workers = workers or os.cpu_count() or 2
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        outs = list(pool.map(lambda c: run_snippet(c, inp + "\n", timeout), codes))
+        try:
+            outs = list(pool.map(lambda c: run_snippet(c, inp + "\n", timeout), codes))
+        except BaseException:
+            if os.name == "nt":
+                pool.shutdown(wait=True, cancel_futures=True)
+            raise
     if allow_trailing_padding and all(_INTEGER_ROW.fullmatch(line) for line in exp.split("\n")):
         exp = _trim_line_ends(exp)
         return [o is not None and _trim_line_ends(o) == exp for o in outs]

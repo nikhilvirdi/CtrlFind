@@ -28,7 +28,7 @@ class VerifyTests(unittest.TestCase):
         self.assertEqual(verify([snippet], self.example, timeout=0.25, workers=1), [False])
 
     def test_subprocess_launch_error_is_rejected(self):
-        with patch("src.execute.subprocess.run", side_effect=OSError("cannot start interpreter")):
+        with patch("src.execute._run_candidate", side_effect=OSError("cannot start interpreter")):
             self.assertEqual(verify(["print(input())"], self.example, workers=1), [False])
 
 

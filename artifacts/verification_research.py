@@ -13,7 +13,6 @@ import sys
 import time
 from collections import Counter
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -85,13 +84,14 @@ def script_fingerprint(code):
 def observed_verify(codes, example, timeout=EXEC_TIMEOUT, workers=WORKERS):
     """Run the production verifier and record the subprocess data it discards."""
     observations = {}
+    runner = execute._run_candidate
 
     def run(args, **kwargs):
         key = hashlib.sha256(Path(args[1]).read_bytes()).hexdigest()
         start = time.perf_counter()
         record = {"returncode": None, "stdout": None, "stderr": None}
         try:
-            result = subprocess.run(args, **kwargs)
+            result = runner(args, **kwargs)
             record.update(returncode=result.returncode, stdout=result.stdout, stderr=result.stderr)
             return result
         except subprocess.TimeoutExpired as exc:
@@ -104,7 +104,7 @@ def observed_verify(codes, example, timeout=EXEC_TIMEOUT, workers=WORKERS):
             record["seconds"] = round(time.perf_counter() - start, 4)
             observations[key] = record
 
-    with patch.object(execute, "subprocess", SimpleNamespace(run=run)):
+    with patch.object(execute, "_run_candidate", run):
         passed = execute.verify(codes, example, timeout=timeout, workers=workers)
     return passed, [observations.get(script_fingerprint(code)) for code in codes]
 
