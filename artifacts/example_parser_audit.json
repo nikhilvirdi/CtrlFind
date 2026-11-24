@@ -1,0 +1,5689 @@
+{
+  "dataset": "CoIR-Retrieval/apps",
+  "dataset_revision": "f22508f96b7a36c2415181ed8bb76f76e04ae2d5",
+  "parquet_file": "queries-00000-of-00001.parquet",
+  "parser_sha256": "6fab5f1636bb9a432a59ca85826bb3fd7424dd3ed35282fed608d4ec4d3f237f",
+  "python": "3.13.13",
+  "pyarrow": "26.0.1",
+  "sampling": {
+    "seed": 20261125,
+    "training_universe": 5000,
+    "method": "random.Random(seed).sample(sorted(training_query_ids), 500)",
+    "ordered_ids_sha256": "d463ba25ae4db0782402be587a550026ae9eef7c7922c64cdd1cb02c55a5a8c3",
+    "query_ids": [
+      "q1068",
+      "q3320",
+      "q4336",
+      "q632",
+      "q2804",
+      "q1270",
+      "q4841",
+      "q3923",
+      "q2337",
+      "q4536",
+      "q1909",
+      "q3190",
+      "q4335",
+      "q1397",
+      "q3293",
+      "q1318",
+      "q1184",
+      "q3099",
+      "q669",
+      "q2301",
+      "q1606",
+      "q278",
+      "q3038",
+      "q4206",
+      "q3406",
+      "q2781",
+      "q3732",
+      "q3738",
+      "q2973",
+      "q858",
+      "q3410",
+      "q1141",
+      "q3392",
+      "q4248",
+      "q3887",
+      "q4410",
+      "q1888",
+      "q4276",
+      "q2108",
+      "q2674",
+      "q4051",
+      "q4231",
+      "q2461",
+      "q88",
+      "q4226",
+      "q1363",
+      "q994",
+      "q2466",
+      "q3236",
+      "q4602",
+      "q1530",
+      "q1917",
+      "q1881",
+      "q497",
+      "q3973",
+      "q4972",
+      "q2370",
+      "q766",
+      "q3321",
+      "q656",
+      "q4256",
+      "q4435",
+      "q848",
+      "q3097",
+      "q1218",
+      "q114",
+      "q2315",
+      "q1542",
+      "q3306",
+      "q1846",
+      "q2852",
+      "q4790",
+      "q37",
+      "q2998",
+      "q4042",
+      "q4092",
+      "q1509",
+      "q2755",
+      "q2812",
+      "q3638",
+      "q4020",
+      "q4323",
+      "q4555",
+      "q996",
+      "q1436",
+      "q1362",
+      "q531",
+      "q1841",
+      "q827",
+      "q2237",
+      "q2631",
+      "q3039",
+      "q818",
+      "q3409",
+      "q1782",
+      "q1034",
+      "q4134",
+      "q944",
+      "q2764",
+      "q2829",
+      "q2409",
+      "q1366",
+      "q3338",
+      "q658",
+      "q1353",
+      "q989",
+      "q1286",
+      "q1178",
+      "q1047",
+      "q754",
+      "q4541",
+      "q4640",
+      "q177",
+      "q1279",
+      "q123",
+      "q3196",
+      "q2431",
+      "q303",
+      "q895",
+      "q3628",
+      "q74",
+      "q3723",
+      "q3427",
+      "q1695",
+      "q1271",
+      "q2428",
+      "q4434",
+      "q3812",
+      "q2169",
+      "q2498",
+      "q4905",
+      "q899",
+      "q3377",
+      "q4060",
+      "q633",
+      "q3872",
+      "q4102",
+      "q4458",
+      "q4618",
+      "q4065",
+      "q4391",
+      "q3357",
+      "q735",
+      "q1055",
+      "q979",
+      "q1903",
+      "q3756",
+      "q192",
+      "q1193",
+      "q3568",
+      "q702",
+      "q138",
+      "q3904",
+      "q711",
+      "q4230",
+      "q566",
+      "q2229",
+      "q4108",
+      "q2153",
+      "q568",
+      "q3843",
+      "q4796",
+      "q2946",
+      "q3583",
+      "q693",
+      "q2271",
+      "q2813",
+      "q4799",
+      "q4795",
+      "q1991",
+      "q4632",
+      "q2891",
+      "q3348",
+      "q1422",
+      "q395",
+      "q79",
+      "q279",
+      "q4625",
+      "q4244",
+      "q3798",
+      "q3314",
+      "q423",
+      "q828",
+      "q2510",
+      "q3390",
+      "q115",
+      "q3364",
+      "q4408",
+      "q1116",
+      "q1897",
+      "q527",
+      "q2144",
+      "q2926",
+      "q4512",
+      "q315",
+      "q1622",
+      "q3892",
+      "q4696",
+      "q1440",
+      "q2131",
+      "q1077",
+      "q327",
+      "q4506",
+      "q3763",
+      "q3528",
+      "q1430",
+      "q851",
+      "q964",
+      "q166",
+      "q3667",
+      "q949",
+      "q3485",
+      "q2390",
+      "q2953",
+      "q4661",
+      "q2",
+      "q2468",
+      "q4053",
+      "q1465",
+      "q576",
+      "q3855",
+      "q1938",
+      "q1791",
+      "q4590",
+      "q4537",
+      "q2549",
+      "q3930",
+      "q1538",
+      "q2106",
+      "q2621",
+      "q2649",
+      "q342",
+      "q2416",
+      "q1722",
+      "q1668",
+      "q2526",
+      "q3452",
+      "q452",
+      "q3040",
+      "q4724",
+      "q971",
+      "q1850",
+      "q3197",
+      "q4035",
+      "q4433",
+      "q3688",
+      "q4698",
+      "q1633",
+      "q3016",
+      "q705",
+      "q3520",
+      "q4828",
+      "q3660",
+      "q4212",
+      "q211",
+      "q4936",
+      "q1778",
+      "q1659",
+      "q1361",
+      "q3475",
+      "q470",
+      "q4908",
+      "q2602",
+      "q1072",
+      "q272",
+      "q3698",
+      "q1406",
+      "q2879",
+      "q1103",
+      "q898",
+      "q3281",
+      "q2560",
+      "q4265",
+      "q465",
+      "q3668",
+      "q11",
+      "q831",
+      "q217",
+      "q1448",
+      "q3611",
+      "q1694",
+      "q692",
+      "q3459",
+      "q1577",
+      "q49",
+      "q1307",
+      "q4875",
+      "q3576",
+      "q1728",
+      "q4751",
+      "q4165",
+      "q2599",
+      "q4401",
+      "q2161",
+      "q2772",
+      "q3856",
+      "q2053",
+      "q4493",
+      "q2628",
+      "q1400",
+      "q3829",
+      "q3602",
+      "q3694",
+      "q2268",
+      "q1416",
+      "q4162",
+      "q2333",
+      "q4586",
+      "q3064",
+      "q1450",
+      "q2854",
+      "q3108",
+      "q1956",
+      "q962",
+      "q4526",
+      "q2811",
+      "q2213",
+      "q4634",
+      "q3764",
+      "q3092",
+      "q2832",
+      "q4038",
+      "q3619",
+      "q4544",
+      "q1851",
+      "q1079",
+      "q2924",
+      "q3506",
+      "q526",
+      "q4935",
+      "q3246",
+      "q580",
+      "q4538",
+      "q3269",
+      "q2985",
+      "q3674",
+      "q3896",
+      "q3247",
+      "q4570",
+      "q2378",
+      "q4443",
+      "q1969",
+      "q3509",
+      "q1183",
+      "q3558",
+      "q3863",
+      "q2256",
+      "q3562",
+      "q3511",
+      "q2261",
+      "q2482",
+      "q1503",
+      "q4107",
+      "q3046",
+      "q3927",
+      "q3914",
+      "q4278",
+      "q368",
+      "q4552",
+      "q3455",
+      "q2786",
+      "q4170",
+      "q4716",
+      "q1871",
+      "q1241",
+      "q3655",
+      "q1245",
+      "q3089",
+      "q4881",
+      "q2831",
+      "q2553",
+      "q3221",
+      "q4275",
+      "q1277",
+      "q3715",
+      "q2208",
+      "q1725",
+      "q586",
+      "q4950",
+      "q3194",
+      "q2557",
+      "q2771",
+      "q958",
+      "q4151",
+      "q4288",
+      "q3671",
+      "q1451",
+      "q1281",
+      "q1247",
+      "q1485",
+      "q318",
+      "q2885",
+      "q2073",
+      "q4923",
+      "q3958",
+      "q820",
+      "q1976",
+      "q2870",
+      "q2181",
+      "q541",
+      "q2449",
+      "q3252",
+      "q4505",
+      "q3597",
+      "q4770",
+      "q795",
+      "q4833",
+      "q2381",
+      "q383",
+      "q3944",
+      "q817",
+      "q1559",
+      "q1201",
+      "q3664",
+      "q3498",
+      "q1672",
+      "q357",
+      "q2702",
+      "q3781",
+      "q1936",
+      "q1963",
+      "q4024",
+      "q1212",
+      "q1454",
+      "q2492",
+      "q2284",
+      "q3369",
+      "q4199",
+      "q3229",
+      "q4442",
+      "q4557",
+      "q809",
+      "q554",
+      "q212",
+      "q1807",
+      "q2285",
+      "q4083",
+      "q3663",
+      "q2336",
+      "q1211",
+      "q4058",
+      "q1478",
+      "q4588",
+      "q4048",
+      "q4047",
+      "q746",
+      "q4857",
+      "q3055",
+      "q4189",
+      "q1244",
+      "q2865",
+      "q4415",
+      "q3550",
+      "q30",
+      "q373",
+      "q2398",
+      "q250",
+      "q1010",
+      "q2847",
+      "q1964",
+      "q1208",
+      "q535",
+      "q3861",
+      "q775",
+      "q4867",
+      "q1409",
+      "q3916",
+      "q2533",
+      "q4615",
+      "q4553",
+      "q3276",
+      "q839",
+      "q3635",
+      "q2263",
+      "q2871",
+      "q3669",
+      "q4630",
+      "q1148",
+      "q193",
+      "q3265",
+      "q2844",
+      "q3616",
+      "q300",
+      "q1372",
+      "q1628",
+      "q4009",
+      "q2464",
+      "q4076",
+      "q2930",
+      "q4702",
+      "q1729",
+      "q3661",
+      "q4521",
+      "q2994",
+      "q125",
+      "q2650",
+      "q268",
+      "q2114",
+      "q1408",
+      "q4385"
+    ]
+  },
+  "train": {
+    "total": 500,
+    "parsed": 43,
+    "unparsed": 457,
+    "share_of_population_percent": 100.0,
+    "parsed_percent": 8.6,
+    "unparsed_percent": 91.4,
+    "markers_overlapping": {
+      "no_recognized_marker": {
+        "total": 54,
+        "parsed": 0,
+        "unparsed": 54,
+        "share_of_population_percent": 10.8,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "input_colon": {
+        "total": 147,
+        "parsed": 1,
+        "unparsed": 146,
+        "share_of_population_percent": 29.4,
+        "parsed_percent": 0.6802721088435374,
+        "unparsed_percent": 99.31972789115646
+      },
+      "output_colon": {
+        "total": 147,
+        "parsed": 0,
+        "unparsed": 147,
+        "share_of_population_percent": 29.4,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "example_word": {
+        "total": 390,
+        "parsed": 43,
+        "unparsed": 347,
+        "share_of_population_percent": 78.0,
+        "parsed_percent": 11.025641025641026,
+        "unparsed_percent": 88.97435897435898
+      },
+      "sample_word": {
+        "total": 71,
+        "parsed": 9,
+        "unparsed": 62,
+        "share_of_population_percent": 14.2,
+        "parsed_percent": 12.67605633802817,
+        "unparsed_percent": 87.32394366197182
+      },
+      "dashed_example_heading": {
+        "total": 75,
+        "parsed": 43,
+        "unparsed": 32,
+        "share_of_population_percent": 15.0,
+        "parsed_percent": 57.333333333333336,
+        "unparsed_percent": 42.666666666666664
+      },
+      "numbered_or_plain_example_heading": {
+        "total": 182,
+        "parsed": 0,
+        "unparsed": 182,
+        "share_of_population_percent": 36.4,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "narrative_cue": {
+        "total": 131,
+        "parsed": 14,
+        "unparsed": 117,
+        "share_of_population_percent": 26.2,
+        "parsed_percent": 10.687022900763358,
+        "unparsed_percent": 89.31297709923665
+      },
+      "arrow_or_function_result_cue": {
+        "total": 132,
+        "parsed": 0,
+        "unparsed": 132,
+        "share_of_population_percent": 26.4,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "retained_regex_match": {
+        "total": 43,
+        "parsed": 43,
+        "unparsed": 0,
+        "share_of_population_percent": 8.6,
+        "parsed_percent": 100.0,
+        "unparsed_percent": 0.0
+      },
+      "both_colon_markers": {
+        "total": 144,
+        "parsed": 0,
+        "unparsed": 144,
+        "share_of_population_percent": 28.8,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "dashed_standalone_colon_pair": {
+        "total": 27,
+        "parsed": 0,
+        "unparsed": 27,
+        "share_of_population_percent": 5.4,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "dashed_inline_colon_payload": {
+        "total": 3,
+        "parsed": 0,
+        "unparsed": 3,
+        "share_of_population_percent": 0.6,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "split_dashed_io_headings": {
+        "total": 80,
+        "parsed": 0,
+        "unparsed": 80,
+        "share_of_population_percent": 16.0,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "plain_colon_io_lines": {
+        "total": 99,
+        "parsed": 0,
+        "unparsed": 99,
+        "share_of_population_percent": 19.8,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      }
+    },
+    "primary_families_exclusive": {
+      "retained_bare_io": {
+        "total": 43,
+        "parsed": 43,
+        "unparsed": 0,
+        "share_of_population_percent": 8.6,
+        "parsed_percent": 100.0,
+        "unparsed_percent": 0.0
+      },
+      "dashed_colon_io": {
+        "total": 27,
+        "parsed": 0,
+        "unparsed": 27,
+        "share_of_population_percent": 5.4,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "split_dashed_io": {
+        "total": 80,
+        "parsed": 0,
+        "unparsed": 80,
+        "share_of_population_percent": 16.0,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "other_dashed_example": {
+        "total": 4,
+        "parsed": 0,
+        "unparsed": 4,
+        "share_of_population_percent": 0.8,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "plain_colon_io": {
+        "total": 68,
+        "parsed": 0,
+        "unparsed": 68,
+        "share_of_population_percent": 13.6,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "plain_example_heading": {
+        "total": 115,
+        "parsed": 0,
+        "unparsed": 115,
+        "share_of_population_percent": 23.0,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "narrative_cue": {
+        "total": 58,
+        "parsed": 0,
+        "unparsed": 58,
+        "share_of_population_percent": 11.6,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "arrow_or_function_result": {
+        "total": 30,
+        "parsed": 0,
+        "unparsed": 30,
+        "share_of_population_percent": 6.0,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "other_marker": {
+        "total": 21,
+        "parsed": 0,
+        "unparsed": 21,
+        "share_of_population_percent": 4.2,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "no_recognized_marker": {
+        "total": 54,
+        "parsed": 0,
+        "unparsed": 54,
+        "share_of_population_percent": 10.8,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      }
+    }
+  },
+  "test": {
+    "total": 3765,
+    "parsed": 2936,
+    "unparsed": 829,
+    "share_of_population_percent": 100.0,
+    "parsed_percent": 77.98140770252324,
+    "unparsed_percent": 22.01859229747676,
+    "markers_overlapping": {
+      "no_recognized_marker": {
+        "total": 29,
+        "parsed": 0,
+        "unparsed": 29,
+        "share_of_population_percent": 0.7702523240371846,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "input_colon": {
+        "total": 85,
+        "parsed": 4,
+        "unparsed": 81,
+        "share_of_population_percent": 2.257636122177955,
+        "parsed_percent": 4.705882352941177,
+        "unparsed_percent": 95.29411764705883
+      },
+      "output_colon": {
+        "total": 80,
+        "parsed": 2,
+        "unparsed": 78,
+        "share_of_population_percent": 2.1248339973439574,
+        "parsed_percent": 2.5,
+        "unparsed_percent": 97.5
+      },
+      "example_word": {
+        "total": 3133,
+        "parsed": 2936,
+        "unparsed": 197,
+        "share_of_population_percent": 83.21381142098274,
+        "parsed_percent": 93.7120970315991,
+        "unparsed_percent": 6.287902968400894
+      },
+      "sample_word": {
+        "total": 1513,
+        "parsed": 783,
+        "unparsed": 730,
+        "share_of_population_percent": 40.1859229747676,
+        "parsed_percent": 51.75148711169861,
+        "unparsed_percent": 48.24851288830139
+      },
+      "dashed_example_heading": {
+        "total": 2958,
+        "parsed": 2936,
+        "unparsed": 22,
+        "share_of_population_percent": 78.56573705179282,
+        "parsed_percent": 99.25625422582826,
+        "unparsed_percent": 0.7437457741717377
+      },
+      "numbered_or_plain_example_heading": {
+        "total": 43,
+        "parsed": 4,
+        "unparsed": 39,
+        "share_of_population_percent": 1.1420982735723773,
+        "parsed_percent": 9.30232558139535,
+        "unparsed_percent": 90.69767441860465
+      },
+      "narrative_cue": {
+        "total": 904,
+        "parsed": 778,
+        "unparsed": 126,
+        "share_of_population_percent": 24.01062416998672,
+        "parsed_percent": 86.06194690265487,
+        "unparsed_percent": 13.938053097345133
+      },
+      "arrow_or_function_result_cue": {
+        "total": 45,
+        "parsed": 29,
+        "unparsed": 16,
+        "share_of_population_percent": 1.1952191235059761,
+        "parsed_percent": 64.44444444444444,
+        "unparsed_percent": 35.55555555555556
+      },
+      "retained_regex_match": {
+        "total": 2936,
+        "parsed": 2936,
+        "unparsed": 0,
+        "share_of_population_percent": 77.98140770252324,
+        "parsed_percent": 100.0,
+        "unparsed_percent": 0.0
+      },
+      "both_colon_markers": {
+        "total": 77,
+        "parsed": 0,
+        "unparsed": 77,
+        "share_of_population_percent": 2.045152722443559,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "dashed_standalone_colon_pair": {
+        "total": 12,
+        "parsed": 0,
+        "unparsed": 12,
+        "share_of_population_percent": 0.3187250996015936,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "dashed_inline_colon_payload": {
+        "total": 1,
+        "parsed": 0,
+        "unparsed": 1,
+        "share_of_population_percent": 0.02656042496679947,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "split_dashed_io_headings": {
+        "total": 697,
+        "parsed": 0,
+        "unparsed": 697,
+        "share_of_population_percent": 18.51261620185923,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "plain_colon_io_lines": {
+        "total": 52,
+        "parsed": 0,
+        "unparsed": 52,
+        "share_of_population_percent": 1.3811420982735725,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      }
+    },
+    "primary_families_exclusive": {
+      "retained_bare_io": {
+        "total": 2936,
+        "parsed": 2936,
+        "unparsed": 0,
+        "share_of_population_percent": 77.98140770252324,
+        "parsed_percent": 100.0,
+        "unparsed_percent": 0.0
+      },
+      "dashed_colon_io": {
+        "total": 12,
+        "parsed": 0,
+        "unparsed": 12,
+        "share_of_population_percent": 0.3187250996015936,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "split_dashed_io": {
+        "total": 697,
+        "parsed": 0,
+        "unparsed": 697,
+        "share_of_population_percent": 18.51261620185923,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "other_dashed_example": {
+        "total": 10,
+        "parsed": 0,
+        "unparsed": 10,
+        "share_of_population_percent": 0.2656042496679947,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "plain_colon_io": {
+        "total": 38,
+        "parsed": 0,
+        "unparsed": 38,
+        "share_of_population_percent": 1.0092961487383798,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "plain_example_heading": {
+        "total": 6,
+        "parsed": 0,
+        "unparsed": 6,
+        "share_of_population_percent": 0.1593625498007968,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "narrative_cue": {
+        "total": 13,
+        "parsed": 0,
+        "unparsed": 13,
+        "share_of_population_percent": 0.3452855245683931,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "arrow_or_function_result": {
+        "total": 2,
+        "parsed": 0,
+        "unparsed": 2,
+        "share_of_population_percent": 0.05312084993359894,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "other_marker": {
+        "total": 22,
+        "parsed": 0,
+        "unparsed": 22,
+        "share_of_population_percent": 0.5843293492695883,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      },
+      "no_recognized_marker": {
+        "total": 29,
+        "parsed": 0,
+        "unparsed": 29,
+        "share_of_population_percent": 0.7702523240371846,
+        "parsed_percent": 0.0,
+        "unparsed_percent": 100.0
+      }
+    }
+  },
+  "reviewed_train_case_ids": [
+    "q1318",
+    "q754",
+    "q1068",
+    "q632",
+    "q775",
+    "q278",
+    "q1909",
+    "q2973",
+    "q3320",
+    "q4841",
+    "q4336",
+    "q4536",
+    "q3293",
+    "q3099",
+    "q3923",
+    "q4335",
+    "q4256",
+    "q4244",
+    "q1695",
+    "q4206"
+  ],
+  "train_rows": {
+    "q1068": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3320": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4336": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q632": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "sample_word",
+        "narrative_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2804": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1270": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4841": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3923": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2337": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q4536": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1909": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3190": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q4335": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q1397": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3293": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1318": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1184": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3099": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q669": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2301": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "sample_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1606": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q278": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3038": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4206": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3406": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2781": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q3732": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q3738": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q2973": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q858": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3410": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1141": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "narrative_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3392": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4248": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3887": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q4410": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q1888": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4276": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q2108": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q2674": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4051": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q4231": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q2461": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q88": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q4226": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1363": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q994": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers"
+      ]
+    },
+    "q2466": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3236": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q4602": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q1530": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "narrative_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1917": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1881": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q497": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3973": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4972": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2370": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q766": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3321": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q656": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4256": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q4435": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q848": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3097": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1218": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q114": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q2315": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q1542": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "sample_word",
+        "arrow_or_function_result_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3306": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1846": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2852": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4790": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q37": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "input_colon",
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q2998": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4042": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "input_colon",
+        "sample_word"
+      ]
+    },
+    "q4092": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q1509": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2755": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2812": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q3638": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4020": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4323": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4555": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q996": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1436": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "narrative_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1362": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q531": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1841": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q827": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2237": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q2631": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q3039": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q818": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3409": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1782": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q1034": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4134": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q944": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2764": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2829": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q2409": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1366": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "both_colon_markers"
+      ]
+    },
+    "q3338": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q658": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1353": {
+      "parsed": false,
+      "family": "other_dashed_example",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers"
+      ]
+    },
+    "q989": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1286": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1178": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1047": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q754": {
+      "parsed": false,
+      "family": "other_dashed_example",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "dashed_inline_colon_payload",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4541": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4640": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q177": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1279": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q123": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3196": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2431": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q303": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q895": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "sample_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3628": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q74": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q3723": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3427": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1695": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q1271": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2428": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4434": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3812": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q2169": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q2498": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4905": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q899": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3377": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4060": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q633": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3872": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4102": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4458": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4618": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4065": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4391": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q3357": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q735": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1055": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q979": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1903": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3756": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q192": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1193": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3568": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q702": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q138": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3904": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q711": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4230": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q566": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2229": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q4108": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2153": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q568": {
+      "parsed": false,
+      "family": "other_dashed_example",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "dashed_inline_colon_payload",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3843": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4796": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2946": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3583": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q693": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2271": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "sample_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2813": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4799": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "output_colon",
+        "example_word"
+      ]
+    },
+    "q4795": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1991": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4632": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2891": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3348": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q1422": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q395": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q79": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q279": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4625": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4244": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3798": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3314": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q423": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q828": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2510": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3390": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q115": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q3364": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q4408": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1116": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1897": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q527": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2144": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q2926": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4512": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q315": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1622": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3892": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q4696": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q1440": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2131": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q1077": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q327": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4506": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3763": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q3528": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q1430": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q851": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q964": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q166": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3667": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q949": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3485": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q2390": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q2953": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q4661": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q2468": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4053": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "output_colon",
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1465": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "narrative_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q576": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3855": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q1938": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1791": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4590": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4537": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2549": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3930": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1538": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2106": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q2621": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q2649": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q342": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2416": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1722": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1668": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2526": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3452": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q452": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3040": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4724": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q971": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "sample_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1850": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q3197": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q4035": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q4433": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3688": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4698": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q1633": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q3016": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q705": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3520": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q4828": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3660": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4212": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q211": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4936": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q1778": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1659": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1361": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3475": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q470": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4908": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q2602": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1072": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q272": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3698": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q1406": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2879": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1103": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "narrative_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q898": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3281": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q2560": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q4265": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q465": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3668": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q11": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q831": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q217": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1448": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3611": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1694": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q692": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3459": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1577": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q49": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q1307": {
+      "parsed": false,
+      "family": "other_dashed_example",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_inline_colon_payload",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4875": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3576": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1728": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q4751": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4165": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "narrative_cue"
+      ]
+    },
+    "q2599": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q4401": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2161": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q2772": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3856": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2053": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q4493": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2628": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q1400": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word",
+        "sample_word"
+      ]
+    },
+    "q3829": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3602": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3694": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2268": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "narrative_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1416": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4162": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q2333": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q4586": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3064": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1450": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2854": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3108": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q1956": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q962": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4526": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q2811": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q2213": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q4634": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q3764": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3092": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2832": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4038": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3619": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q4544": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q1851": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1079": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2924": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3506": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q526": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4935": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "both_colon_markers"
+      ]
+    },
+    "q3246": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q580": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4538": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3269": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2985": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3674": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q3896": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3247": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4570": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2378": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q4443": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1969": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3509": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1183": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3558": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3863": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2256": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q3562": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3511": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2261": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q2482": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1503": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4107": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3046": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3927": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q3914": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4278": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q368": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4552": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q3455": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2786": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4170": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4716": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1871": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1241": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3655": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1245": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3089": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4881": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2831": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2553": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3221": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q4275": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1277": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "sample_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3715": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q2208": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q1725": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q586": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4950": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3194": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q2557": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2771": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q958": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4151": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4288": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3671": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q1451": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1281": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1247": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1485": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "narrative_cue",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q318": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2885": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2073": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q4923": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q3958": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q820": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1976": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2870": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2181": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q541": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2449": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3252": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4505": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3597": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q4770": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q795": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4833": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "narrative_cue"
+      ]
+    },
+    "q2381": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q383": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3944": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q817": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1559": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1201": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3664": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue"
+      ]
+    },
+    "q3498": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1672": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q357": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2702": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3781": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q1936": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1963": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4024": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q1212": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q1454": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2492": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2284": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q3369": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q4199": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3229": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4442": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q4557": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q809": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q554": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q212": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1807": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2285": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q4083": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "example_word"
+      ]
+    },
+    "q3663": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q2336": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q1211": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4058": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1478": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4588": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4048": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4047": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q746": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q4857": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3055": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4189": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q1244": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2865": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4415": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "sample_word"
+      ]
+    },
+    "q3550": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q30": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q373": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2398": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "narrative_cue",
+        "retained_regex_match"
+      ]
+    },
+    "q250": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1010": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "sample_word",
+        "arrow_or_function_result_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2847": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers"
+      ]
+    },
+    "q1964": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1208": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q535": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q3861": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q775": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4867": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1409": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3916": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q2533": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4615": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q4553": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3276": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "narrative_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q839": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3635": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2263": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "sample_word",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q2871": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q3669": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4630": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "narrative_cue",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q1148": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "sample_word",
+        "both_colon_markers",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q193": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q3265": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q2844": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "narrative_cue"
+      ]
+    },
+    "q3616": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q300": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1372": {
+      "parsed": false,
+      "family": "dashed_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "dashed_example_heading",
+        "both_colon_markers",
+        "dashed_standalone_colon_pair",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q1628": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4009": {
+      "parsed": false,
+      "family": "narrative_cue",
+      "markers": [
+        "example_word",
+        "narrative_cue"
+      ]
+    },
+    "q2464": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q4076": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2930": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "example_word",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q4702": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q1729": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "input_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q3661": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading"
+      ]
+    },
+    "q4521": {
+      "parsed": false,
+      "family": "arrow_or_function_result",
+      "markers": [
+        "arrow_or_function_result_cue"
+      ]
+    },
+    "q2994": {
+      "parsed": false,
+      "family": "no_recognized_marker",
+      "markers": [
+        "no_recognized_marker"
+      ]
+    },
+    "q125": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2650": {
+      "parsed": false,
+      "family": "other_marker",
+      "markers": [
+        "sample_word"
+      ]
+    },
+    "q268": {
+      "parsed": false,
+      "family": "plain_colon_io",
+      "markers": [
+        "input_colon",
+        "output_colon",
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "both_colon_markers",
+        "plain_colon_io_lines"
+      ]
+    },
+    "q2114": {
+      "parsed": true,
+      "family": "retained_bare_io",
+      "markers": [
+        "example_word",
+        "dashed_example_heading",
+        "retained_regex_match"
+      ]
+    },
+    "q1408": {
+      "parsed": false,
+      "family": "split_dashed_io",
+      "markers": [
+        "example_word",
+        "narrative_cue",
+        "split_dashed_io_headings"
+      ]
+    },
+    "q4385": {
+      "parsed": false,
+      "family": "plain_example_heading",
+      "markers": [
+        "example_word",
+        "numbered_or_plain_example_heading",
+        "arrow_or_function_result_cue"
+      ]
+    }
+  }
+}

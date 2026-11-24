@@ -1,0 +1,142 @@
+[
+  {
+    "query_id": "q1318",
+    "format": "Dashed Example with standalone colon labels",
+    "evidence": "Complete stdin/stdout example",
+    "excerpts": ["-----Example-----\nInput:\n2 4 5 5 3", "Output:\n48"],
+    "why_unparsed": "The production regex requires bare Input and Output lines. Both labels end in colons."
+  },
+  {
+    "query_id": "q754",
+    "format": "Dashed Example with inline colon payloads",
+    "evidence": "Complete stdin/stdout example",
+    "excerpts": ["-----Example-----\nInput:1\n1 2 3\n3 2 1\n1 3 4", "Output:7"],
+    "why_unparsed": "Both labels carry data on the same line. They fail the bare-label regex and the narrower standalone-colon probe."
+  },
+  {
+    "query_id": "q1068",
+    "format": "Separate dashed sample headings with colons",
+    "evidence": "Complete stdin/stdout example",
+    "excerpts": ["-----Sample Input:-----\n1\n2", "-----Sample Output:-----\n6"],
+    "why_unparsed": "Sample Input and Sample Output are distinct dashed sections outside the required shared Example block."
+  },
+  {
+    "query_id": "q632",
+    "format": "Separate dashed sample headings without colons",
+    "evidence": "Complete stdin/stdout example",
+    "excerpts": ["-----Sample Input-----\n5858 1234", "-----Sample Output-----\n1624"],
+    "why_unparsed": "The headings are split even though neither uses a colon. The statement also permits multiple correct answers."
+  },
+  {
+    "query_id": "q775",
+    "format": "Dashed Example followed by separate sample headings",
+    "evidence": "Complete stdin/stdout example",
+    "excerpts": ["-----Example-----\n\n-----Sample Input:-----\n5 3 3\n0 3 8 5 12\n1 2\n1 3\n2 5", "-----Sample Output:-----\nYes\nYes\nNo"],
+    "why_unparsed": "The Example heading is present, but the following heading is Sample Input instead of a standalone Input label."
+  },
+  {
+    "query_id": "q278",
+    "format": "Numbered example with inline colon labels",
+    "evidence": "Complete function argument/result example",
+    "excerpts": ["Example 1:\n\nInput: light = [2,1,3,5,4]\nOutput: 3"],
+    "why_unparsed": "The numbered heading has no dashes and both values appear inline. The argument is a named list."
+  },
+  {
+    "query_id": "q1909",
+    "format": "Plain Example with diagram input",
+    "evidence": "Complete conceptual tree/result example",
+    "excerpts": ["Example:\n\n\nInput: \n    1\n   / \\", "Output: 6"],
+    "why_unparsed": "The heading is undashed, Input has a colon, and the output is inline. The tree diagram also leaves the executable input representation unspecified."
+  },
+  {
+    "query_id": "q2973",
+    "format": "Fenced function-call example with an arrow",
+    "evidence": "Complete function argument/result example",
+    "excerpts": ["multiple_split('1+2-3', ['+', '-']) => ['1', '2', '3']"],
+    "why_unparsed": "A function call and arrow encode the pair without the required dashed block and standalone labels."
+  },
+  {
+    "query_id": "q3320",
+    "format": "Markdown Examples with return-value comments",
+    "evidence": "Complete function argument/result example",
+    "excerpts": ["## Examples", "to_camel_case(\"the-stealth-warrior\") # returns \"theStealthWarrior\""],
+    "why_unparsed": "The result is in an inline comment under a Markdown heading. The parser only understands its prescribed stdin/stdout layout."
+  },
+  {
+    "query_id": "q4841",
+    "format": "Function assertion embedded in the task prose",
+    "evidence": "Complete function argument/result example",
+    "excerpts": ["perform(\"F U\") == \"byybyybyyrrrbbwbbwyggrrrrrroooyggyggbbwoooooogggwwwwww\""],
+    "why_unparsed": "The comparison encodes the expected function result without a dashed example block."
+  },
+  {
+    "query_id": "q4336",
+    "format": "Narrative cue followed by a function-call result",
+    "evidence": "Complete function argument/result example",
+    "excerpts": ["For example:\n\nanagrams('abba', ['aabb', 'abcd', 'bbaa', 'dada']) => ['aabb', 'bbaa']"],
+    "why_unparsed": "The narrative cue introduces an arrow mapping. Neither the heading nor the input/output layout matches the regex."
+  },
+  {
+    "query_id": "q4536",
+    "format": "Narrative demonstration beside colon-labelled specifications",
+    "evidence": "Complete function argument/result example",
+    "excerpts": ["Input: string str \n\nOutput: Z array", "print zfunc('ababcaba')\n\n[8, 0, 2, 0, 0, 3, 0, 1]"],
+    "why_unparsed": "The colon markers describe types. The actual values occur later in an unlabelled call/result demonstration."
+  },
+  {
+    "query_id": "q3293",
+    "format": "Multi-step narrative calculation",
+    "evidence": "Complete worked input/result example",
+    "excerpts": ["'ABC' --> 'A' = 65, 'B' = 66, 'C' = 67 --> 656667", "-------------------------\n                       6"],
+    "why_unparsed": "The input and final result are distributed across multiple explanatory code blocks with no paired labels."
+  },
+  {
+    "query_id": "q3099",
+    "format": "Example heading with a table and prose conclusion",
+    "evidence": "Complete worked input/result example",
+    "excerpts": ["example:\n```\nlet see n=42", "So the depth of `42` is `9`."],
+    "why_unparsed": "The example input appears in a table introduction and the answer appears in prose after the table."
+  },
+  {
+    "query_id": "q3923",
+    "format": "Narrative input/result sentence and trace",
+    "evidence": "Complete function argument/result example",
+    "excerpts": ["For `arr = [0,-1,-2,-3,-4], n = 3`, the output should be `0`."],
+    "why_unparsed": "One sentence gives the concrete arguments and result without any standalone I/O labels."
+  },
+  {
+    "query_id": "q4335",
+    "format": "Narrative illustrative output",
+    "evidence": "Partial illustration without an explicit matching input",
+    "excerpts": ["For example:\n\n`\"1 skip 2 skip 5 skip 13 skip 34\"`"],
+    "why_unparsed": "The text illustrates the output shape, but states no input n paired with that output and uses no dashed example block."
+  },
+  {
+    "query_id": "q4256",
+    "format": "Specification and language note",
+    "evidence": "No concrete example in the supplied statement",
+    "excerpts": ["Write a function which converts the input string to uppercase."],
+    "why_unparsed": "The statement specifies behavior and a language-specific input constraint, with no concrete string and expected conversion."
+  },
+  {
+    "query_id": "q4244",
+    "format": "One-line function specification",
+    "evidence": "No concrete example in the supplied statement",
+    "excerpts": ["Write function avg which calculates average of numbers in given list."],
+    "why_unparsed": "The entire statement gives the operation only. There is no concrete list or expected average."
+  },
+  {
+    "query_id": "q1695",
+    "format": "Dashed input/output specifications without a sample",
+    "evidence": "No concrete example in the supplied statement",
+    "excerpts": ["-----Input-----\n\nSame as the easy version.", "Output one line per village"],
+    "why_unparsed": "The Input section refers to another version and the Output section describes a range of acceptable answers without a fixture."
+  },
+  {
+    "query_id": "q4206",
+    "format": "Narrative output rules",
+    "evidence": "No concrete example in the supplied statement",
+    "excerpts": ["If all answers are 'aye' then Fire!\nif one or more are 'nay' then Shiver me timbers!"],
+    "why_unparsed": "The statement names result strings for generic conditions. It supplies no concrete input dictionary and paired result."
+  }
+]
