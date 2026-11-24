@@ -805,3 +805,473 @@ The average contained run was 1.252 s/query and 250.471 s cold. That is 0.985× 
 **Final tests and replay.** All 35 tests passed. One fresh checkpoint replay on the unchanged 200-query training plan completed in 246.191 s cold (1.231 s mean, 1.163 s median, 1.770 s P95, 40.62 pairs/s), with 10,000 attempts, 149 timeouts, 7,040 nonzero exits and no counted launch errors. All 10,000 verdicts matched the saved baseline. NDCG@10 and MRR@10 remained 25.6267 and 25.3714. The warm replay took 0.136 s, performed zero launches and returned identical score dictionaries. The prior Windows reader-thread decoding diagnostic recurred. [Final review replay](../artifacts/verification_containment_review_train.json)
 
 **Per-candidate timeout follow-up.** Selected the eight saved query rows containing sources previously identified as timing-sensitive. Replayed their exact top 50 without checkpoints in a 2, 12, 12, 2 worker sequence. The four runs recorded 3, 10, 11 and 1 timeouts. Ten candidate/query pairs switched between timeout and a completed outcome, and every switched verdict remained a non-pass. For example, `q2045/d2312` exited nonzero under two workers in both repeats and timed out under twelve in both repeats. `q1673/d2346` exited zero under two workers with mismatching output and timed out under twelve. All four passer sets matched the saved reference on these eight queries. This targeted diagnostic explains how contention changes timeout tallies without altering verdicts. It is not a representative timeout-rate estimate for the full panel. [Diagnostic script](../artifacts/verification_containment_timeout_review.py) · [Per-candidate observations](../artifacts/verification_containment_timeout_review_train.json)
+
+### 2026-11-25 E5 retrieval and live verification funnel
+
+Sampled 500 of 5,000 training query IDs from `CoIR-Retrieval/apps` at `f22508f96b7a36c2415181ed8bb76f76e04ae2d5` using `random.Random(20261125).sample(sorted(train_ids), 500)`. Gold IDs come from the train qrels. Search used all 8,765 corpus documents in snapshot order, matching MTEB's candidate pool. The sampled IDs, gold IDs, top-50 lists, ranks, and passing candidate IDs are in the measurement JSON.
+
+The run used CtrlFind `d5274bdbc42fafea0ccf6e8f683c7bc9e0a41427`, `intfloat/e5-base-v2` at `f52bf8ec8c7124536f0efb74aca902b2995e5bcd`, E5's `query: ` and `passage: ` prefixes, 512 tokens, normalized embeddings, and MTEB 2.21.0 cosine search at depth 1,000. The CPU batch size was 16 with four Torch threads and one interop thread. All 8,765 corpus embeddings were cache hits and the 500 sampled query embeddings were computed in memory. The live verifier used the original top 50, the production parser and reranker, a one-second candidate timeout, 12 workers, and a fresh scratch checkpoint. Runtime and dependency versions, source fingerprints, and the embedding-cache hash are recorded with the measurements. [Training measurements and query IDs](../artifacts/retrieval_diagnostic_train.json)
+
+**Stage 1.** Recall@10 was **259/500 (51.8%)**, Recall@50 **311/500 (62.2%)**, Recall@100 **335/500 (67.0%)**, and Recall@200 **364/500 (72.8%)**. The verification cutoff excluded 189/500 golds. Another 53/500 were ranked 51–200 and 136/500 were beyond 200.
+
+**Token lengths.** Raw counts use the dataset text with no prefix or special tokens. Formatted counts use the MTEB encoder text, E5 prefix and tokenizer special tokens before truncation. Effective counts use the production attention mask after truncation, excluding padding.
+
+| Population | Raw >512 | Formatted >512 | Effective >512 |
+|---|---:|---:|---:|
+| Sampled train queries | 133/500 (26.60%) | 135/500 (27.00%) | 0/500 (0%) |
+| All train queries | 1,218/5,000 (24.36%) | 1,242/5,000 (24.84%) | 0/5,000 (0%) |
+| Indexed corpus | 581/8,765 (6.63%) | 587/8,765 (6.70%) | 0/8,765 (0%) |
+| Train corpus subset | 247/5,000 (4.94%) | 249/5,000 (4.98%) | 0/5,000 (0%) |
+
+**Live verification funnel.** The parser consumed the full statement. Only parsed queries launched candidates.
+
+| Outcome | Conditional rate | Share of sample |
+|---|---:|---:|
+| Gold in stage-1 top 50 | 311/500 (62.20%) | 311/500 (62.20%) |
+| Gold retrieved and example parsed | 8/311 (2.57%) | 8/500 (1.60%) |
+| Gold retrieved and example skipped | 303/311 (97.43%) | 303/500 (60.60%) |
+| Gold passed | 7/8 parsed (87.50%) and 7/311 retrieved (2.25%) | 7/500 (1.40%) |
+| Gold failed after parsing | 1/8 parsed (12.50%) | 1/500 (0.20%) |
+| At least one candidate passed | 7/8 parsed (87.50%) and 7/311 retrieved (2.25%) | 7/500 (1.40%) |
+| Zero passers, including parser skips | 304/311 (97.75%) | 304/500 (60.80%) in the retrieved cohort |
+
+Eight of 400 attempted pairs passed (2.00%), including one of 392 non-gold pairs (0.26%). Mean passers were **8/311 = 0.0257** per retrieved query including zeros, or **8/8 = 1.00** per parsed query including its one zero-pass case. Among the seven passing golds, six ranked first (85.71%) and one ranked second (14.29%), both overall and within the passing block. On `q2131`, `d5733` passed ahead of gold `d2131`, which moved from rank 41 to 2. The failed gold stayed at rank 2. Across all 311 retrieved golds, 5 improved (1.61%), 306 stayed in place (98.39%), and none dropped. The final median rank was 1, the mean was 5.61, and the top-10 count increased from 259/311 (83.28%) to 264/311 (84.89%).
+
+**Bottlenecks.** The top-50 cutoff excluded 189 golds and the parser prevented 303 further gold checks. Post-run source grouping by dataset URL host shows that 262/311 retrieved gold queries came from Codewars or LeetCode and zero of those parsed. All eight parsed queries in this cohort came from Codeforces. Only 8/303 skipped statements matched the existing colon-label probe. Prioritize a source-stratified audit of example formats and availability. Stage-1 Recall@50 was 56/135 (41.48%) for truncated queries and 255/365 (69.86%) for the rest. Compare within source and use a paired diagnostic before attributing that gap to truncation. Use the 53 golds at ranks 51–200 to estimate how often extra retrieval depth would actually produce a verifiable example.
+
+**Frozen baseline.** `python evaluate.py --mode cached` printed NDCG@10 **19.96** and MRR@10 **19.05** in a scratch copy with MTEB set to `only-cache`. The replay JSON differs in metadata and precision from the frozen artifact, and both headline scores match at the reported precision. The scratch run could only load the cached test score. [Cached output](../artifacts/retrieval_diagnostic_cached.json)
+
+Run from the repository root with the pinned local Hugging Face snapshots, `artifacts/emb_cache.npz`, and the local MTEB result `results/prism__e5-base-v2-exec-rerank/1/AppsRetrieval.json`. Both measurement files use fresh destinations.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/retrieval_diagnostic.py artifacts/retrieval_diagnostic_train_repro.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/retrieval_diagnostic_baseline.py artifacts/retrieval_diagnostic_cached_repro.json
+```
+
+### 2026-11-25 Semantic retrieval ablation for example removal
+
+**Protocol and baseline.** Used only the 5,000 queries, snippets and relevance labels in CoIR APPS training revision `f22508f96b7a36c2415181ed8bb76f76e04ae2d5`. The production evaluation entry points were not called because they load test data. Drew 500 from lexically sorted training query IDs with `random.Random(20261125).sample`, and kept the separately defined 200-query parseable verification workload in its saved order. The union has 685 distinct queries. The two panels overlap by 15 and are reported separately. The 500-query panel represents the training mix, while the 200-query panel deliberately selects queries for which the current verifier can extract a first example. Their ordered query ID SHA-256 values are `d463ba25ae4db0782402be587a550026ae9eef7c7922c64cdd1cb02c55a5a8c3` and `bd29b441a1159a43ccdd2c05933017c0c0cf194f19f331b6caa98bc131f7264a`, respectively.
+
+Used the production E5-base-v2 encoder with local model revision `f52bf8ec8c7124536f0efb74aca902b2995e5bcd`, the existing query and document prefixes, 512-token limit and L2 normalization. Ran on Windows Python 3.13.13 with CPU device, four PyTorch intraop threads, one interop thread, and batches of 16. Every one of the 5,000 training document vectors was a cache hit. The run selected only training document vectors from the existing cache and never wrote to that cache. The ordered training corpus ID SHA-256 is `a8a7748b4669d0b92d2fa28ac00b5e227e480ac33889b4bf793bc60aacebd7b1`. Ranked by cosine with document-ID tie order, held K at 50, and used the single training relevance label per query for scoring only. The unmodified cold baseline ran before the experiment parser or tests were added. Its scoped stage-1 wall time, excluding downloads, model load and document setup, was 921.962 s across 685 queries. [Baseline ranks, candidate lists and timing](../artifacts/query_example_baseline_train.json)
+
+| Unmodified panel | Queries | Recall@10 | Recall@50 | NDCG@10 | MRR@10 |
+|---|---:|---:|---:|---:|---:|
+| Random training panel | 500 | 56.60 | 69.00 | 47.0568 | 44.0040 |
+| Saved verification panel | 200 | 14.00 | 29.50 | 8.7183 | 7.1442 |
+
+**Intervention.** The research parser recognizes dashed Example or Examples sections with complete alternating standalone Input and Output labels, or adjacent matching dashed Example Input/Output or Sample Input/Output sections. Sample data must be numbers, with YES and NO additionally allowed as output tokens. It leaves a section with prose, inline labels, empty payloads, or missing/disordered fields untouched. Other sections, including the problem's Input, Output, Constraints, Notes and Explanation, are preserved verbatim. Material on the original statement side remains available to the unchanged first-example parser and output comparator. The experiment feeds the modified text only to the E5 query embedder. Nothing changes in the execution and Windows containment path. [Research-only implementation](../artifacts/query_example_preprocessing.py)
+
+The paired run encodes the 253 changed queries in both representations with separate cold in-memory caches and identical query order and batch shape. Unchanged query rows reuse their original ranks because the encoder would receive the same text. Original ranks are also compared with the fresh paired originals to detect numerical or retrieval drift. Paired bootstrap intervals for Recall@50 use 5,000 iid query-level resamples within each population, seed 20261125. Separately time 24 fixed edited queries, one at a time, in alternating arm order with an empty query cache and resident model and corpus. The preprocessed timed arm includes the stripping call. An actual-model check puts both representations in the same cache and checks two independent first misses and two later hits in reverse order. Before seeing the ablation outputs, the deployment criterion was a gain of at least 1.0 percentage point in Recall@50 on the random panel with a paired interval above zero, compatible secondary metrics and CPU cost, and downstream verification evidence on the fixed workload.
+
+**Results.** All metrics are on a 0–100 scale, with the same 500 and 200 denominators. Gains and losses count the single gold document's full-corpus rank, so movement beyond K=50 is included in those counts.
+
+| Panel | Recall@10 | Recall@50 | NDCG@10 | MRR@10 | Better / worse / unchanged gold ranks |
+|---|---:|---:|---:|---:|---:|
+| Random 500 | 56.60 → 56.80 | 69.00 → 68.40 | 47.0568 → 47.1155 | 44.0040 → 44.0226 | 30 / 42 / 428 |
+| Saved verification 200 | 14.00 → 12.50 | 29.50 → 29.00 | 8.7183 → 8.3520 | 7.1442 → 7.1083 | 37 / 50 / 113 |
+| Edited union, 253 distinct rows | 11.46 → 10.67 | 26.09 → 24.51 | 7.4041 → 7.2306 | 6.1746 → 6.1829 | 67 / 87 / 99 |
+
+Recall@50 lost 3/500 hits in the random sample and 1/200 on the verification panel. No query gained a top-50 gold in either panel. The paired bootstrap intervals for the change were [−1.40, 0.00] and [−1.50, 0.00] percentage points, respectively. Recall@10 gained one hit in the random panel. In the verification panel, one entered the top ten and four left. The parser changed 110/500 and 154/200 statements, or 1,108/5,000 in the grammar census. Of the 253 edited benchmark queries, 83 retained identical effective token sequences at the 512-token limit and identical gold ranks. The freshly encoded original arm reproduced every gold rank and every ordered top 50 from the unmodified baseline. [Paired metrics, candidate lists, timings and token details](../artifacts/query_example_experiment_train.json)
+
+| Representative training case | Gold rank | Removed example |
+|---|---:|---|
+| `q632`, waiter arithmetic | 27 → 8 | The input `5858 1234` and answer `1624`. |
+| `q2081`, shopping discounts | 12 → 10 | Three labelled input/output pairs with item prices. |
+| `q1509`, numeric pattern generation | 44 → 68 | The example directly showed the shape of the required rows, including `01`, `10` and `012`. |
+| `q15`, rectangles cut from a square | 21 → 85 | Three dimension pairs with answers `Yes`, `Yes` and `No`. |
+
+The original `q15` ordered top 50 matches the saved verification replay exactly, and `d15` passed in both saved cold runs. After stripping, rank 85 makes that gold unreachable for the existing verifier at K=50. No new full stage-2 run was triggered because Recall@50 declined on both preregistered panels. The source, first-example parser, output policy, checkpoint handling, and Windows containment were unchanged.
+
+**Cost and cache checks.** Across the same 253 edited queries, cold batched stage-1 wall time was 171.377 s for originals and 176.497 s after removal. All 253 texts were cold misses in each arm. On the 24 alternating single-query trials per arm, original versus stripped mean was 404.8 → 391.7 ms, median 431.2 → 430.1 ms, and P95 463.1 → 474.0 ms. These mixed timings do not establish a consistent CPU benefit. The grammar census for 5,000 raw statements took about 69 ms. Two actual-model representations were distinct first misses and returned their own bit-identical vectors on reverse-order cache hits. A fixture also verified that the same text under the document prefix has its own cache entry. All 39 regression tests passed.
+
+**Decision: REVERT.** The preprocessor stays in research only. There is no production diff to revert. The loss of top-50 gold hits fails the primary criterion, and the small random-panel top-10 gain did not reproduce in the verification panel. The original cache, frozen results, and test split were preserved. The measured result applies to this grammar, corpus and model setup.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/query_example_ablation.py baseline NEW_BASELINE_JSON
+.venv/Scripts/python.exe -B -X utf8 artifacts/query_example_ablation.py experiment NEW_EXPERIMENT_JSON --baseline NEW_BASELINE_JSON
+.venv/Scripts/python.exe -B -m unittest discover -s tests -v
+```
+
+### 2026-11-25 Example parser coverage and Recall@50 audit
+
+**Protocol.** Ran the retained `src.execute.parse_example` on raw `CoIR-Retrieval/apps` statements from local revision `f22508f96b7a36c2415181ed8bb76f76e04ae2d5`. The training panel is `random.Random(20261125).sample(sorted(train_ids), 500)` from 5,000 training IDs. All 500 IDs and parser flags matched the earlier funnel ledger, and all queries counted regardless of retrieval. The ordered IDs are in the audit JSON with SHA-256 `d463ba25ae4db0782402be587a550026ae9eef7c7922c64cdd1cb02c55a5a8c3`. The test reader projected only `text` under the `partition=test` filter and emitted aggregate counts. The parser audit's sole dataset input is the query parquet. [Measurements and IDs](../artifacts/example_parser_audit.json) · [Audit script](../artifacts/example_parser_audit.py)
+
+| Population | Parsed | Unparsed |
+|---|---:|---:|
+| Fixed training sample | 43/500 (8.60%) | 457/500 (91.40%) |
+| Full test-query text | 2,936/3,765 (77.98%) | 829/3,765 (22.02%) |
+
+The grouped counts below use parsed statements divided by all statements bearing the marker. Flags can overlap across a query, including between its specifications and examples. The JSON includes percentages, other flags, and exclusive format buckets with their precedence specified in the script.
+
+| Marker | Train parsed / with marker | Test parsed / with marker |
+|---|---:|---:|
+| `Input:` | 1/147 | 4/85 |
+| `Output:` | 0/147 | 2/80 |
+| Both colon markers anywhere | 0/144 | 0/77 |
+| `Example` or `Examples` word | 43/390 | 2,936/3,133 |
+| Dashed `Example` heading | 43/75 | 2,936/2,958 |
+| Numbered or plain example/sample heading | 0/182 | 4/43 |
+| Dashed example with standalone colon-labelled I/O | 0/27 | 0/12 |
+| Dashed example with an inline colon-labelled payload | 0/3 | 0/1 |
+| Separate dashed sample/example I/O headings | 0/80 | 0/697 |
+| Line-start `Input:` followed by line-start `Output:` | 0/99 | 0/52 |
+| Narrative cue such as `for example` | 14/131 | 778/904 |
+| Arrow or function-result cue | 0/132 | 29/45 |
+| No recognized marker | 0/54 | 0/29 |
+
+**Manual review.** Reviewed 20 training misses selected to span distinct formats. Fifteen contained a complete example, including five explicit stdin/stdout pairs and ten function, conceptual or worked examples. One contained an output-only illustration and four supplied no concrete example in the available text. The retained parser expects a dashed `Example` or `Examples` heading, bare standalone `Input` and `Output` labels and nonempty extracted payloads. For instance, `q754` has inline `Input:1` and `Output:7`, `q775` places separate sample headings inside its dashed Example section, and `q3923` puts the arguments and expected result in a sentence. `q1695` supplies only specifications and refers to the easy version for its input. The review includes verbatim excerpts and reasons for each case. These cases illustrate failure modes. Marker counts and the curated review cannot estimate the prevalence of genuinely missing examples, and a textual extraction alone gives no evidence about execution compatibility. [20 reviewed cases](../artifacts/example_parser_audit_cases.json)
+
+**Recall@50 provenance.** The README's roughly 31% traces to the historical 31.29% from the stage-1 notebook. Its data-loading and recall cells use every test query and the test-only corpus, historically 3,765 of each. A dictionary selects the last qrel row per query, ignores `score`, and ranks the selected doc as `1 + count(similarity > gold_similarity)` across the whole corpus. An equal score shares the better rank at the cutoff. The unweighted mean of `rank <= 50` uses all test query rows. The historical log documents one binary relevant doc per query. This audit inspected the notebook code, with the historical test qrels and ranks left outside the audit. The notebook did not pin its dataset or model revision. [README limitation](../README.md#limitations-and-future-work) · [Historical notebook source](../notebook/baseline_recall_and_execution_validation.ipynb)
+
+The funnel reports 311/500 (62.20%) from its pinned uniform training sample against the full 8,765-snippet corpus. `load_train` keeps positive scores and asserts 5,000 qrel rows with unique query IDs and unique gold docs. The funnel uses an unweighted mean of whether that single gold ID is in each materialized stage-1 top 50. MTEB cosine search produces the hits and the script sorts by score, with ties following the returned hit order. The historical notebook used a dot product of normalized vectors, raw passage text and a shared rank for tied scores. Both use binary per-query hits under the documented one-gold dataset. Multiple golds would be overwritten in the notebook dictionary and would fail the funnel's training-data assertions. A quality comparison would require the same query population, corpus and tie rule. [Funnel retrieval and aggregation](../artifacts/retrieval_diagnostic.py) · [Training qrel checks](../artifacts/verification_research.py)
+
+**Query representation.** The funnel sends full `queries[qid]` strings into the MTEB search dataset and again into the batch passed to `LiveExecReranker.search`. The stage-1 encoder creates its own `query: ` strings and the Sentence Transformer applies the 512-token cap while encoding. The reranker independently builds `qtext` from the incoming `queries["text"]` and calls `parse_example(qtext[qid])`. The ledger also calls `execute.parse_example(queries[qid])` directly. The demo follows the same separation. Example visibility to the parser is therefore governed by the original statement and its format. [Live reranker](../src/mteb_wrappers.py#L100) · [E5 encoder](../src/encoder.py#L24) · [Funnel script](../artifacts/retrieval_diagnostic.py#L198)
+
+Reproduce from the repository root with the pinned local query snapshot. The script checks the 20 review IDs, excerpts and parser outcomes. All 39 regression tests passed.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/example_parser_audit.py artifacts/example_parser_audit_repro.json
+.venv/Scripts/python.exe -B -m unittest discover -s tests -v
+```
+
+### 2026-11-25 Source-specific example availability and verification audit
+
+Used the same ordered 500 training IDs as the saved retrieval diagnostic and query ablation. The script reproduces them with `random.Random(20261125).sample(sorted(training_query_ids), 500)` and checks both saved lists and the gold IDs. The SHA-256 of the newline-joined ordered IDs is `d463ba25ae4db0782402be587a550026ae9eef7c7922c64cdd1cb02c55a5a8c3`. CoIR APPS snapshot `f22508f96b7a36c2415181ed8bb76f76e04ae2d5` provides a statement, URL and optional starter code for each training query and one positive qrel per query. It supplies no separate expected-output fixture or judge. Source is the normalized URL host. New reads of statements, metadata and candidate source are filtered to `train`, and new executions use only training candidate source. Saved top-50 ranks come from the 8,765-document diagnostic corpus. The same training IDs have 345 hits against the 5,000-document training-only corpus, compared with 311 saved diagnostic hits. The opportunity and near-match analysis below uses the saved 311. No retrieval or test evaluation was rerun. [Saved retrieval diagnostic](../artifacts/retrieval_diagnostic_train.json) · [Training-corpus comparison](../artifacts/query_example_baseline_train.json) · [Audit runner](../artifacts/source_example_audit.py)
+
+| Source | Queries | Saved top 50 | Train-corpus top 50 | Potential stdin/stdout total / saved top 50 | Current raw parses total / saved top 50 | Potential stdin/stdout misses total / saved top 50 |
+|---|---:|---:|---:|---:|---:|---:|
+| Codewars | 263 | 213 | 226 | 0 / 0 | 0 / 0 | 0 / 0 |
+| LeetCode | 68 | 49 | 55 | 0 / 0 | 0 / 0 | 0 / 0 |
+| CodeChef | 114 | 31 | 40 | 114 / 31 | 2 / 0 | 112 / 31 |
+| Codeforces | 42 | 9 | 12 | 40 / 7 | 41 / 8 | 0 / 0 |
+| HackerRank | 9 | 6 | 8 | 2 / 1 | 0 / 0 | 2 / 1 |
+| AtCoder | 4 | 3 | 4 | 4 / 3 | 0 / 0 | 4 / 3 |
+| **Total** | **500** | **311** | **345** | **160 / 42** | **43 / 8** | **118 / 35** |
+
+Potential stdin/stdout means a structurally extracted or manually reconstructed first pair compatible with the documented stream interface. It is an availability estimate before establishing judge validity, execution success or discriminating power. The parser recognized 42 such cases, seven with gold in the saved top 50. It also recognized `q1694`, whose published input is truncated. The CodeChef census includes six manually recovered pairs that the shadow grammar leaves out, plus two pairs tested successfully only after manual stdin cleanup. The callable sources have a separate pool. All 331 Codewars and LeetCode statements supply starter code, and 262 have gold in the saved top 50. A narrow AST literal check keyed to the starter function found 29 Codewars call-and-return examples, 28 retrieved. LeetCode has 62 colon-labelled statements, 43 retrieved. These counts describe possible material for a typed runner. They give no estimate of callable verification pass rates.
+
+| Source | Explicit pairs | Colon-labelled | Narrative | Constraints/spec alone | Ambiguous | No usable marker |
+|---|---:|---:|---:|---:|---:|---:|
+| Codewars | 0 | 5 | 208 | 1 | 0 | 49 |
+| LeetCode | 0 | 62 | 5 | 0 | 0 | 1 |
+| CodeChef | 77 | 31 | 1 | 1 | 4 | 0 |
+| Codeforces | 39 | 0 | 0 | 1 | 2 | 0 |
+| HackerRank | 0 | 0 | 9 | 0 | 0 | 0 |
+| AtCoder | 4 | 0 | 0 | 0 | 0 | 0 |
+| **Total** | **120** | **98** | **223** | **3** | **6** | **50** |
+
+The exclusive format census labels the first recognizable syntax under the audit's precedence. Separate named input/output headings count as explicit pairs. Narrative cues can come from tutorials, worked reasoning or illustrations. Absence of a recognizable marker is a heuristic. Reviewed exceptions include the actual width-three grid row `...` in `q79`, which the prototype conservatively abstains on, and `q1695`, which references another version and gives an answer tolerance without a local runnable pair. The current parser requires a dashed Example or Examples heading, bare standalone Input and Output labels and nonempty payloads. `q303` has labelled point assignments for `Solution.validSquare`, `q2549` has a single number and a Boolean method return, and `q3406` gives a callable result list. Sending those representations to stdin assumes a contract absent from the statements and candidate code. HackerRank `q2621` shows deque tutorial calls instead of the task's command batch. [Per-query formats and payloads](../artifacts/source_example_audit_train.json) · [Hand-labelled examples](../artifacts/source_example_labels_train.json)
+
+**Experimental extraction.** A research-only variant admits anchored combined blocks with standalone or inline colons and separately headed Sample or Example Input/Output with matching numbering. It stops at clear commentary boundaries, abstains on known placeholders, gates by stream-oriented source and has an AtCoder-specific first-paragraph check for numeric or yes/no output. It adds 110 pairs (76 separate headings, 30 combined blocks and four AtCoder paragraph cases), or 153/500 raw recognitions including the current parser. On the saved retrieved set it adds 33, from 8/311 raw recognitions to 41/311. The historical narrow colon probe proposes 27 new pairs, of which eight are retrieved. An ungated line-start colon scan flags 99 overall and 58 retrieved, including 67 Codewars or LeetCode statements and 48 of their retrieved queries. The unscreened figures include unsupported payloads.
+
+| Parser probe | Precisely reproduced labelled pairs (13) | Precisely reproduced contract-dependent pairs (11) | Unsafe controls with extraction (11) |
+|---|---:|---:|---:|
+| Current | 1 | 1 | 1 |
+| Earlier narrow colon matcher | 2 | 0 | 0 |
+| Ungated colon labels, first output line | 0 | 0 | 3 |
+| Source-gated shadow prototype | 13 | 0 | 0 |
+
+The 36 purposefully selected review cases include one visual case outside those three denominators. The labelled controls are a diagnostic challenge set. They cannot estimate population precision. The gated prototype extracted two manual cases inaccurately. `q944` retained an internal display blank and `q658` retained per-row Markdown spaces. The gold snippets threw `ValueError` on those inputs and passed after manual formatting consistent with each input contract. A hand-isolated sample recovered `q1211` (raw heading includes editorial guidance, gold at rank 7), and hand-reconstructed `q2631` passed at rank 1. The explicit empty-input contract `q2650` also passed in a manual run. This evidence does not justify global removal of input blanks or spaces. `q1077` also permits any satisfying node, so a literal extraction can still reject valid outputs. [Label comparisons and manual replays](../artifacts/source_example_summary_train.json)
+
+**Live shadow execution.** Ran the 110 proposed pairs with the current one-second timeout, two workers, Windows containment and production comparison policy selected from the original full statement. The diagnostic reused captured stdout for its exact-comparison control and wrote no verdict checkpoints. Gold passed 88/110 (80.00%) and 30/33 (90.91%) among new pairs with saved top-50 gold. The latter includes 27/30 CodeChef and 3/3 AtCoder. One gold, `q1363`, passed only with existing scoped output padding. Gold exited cleanly 98 times, exited nonzero 11 times and timed out once. `q827` timed out on three further standalone runs. Its stored code fills a large combination table before reading input. This audit measures the effect of enabling an example with existing execution settings. It did not implement input normalization or modify the verifier.
+
+| Control on proposed pairs | Passing pairs / attempts |
+|---|---:|
+| Five seeded random training snippets per query | 0 / 550 |
+| Available distinct training-source non-gold hits from the saved top 50 | 3 / 897 |
+| A known wrong training snippet, separately selected | 1 / 1 |
+
+Random controls use `random.Random(f"{SEED}:{qid}")`, sorted training doc IDs and exclude the intended gold and exact source duplicates of it. Near controls use saved top-50 order, exclude the same gold/duplicate cases and skip IDs outside the training corpus. After one cross-cohort duplicate is executed once, the raw run contains 1,557 candidate executions. The control denominators describe different populations. The known collision is not a rate estimate. Three observed near matches and the known control reproduced cleanly on the published fixture. Independently derived inputs established the wrong matches below. [Raw outcomes](../artifacts/source_example_audit_train.json) · [Witness replays with inputs and expected results](../artifacts/source_example_summary_train.json)
+
+| Published match | Reason | Independent witness |
+|---|---|---|
+| `q1465 / d2133` | A singleton tree computation prints the same `1` as a pill schedule beginning March 31. | March 29 allows two correct doses before April 1. Only the gold matched `2`. |
+| `q692 / d556` | A Fibonacci-like streak has length `3`, coinciding with the task's maximum divisibility count. | For `[2,4,6]` the divisibility count is `0`. Only gold matched. |
+| `q541 / d1030` | An unfinished-job program prints job `3` while the MEX task's optimal subset size is also `3`. | For `[1,2,3,5]` and MEX `3`, the subset `[1,2,5]` gives size `3`. Only gold matched. |
+| `q949 / d814` | An unrelated program's tie branch prints `1`, the published number of square-valued pairs. | `1 2` allows values 2 and 3, so the count is `0`. Only gold matched. |
+
+The same MEX task exposed a gold defect. For `[1,2,3]` and target MEX `3`, the optimal subset `[1,2]` gives size `2`. Gold executed cleanly and printed `-1` because its search for an absent element ends at `N`. Published-example agreement and gold labels therefore leave independent uncertainty about correctness. The targeted witnesses are diagnostic fixtures with derivations, separate from the published-example runs.
+
+**Decision. CHANGE VERIFICATION STRATEGY.** Of the 35 retrieved-gold queries with potentially recoverable stream examples, 33 reached the shadow run, 30 golds matched and 23 of those could move up from below rank 1. Twenty of those 23 had no observed rival match in the sampled controls. This screens roughly 6.4% of the 311 retrieved-gold queries for potential upside. The 20 is neither an observed ranking gain nor a safety guarantee, since some saved neighbors were unavailable as training controls and a single fixture misses errors. No end-to-end ranking metric was measured. Prioritize explicit invocation and return contracts and independently checked fixtures for callable sources, with abstention where a harness or judge semantics cannot be established. Retain grammar changes as a shadow experiment pending candidate-discrimination evidence. No production change was made.
+
+The nonexecution inventory replay reproduced all 500 rows exactly, and all 39 repository regression tests passed, including Windows containment. The commands below create new files and leave the saved evidence intact.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/source_example_audit.py artifacts/source_example_audit_repro.json --execute
+.venv/Scripts/python.exe -B -X utf8 artifacts/source_example_audit.py artifacts/source_example_summary_repro.json --summarize artifacts/source_example_audit_repro.json --witnesses
+.venv/Scripts/python.exe -B -m unittest discover -s tests -v
+```
+
+### 2026-11-25 Typed callable verification feasibility on training queries
+
+**Population and prior counts.** Reused the 500 query IDs from seed `20261125` on APPS revision `f22508f96b7a36c2415181ed8bb76f76e04ae2d5`. The full-corpus diagnostic had 311 top-50 golds at 8,765 documents and the training-corpus ablation had 345 at 5,000 documents. All 311 remain hits in the train-corpus list. Each of the 34 additional hits had at least one non-training document occupying a position in its full-corpus list. Filtering the saved full-corpus top 50 to training IDs gives the same candidate set as the corresponding train-list prefix for all 500 queries, and identical order for 496. The archived retrieval runs used the same E5 revision and prefixes, with MTEB cosine in the diagnostic and a stable normalized dot product in the ablation. The corpus accounts for the hit-set difference in these lists. The saved evidence does not establish the cause of the four ordering differences. For example, `q272` moved from saved rank 81 with 36 non-training top-50 slots to rank 24 on the training corpus. Separately, 41 of 42 Codeforces statements had a raw production parse, and 40 contained potentially suitable pairs. The extra parse `q1694` contains two literal “input is truncated” lines. [Source audit and raw examples](../artifacts/source_example_audit_train.json) · [Prefix audit and gained IDs](../artifacts/callable_feasibility_summary_train.json)
+
+The evaluation population is all 331 Codewars (263) and LeetCode (68) statements in the panel, with 281 retrieved golds in the training corpus and 262 in the older diagnostic. New query, metadata and candidate code reads were partition-filtered to training. The primary arm uses the saved all-training lists. A secondary replay preserves previously saved full-corpus ranks and leaves candidates outside the training partition ineligible. It never loads or executes their source. No model inference, new corpus search, test evaluation or production writes were performed. [Training-corpus orders](../artifacts/query_example_baseline_train.json) · [Saved diagnostic orders](../artifacts/retrieval_diagnostic_train.json)
+
+**Fixture selection.** The source audit supplied 29 Codewars statements with literal Python calls and 62 LeetCode statements with colon labels. In original panel order, draw 12 from each of these pools with `random.Random(f"{SEED}:{source}")`. Draw six more per source from the remaining queries with a gold rank of 2–50 in either saved list using `random.Random(f"{SEED}:rank:{source}")`. The latter deliberately enriches for measurable rank changes. A targeted review admitted 13/18 Codewars and 14/18 LeetCode queries, for 27/36 reviewed and 27/331 operational coverage in this replay. Unreviewed statements abstained. These counts do not estimate the prevalence of trustworthy fixtures in the remaining workload.
+
+Codewars examples such as `q3930` use a starter's standalone name and Python literal call/return pairs. LeetCode starters establish the exact `Solution` method, parameter order and sometimes types. Examples such as `q1956` spell out assignments. A bare list in `q268` maps to its single declared argument. The review checks each of 87 fixture arguments and expected returns against the published statement and an independent small-input reference. References use direct search, exhaustive enumeration or exact arithmetic where possible, including reachable string permutations for `q1956`, all triple choices for `q193`, a bit-state search for `q138` and rational arithmetic for `q452`. No candidate output supplied the expected value. The nine abstentions cover alternate or ambiguous outputs (four), tree-node object contracts (two), unsupported numerical representations (two) and a missing recurrence (one). Examples include the multiple peaks allowed by `q383`, the tree serialization in `q1841` and the missing recurrence in `q4076`. [Reviewed IDs, starters and typed fixtures](../artifacts/callable_verified_fixtures_train.json) · [Independent references and abstention reasons](../artifacts/callable_fixture_reference.py)
+
+**Candidate interfaces and execution.** Static AST inspection of the 16,550 training top-50 slots found 6,166 standalone-function slots, 2,311 direct `Solution` method slots, 173 other-class-method slots, 146 with standalone functions and other class methods, 7,569 without a direct callable and 185 invalid Python. These are candidate slots across queries. The prototype admits only the supplied callable name, owner and compatible positional arity. It abstains on unsupported constructors, variadic or decorated entry points and class inheritance. It does not rename functions, synthesize object adapters, supply third-party modules or repair submissions. `q4170`'s gold uses a variadic entry and also imports the removed `fractions.gcd`. The compatible gold for `q279` exits nonzero on all four examples because it assumes a `Counter` import.
+
+Each candidate–fixture case runs in a new contained Windows Python process with a private temporary working directory, `-I -S -B`, empty stdin and the existing Job Object launcher and one-second deadline. The trusted harness clears inherited environment variables before loading candidate code, retaining Windows system paths and setting its temp variables to the private directory. The only judge prelude is `typing.List` for `Solution` references. Explicit typed values support integers, Booleans, strings, lists, tuples and `None`. The parent supplies arguments and keeps expected values out of the invocation. It requires exit code zero and an exact typed return record, with stdout/stderr captured separately. Research controls confirmed current-directory cleanup, fresh state per fixture, no inherited sentinel variable, rejection of stdout-only and nonzero results, distinct Boolean and integer types, distinct list and tuple types, and termination of a launched descendant after timeout. Job Objects constrain process lifetimes. The study did not enforce filesystem, network or privilege isolation or attempt to authenticate return records against a hostile interpreter. [Runner](../artifacts/callable_candidate_runner.py) · [Control outcomes](../artifacts/callable_feasibility_summary_train.json)
+
+| Source | Reviewed | Fixture queries | Compatible gold / gold slots | Gold passing all / gold slots | Compatible non-gold / non-gold slots | Non-gold passing first / all cases |
+|---|---:|---:|---:|---:|---:|---:|
+| Codewars | 18 | 13 | 12 / 13 | 12 / 13 | 2 / 637 | 0 / 2 and 0 / 2 |
+| LeetCode | 18 | 14 | 14 / 14 | 13 / 14 | 1 / 686 | 1 / 1 and 0 / 1 |
+| **Total** | **36** | **27** | **26 / 27** | **25 / 27 (92.59%)** | **3 / 1,323** | **1 / 3 and 0 / 3** |
+
+Twenty-nine of 1,350 primary shortlist slots were callable-compatible. The remaining statuses were 703 with no direct callable, 456 missing or ambiguous names, 154 missing or ambiguous owners, three unsupported signatures, two unsupported owners and three invalid Python. The all-case gold pass rate among runnable golds was 25/26 (96.15%). Reporting non-gold compatibility separately matters. All cases rejected the three compatible non-golds, and the other 1,320 non-gold slots were screened out before execution. The secondary lists had 24/26 gold passes among retrieved golds and 0/3 compatible non-gold passes. Another 828 slots on those fixture queries were outside the training partition and skipped. The only six extra training candidates with a compatible interface outside both lists matched none of their `q3930` fixtures.
+
+**Incorrect passes and gold defects.** The retrieved `q373/d158` wildcard matcher accepts the same method signature as the regular-expression task and passes three of its five examples, including the first. It fails `("ab", ".*")` because it treats the dot literally and fails `("aab", "c*a*b")` because its star semantics differ. All-case verification rejects it. The real lists placed this candidate below gold, so already rejecting it had no ranking effect. A synthetic `q452` method that always returns true passes all three published rational-equality cases. The independently derived inequality `"0.(3)" != "0.3"` rejects it. This control illustrates a coverage gap and stays outside the observed non-gold rate. The CodeChef `q541` contradiction was independently reproduced with exhaustive subsets on `[1,2,3]` and target MEX 3. The maximum size is 2 using `[1,2]`. The designated gold prints `-1` with exit zero because its scan never finds an absent value within `1..N`. That fixture stays outside the callable and ranking denominators. [Per-case returns and subprocess outcomes](../artifacts/callable_feasibility_train.json) · [Positive and negative controls](../artifacts/callable_feasibility_summary_train.json)
+
+**Ranking.** The production parser abstains on all 331 target statements, so its baseline makes no stage-2 promotions. Saved final ranks confirm this on the secondary lists. For the experimental replay, stably group passing IDs at the top, matching the reranker's promotion order while leaving the existing lists and order within each group intact. Gold missing from the top 50 contributes zero. With one gold per query, NDCG@10 is mean discounted gain and MRR@10 is mean reciprocal rank, both reported on a 0–100 scale. The signature-only arm promotes the same candidates that would be eligible to run before considering returns.
+
+| Saved candidate list / policy | Queries | NDCG@10 | MRR@10 | Gold improved / regressed | Entered top 10 |
+|---|---:|---:|---:|---:|---:|
+| Training corpus, production | 331 | 63.66 | 60.20 | 0 / 0 | 0 |
+| Training corpus, signature only | 331 | 65.55 | 62.43 | 12 / 0 | 3 |
+| Training corpus, all fixtures | 331 | 65.70 | 62.63 | 12 / 0 | 3 |
+| Training corpus, minimum two fixtures | 331 | 65.48 | 62.33 | 10 / 0 | 3 |
+| Full-corpus diagnostic, production | 331 | 59.13 | 55.85 | 0 / 0 | 0 |
+| Full-corpus diagnostic, signature only | 331 | 61.37 | 58.33 | 11 / 0 | 5 |
+| Full-corpus diagnostic, all fixtures | 331 | 61.52 | 58.54 | 11 / 0 | 5 |
+| Full-corpus diagnostic, minimum two fixtures | 331 | 61.11 | 58.08 | 9 / 0 | 4 |
+
+The first-fixture policy has the same gold ranking metrics as all fixtures while accepting the known wrong wildcard candidate. The training-corpus all-fixture gain over production is 2.04 NDCG and 2.43 MRR points. Over the signature-only arm it is 0.15 and 0.20 points, respectively. The single additional move over the signature control is `q3930`: both unrelated `reverse` functions were compatible and ahead of gold, and execution filtered them. Gold moved from baseline rank 15 to rank 3 with signature matching and rank 1 with execution. In the training-only list, `q3246` and `q272` also entered the top 10. On the 36 reviewed queries, training-corpus scores changed from 67.28/61.90 to 86.08/84.26 NDCG/MRR, with the same 12 improved and zero regressed. Selection enriched this subset for rank opportunity. [All rank orders, policies and populations](../artifacts/callable_feasibility_train.json) · [Signature-only control](../artifacts/callable_feasibility_summary_train.json)
+
+**Cold overhead and reproducibility.** Two sequential runs on Windows with 12 logical processors, Python 3.13.13, two workers and no verdict cache each launched 93 candidate subprocesses. Both had 83 matching case verdicts, six mismatches, four nonzero exits and zero timeouts in the main study. All 93 case verdicts and all rankings reproduced. Total experiment wall time was 18.20/18.88 seconds, excluding dataset load and independent controls. Mean, median and P95 per fixture-eligible query were 0.637/0.621/1.254 seconds on the first run and 0.657/0.619/1.227 seconds on the repeat. The production baseline spent under 2 ms parsing all 331 statements and launched no processes. Main study time includes scanning training source and subprocess setup, capture and cleanup. The reported timeout in the descendant control is separate from the main study. [Cold run](../artifacts/callable_feasibility_train.json) · [Cold repeat](../artifacts/callable_feasibility_repeat_train.json)
+
+**Decision. REJECT production integration on this evidence.** Most of the measured gain comes from the callable interface. Execution adds one rank improvement beyond that control, materially increases latency where enabled and has only three compatible retrieved non-golds for estimating false promotions. Published examples alone admit a known wrong callable even when every example is checked. The reviewed sample and partial mixed-corpus candidate coverage limit extrapolation. All 39 repository regression tests passed, including the Windows containment suite. Reproduce with new output filenames so that saved evidence stays intact.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/callable_feasibility.py fixtures artifacts/callable_fixtures_repro.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/callable_feasibility.py run artifacts/callable_run_repro.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/callable_feasibility.py run artifacts/callable_repeat_repro.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/callable_feasibility_analysis.py artifacts/callable_run_repro.json artifacts/callable_summary_repro.json --repeat artifacts/callable_repeat_repro.json
+.venv/Scripts/python.exe -B -m unittest discover -s tests -v
+```
+
+### 2026-11-25 Training source distribution and retrieval consistency
+
+Read the 5,000 training query and corpus rows and `train` qrels from `CoIR-Retrieval/apps` revision `f22508f96b7a36c2415181ed8bb76f76e04ae2d5`. Source is the normalized URL hostname. Ran the retained parser on full statements and counted characters and untruncated E5 input tokens using `query: ` and the model's special tokens at revision `f52bf8ec8c7124536f0efb74aca902b2995e5bcd`. Inputs longer than 512 tokens are classified as truncated. The audit reproduced the prior parser flags and token lengths for every fixed sample ID. The 500 IDs use `random.Random(20261125).sample(sorted(train_ids), 500)` and match both saved ranking runs. Their ordered SHA-256 is `d463ba25ae4db0782402be587a550026ae9eef7c7922c64cdd1cb02c55a5a8c3`. [Audit script](../artifacts/training_distribution_audit.py) · [Summary and sample IDs](../artifacts/training_distribution_audit_summary.json) · [5,000 per-query rows](../artifacts/training_distribution_audit_rows.jsonl)
+
+**Source breakdown.** The prior funnel column reuses the saved scalar ranks of these training queries from the 8,765-document run. The training-only column uses the saved 5,000-document baseline on the same IDs. The audit rerun checked that all parquet reads selected only training data. [Prior funnel](../artifacts/retrieval_diagnostic_train.json) · [Training-only ranks](../artifacts/query_example_baseline_train.json)
+
+| Source | Sample share | Census share | Parsed sample / census | Truncated sample / census | Prior Recall@50 | Training-only Recall@50 |
+|---|---:|---:|---:|---:|---:|---:|
+| AtCoder | 4/500 (0.80%) | 61/5,000 (1.22%) | 0/4 · 0/61 | 0/4 · 19/61 | 3/4 (75.00%) | 4/4 (100.00%) |
+| CodeChef | 114/500 (22.80%) | 1,112/5,000 (22.24%) | 2/114 · 37/1,112 | 53/114 · 464/1,112 | 31/114 (27.19%) | 40/114 (35.09%) |
+| Codeforces | 42/500 (8.40%) | 477/5,000 (9.54%) | 41/42 · 474/477 | 30/42 · 314/477 | 9/42 (21.43%) | 12/42 (28.57%) |
+| Codewars | 263/500 (52.60%) | 2,515/5,000 (50.30%) | 0/263 · 0/2,515 | 44/263 · 369/2,515 | 213/263 (80.99%) | 226/263 (85.93%) |
+| HackerRank | 9/500 (1.80%) | 96/5,000 (1.92%) | 0/9 · 0/96 | 3/9 · 21/96 | 6/9 (66.67%) | 8/9 (88.89%) |
+| LeetCode | 68/500 (13.60%) | 739/5,000 (14.78%) | 0/68 · 0/739 | 5/68 · 55/739 | 49/68 (72.06%) | 55/68 (80.88%) |
+| All | 500 | 5,000 | 43/500 · 511/5,000 | 135/500 · 1,242/5,000 | 311/500 (62.20%) | 345/500 (69.00%) |
+
+**Representativeness.** Parser coverage was 8.60% in the sample and 10.22% in the census. Truncation was 27.00% and 24.84%, respectively. Median character lengths were 1,027 and 1,051.5. Median formatted lengths were 311 and 318.5 tokens. The largest source-share shift was Codewars at +2.30 percentage points. Across 20,000 random draws of 500 without replacement from the fixed census (seed `20261126`), the source-mix Pearson statistic gave p=0.732, parser count p=0.208, truncation count p=0.254, character-length KS p=0.832, and formatted-token KS p=0.559. The KS statistic compares each draw against its 4,500-query complement. All five Holm-adjusted p-values were 1.00. These checks found no evidence of a material sample imbalance on the measured margins. Small sources still have wide sampling uncertainty. For example, prior Recall@50 Wilson intervals are 30.1–95.4% for 3/4 AtCoder queries and 35.4–87.9% for 6/9 HackerRank queries. The summary includes intervals and joint parser × truncation × retrieval counts by source.
+
+**Parser and retrieval.** The prior funnel's parseable and unparseable Recall@50 values were 8/43 (18.60%, Wilson 95% 9.74–32.62%) and 303/457 (66.30%, 61.85–70.48%). Forty-one of the 43 parseable queries were Codeforces. The only within-source comparisons were Codeforces (8/41 parseable and 1/1 unparseable) and CodeChef (0/2 and 31/112). The 1/1 and 0/2 cells have Wilson intervals of about 21–100% and 0–66%. Under exchangeability of parser flags within each source, the pooled source recall rates predict 9.33 parsed hits and a −44.31-point gap of the observed −47.70 points. The residual is −3.38 points with exact conditional p=0.170. This is a descriptive decomposition that holds source margins fixed and convolves the corresponding hypergeometric hit counts. The same approach on the 5,000-document baseline gave 11/43 versus 334/457 and predicted −43.90 of the −47.50 points (p=0.206).
+
+Parseable queries had median 579 versus 292 formatted tokens, and 30/43 versus 105/457 exceeded 512. Truncation status alone predicts −13.28 of the prior −47.70-point parser gap. Source plus length bands (≤256, 257–512, >512) predicts −45.81 points, with both parser outcomes represented in only one of 16 populated strata. All 43 parsed queries lacked starter code, whereas the 340 queries with starter code had 268/340 prior hits (78.82%). Starter-code presence closely tracks source and was used only for this analysis. The parser runs downstream of retrieval and cannot affect these ranks. The observed overlap is too sparse to isolate the effects of statement format or length.
+
+**Miss concentration.** CodeChef and Codeforces made up 156/500 queries (31.20%) and accounted for 116/189 prior misses (61.38%) and 104/155 training-only misses (67.10%). In the prior run, 35/189 misses were parseable (18.52%), 79/189 were truncated (41.80%), and 24 belonged to both groups. The corresponding training-only counts were 32/155 (20.65%), 72/155 (46.45%), and 22 in both. Truncated recall trailed shorter-query recall by 28.38 points in the prior run and 30.59 in the training-only run. Source composition predicts 22.21 and 21.78 points of those gaps. The remaining within-source association is −6.17 points (exact p=0.113) and −8.82 (exploratory p=0.022), respectively. On the training-only CodeChef panel, truncated queries reached the top 50 at 12/53 (22.64%) and shorter ones at 28/61 (45.90%). Source stratification addresses source composition. Statement content and difficulty may still confound the length comparison.
+
+**Recommended training-only protocol.** Use the existing `query_example_ablation.py baseline` runner with the pinned revision and fixed uniform 500 query IDs. Report the separately saved parseable verification panel as a separate workload. Use all 5,000 training snippets in lexicographic document-ID order, keep positive train qrels, and assert exactly one relevant document per query and complete ID coverage. Use raw statement and snippet text through the original E5 `query: ` and `passage: ` prefixes, a 512-token limit and L2 normalization. Fix the model revision, CPU, batch size 16, four Torch threads and one interop thread. The runner selects the training document vectors from the read-only cache, holds query embeddings in memory, and saves ranks to a fresh artifact. Rank all candidates by descending normalized dot product using stable sorting and lexicographic document ID for exact ties. Compute query-macro Recall@K as `mean(rank <= K)` over all 500 queries, NDCG@10 as the mean of `1/log2(rank+1)` at ranks 1–10, and MRR@10 as mean `1/rank` at ranks 1–10. Both latter metrics assign zero outside the cutoff. Preserve per-query ranks, sample order, corpus digest, and model configuration. [Training-only runner](../artifacts/query_example_ablation.py)
+
+The historical README figure used all 3,765 test queries and 3,765 test candidates, an unpinned dataset/model revision, a dictionary that kept the last qrel per query and ignored its relevance score, and `1 + count(scores > gold_score)` as rank. That rank lets exact ties share a cutoff position. The historical notebook also averaged reciprocal rank without the @10 cutoff. The prior diagnostic on the same 500 training queries used an 8,765-document MTEB search, MTEB corpus-text formatting and MTEB's returned tie order. The training-only ledger has 34 additional top-50 hits and zero losses against the prior ledger. The corpus, formatting and ranking implementation differ between these saved runs, so this is a protocol difference and cannot isolate a corpus-size effect. The historical comparison uses the recorded definition. [Historical evaluation trace](#2026-11-25-example-parser-coverage-and-recall50-audit)
+
+**Next experiment.** Preregister a new source-stratified training panel with enough CodeChef and Codeforces queries above and below 512 tokens. Evaluate the same queries in paired arms using the existing head truncation and a fixed head-plus-tail token allocation at the same 512-token budget. Hold corpus, model, prefixes and tie rules constant. Report paired Recall@50 differences and intervals within each source. Short inputs can serve as an identical-input control. This tests whether information outside the current window is recoverable while controlling for the large source-composition difference.
+
+Reproduce the audit from the saved ledgers and pinned local snapshots. The first command emits new audit files. The second is the training-only baseline command for generating a new rank ledger. All 39 repository regression tests passed.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/training_distribution_audit.py artifacts/training_distribution_summary_repro.json artifacts/training_distribution_rows_repro.jsonl
+.venv/Scripts/python.exe -B -X utf8 artifacts/query_example_ablation.py baseline artifacts/training_rank_baseline_repro.json
+.venv/Scripts/python.exe -B -m unittest discover -s tests -v
+```
+
+### 2026-11-25 Exact rank attribution and dev-stdin
+
+**311 versus 345.** The archived full-corpus replay reproduced all 500 ordered top-50 lists and all recorded gold ranks, including the markers for ranks beyond depth 1,000. The replay returns 311/500 (62.20%). Holding its cosine scores fixed and dropping the 3,765 non-training distractors gives 345/500 (69.00%), with the exact same 34 entrants as the training-only archive and zero losses. The per-query count of removed documents ahead of gold exactly accounts for all 288 changed gold ranks. For the 34 entrants, the removed counts range from 2 to 173. The attribution script verified the saved full-corpus witnesses and rescored against the training corpus exclusively. The full-corpus scoring evidence is retained as an archived training-query replay. [Full-corpus witness](../artifacts/retrieval_consistency_run/historical_check.json) · [Per-query attribution and score controls](../artifacts/dev_stdin_attribution.json)
+
+**Inputs and numeric controls.** Both runs use the same seed `20261125` IDs, verbatim statements, `query: ` prefix, 512-token cap, pinned `intfloat/e5-base-v2` revision `f52bf8ec8c7124536f0efb74aca902b2995e5bcd`, and exact same positive training qrel. The historical full-corpus run used MTEB-formatted passage text in parquet order and MTEB cosine/top-k/heap ordering. The training-only ablation used raw passages in lexicographic ID order and NumPy dot product over normalized vectors. The historical production cache had zero sampled query hits. Both sets of 5,000 document inputs resolve from the pinned content-addressed cache, with 1,710 raw/formatted text differences and 524 distinct vector pairs. Their maximum component difference was `2.66e-7`. The archived 16-document fresh encoding probe had minimum cosine `0.99999994` versus the cached vectors. Rescoring the training pool with formatted cosine or raw cosine preserved all 500 original training gold ranks. Reversing document input order with fixed lexical tie resolution preserved every tested order, and the historical MTEB tie behavior caused zero Recall@50 changes.
+
+**Two numerical exceptions in the shared-vector replay.** The historical ablation calls E5 on individual blocks of 16, while the shared query-vector cache lets E5 length-sort all 500 inputs before making batches. Recreating the original blocks recovered both exceptions and all 500 archived gold ranks and ordered top-50 lists. For `q4336`, float32 rounding switches `d249` and `d3696` at ranks 42/43. Gold stays first and the same 50 candidates remain. For `q4630`, cosine over the shared vectors puts `d252` above gold `d4630`. Raw dot product over the same vectors reverses them and gives gold rank 139. With the exact original batch and dot product, both score `0.803173303604126` and lexical ID puts `d252` first, restoring archived gold rank 140. The full-corpus gold rank is 358, with 218 excluded distractors ahead of gold. Neither exception changes any gold top-50 hit.
+
+**Training-only protocol.** Pin the dataset revision `f22508f96b7a36c2415181ed8bb76f76e04ae2d5`. Select every training query from AtCoder, CodeChef, Codeforces and HackerRank by normalized URL hostname, leaving Codewars and LeetCode outside the query panel. Codewars and LeetCode training snippets remain eligible distractors in the fixed 5,000-document training corpus. Validate that each query has exactly one positive training qrel. Preserve raw query text and MTEB passage formatting, the production E5 prefixes, batch size 16 and normalized float32 embeddings. Rank all 5,000 candidates with MTEB cosine, descending score and ascending lexical document ID on exact ties. Recall@K uses one gold-membership indicator per query and averages over the complete query group. The parser consumes full statements. Truncation counts the inputs whose E5 prefix and tokenizer special tokens place them above 512 tokens before truncation. The source rule includes all eligible queries independently of parser output or individual interface compatibility. [Training-only audit runner](../artifacts/dev_stdin_audit.py)
+
+| Source | Queries / 1,746 | Recall@10 | Recall@50 | Recall@100 | Recall@200 | Parsed | Over 512 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| AtCoder | 61 (3.49%) | 15/61 (24.59%) | 22/61 (36.07%) | 31/61 (50.82%) | 41/61 (67.21%) | 0/61 (0%) | 19/61 (31.15%) |
+| CodeChef | 1,112 (63.69%) | 233/1,112 (20.95%) | 370/1,112 (33.27%) | 477/1,112 (42.90%) | 594/1,112 (53.42%) | 37/1,112 (3.33%) | 464/1,112 (41.73%) |
+| Codeforces | 477 (27.32%) | 58/477 (12.16%) | 140/477 (29.35%) | 192/477 (40.25%) | 245/477 (51.36%) | 474/477 (99.37%) | 314/477 (65.83%) |
+| HackerRank | 96 (5.50%) | 68/96 (70.83%) | 79/96 (82.29%) | 84/96 (87.50%) | 88/96 (91.67%) | 0/96 (0%) | 21/96 (21.88%) |
+| **All** | **1,746 (100%)** | **374/1,746 (21.42%)** | **611/1,746 (34.99%)** | **784/1,746 (44.90%)** | **968/1,746 (55.44%)** | **511/1,746 (29.27%)** | **818/1,746 (46.85%)** |
+
+**Deterministic replay.** The separate cached scoring runs produced byte-identical ledgers for all 1,746 gold ranks and 349,200 ordered top-200 positions. Ledger SHA-256 was `e9a5f695da8a82106e62761024ac19ce05163263998da78d0b99a741f84e9b68`. Reversing document input order preserved the ranks. The ordered query ID SHA-256 was `c7453c957102b794c7ddf7c7fe56bcd709712650f7e019b4ee971dda7e932aff`. The independent replay guarded parquet reads to the training partition and confirmed that source, parser and length measurements match the prior training census on every selected ID. The query-vector manifest validates the model files, package versions, prefixed inputs, vector bytes, shape, finiteness and normalization. Both rank runs used the same validated vectors. The two historical witness files and the independent attribution repeat also matched byte for byte. All 39 regression tests passed. [Per-query measurements and configuration](../artifacts/dev_stdin_train.json) · [Replay fingerprints](../artifacts/dev_stdin_replay.json)
+
+**INVALID PROXY for the historical full-test result.** Recall@50 is 34.99% versus the README's 31.29%, while parser coverage is 29.27% versus the historical 2,936/3,765 (77.98%), a 48.71-point gap. CodeChef and Codeforces make up 91.01% of `dev-stdin` and 511/511 of its parser hits. The historical test run used the full split and the saved evaluation description gives no source-level counts to establish a comparable mix. `dev-stdin` uses 5,000 training distractors. The notebook used 3,765 test distractors, selected one qrel by dictionary assignment without checking its relevance score, and gave tied scores the same rank via `1 + count(score > gold_score)`. The historical research log describes one binary relevant document per query. `dev-stdin` verifies that property using positive train qrels and assigns unique positions by lexical ID on ties. Median and p95 statement lengths are 1,644 and 3,110.75 characters, compared with the early research summary's 1,316 and 2,903. That summary lacks pinned split and tokenizer provenance, so the length comparison is contextual. The current E5 median is 495.5 formatted tokens. The verified panel is suitable for repeatable, source-wise stdin development measurements and has its own baseline. [Historical trace](#2026-11-25-example-parser-coverage-and-recall50-audit)
+
+Reproduce with the pinned local snapshots and saved sample/dev query vectors. `attribute` uses the archived historical full-corpus evidence and opens only training parquet rows. The two `dev` commands run fresh scoring passes with the same validated inputs. The optional final command regenerates query vectors in a fresh directory using training queries only.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_audit.py attribute artifacts/dev_stdin_attribution_repro.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_audit.py dev artifacts/dev_stdin_train_repro.json --reference artifacts/dev_stdin_train.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_audit.py dev artifacts/dev_stdin_train_repeat.json --reference artifacts/dev_stdin_train_repro.json
+.venv/Scripts/python.exe -B -m unittest discover -s tests -v
+.venv/Scripts/python.exe -B -X utf8 artifacts/retrieval_consistency.py encode artifacts/dev_stdin_cold_vectors_repro
+```
+
+### 2026-11-25 Retrieval consistency replay and dev-stdin proxy
+
+**Root cause.** Both archival runs used the same ordered 500 training queries and one positive training qrel per query. The 311 run searched all 8,765 candidates. The 345 run searched the 5,000 training candidates. A paired control froze the full-corpus cosine scores and the document-ID tie rule, then removed the 3,765 non-training candidates. Exactly the same 34 queries gained a top-50 hit, and all 311 original hits stayed in the top 50. For example, `q632` moved from rank 90 to 27 after 63 distractors ahead of its gold were removed. Every query and qrel read in the replay was from training. [Full-corpus ledger](../artifacts/retrieval_diagnostic_train.json) · [Training-only ablation ledger](../artifacts/query_example_baseline_train.json)
+
+| Fixed 500 queries | Recall@10 | Recall@50 | Recall@100 | Recall@200 |
+|---|---:|---:|---:|---:|
+| 8,765 full-corpus candidates | 259/500 (51.8%) | 311/500 (62.2%) | 335/500 (67.0%) | 364/500 (72.8%) |
+| 5,000 training candidates | 283/500 (56.6%) | 345/500 (69.0%) | 368/500 (73.6%) | 395/500 (79.0%) |
+
+**Other protocol differences.** The ordered sample ID SHA-256 was `d463ba25ae4db0782402be587a550026ae9eef7c7922c64cdd1cb02c55a5a8c3`. Both query paths use verbatim statements, the same pinned E5-base-v2 checkpoint, `query: ` and `passage: ` prefixes, 512 tokens, and normalized embeddings. The full run used parquet corpus order, MTEB passage formatting and cosine, and stable descending score with MTEB's returned order for ties. The ablation used lexical corpus order, raw code, NumPy normalized dot product, and stable lexical document-ID ties. Passage formatting changed 1,710 of the 5,000 training cache keys' input strings. Of those, 524 vectors differed, with a maximum component difference of `2.66e-7`. Rescoring with either passage representation and either similarity path preserved the same top-50 gold IDs. Reversing candidate order preserved the deterministic rankings. Exact score ties at the 50th position appeared for one query in each controlled arm and did not change which gold IDs were retrieved.
+
+**Archive fidelity and cache checks.** The unmodified MTEB search reproduced all 500 full-corpus top-50 lists and archived gold ranks at depth 1,000. Reusing the full-run query vectors for the ablation swapped two non-gold documents at ranks 42 and 43 for `q4336`, and placed the gold for `q4630` at 139 instead of 140. Re-encoding those queries in their original ablation batches reproduced both archived orders and ranks. Both batch effects were outside the gold top-50 boundary. The document cache matched the archived SHA-256, every required passage key was present, and none of the 500 prefixed queries was a hit in that cache. Re-encoding 16 fixed training passages with the pinned model gave a maximum absolute component difference of `2.64e-7` against cached vectors. Query inputs, model files, vector digests, dependencies, corpus IDs and the frozen input hashes are recorded with the replay. [Runner](../artifacts/retrieval_consistency.py) · [Reproduction commands](../artifacts/retrieval_consistency_run/README.md)
+
+**dev-stdin census.** Selected every training query from four stdin/stdout sources by normalized hostname. Excluded 2,515 Codewars and 739 LeetCode queries. All 5,000 training documents remained candidates, including documents associated with the two excluded query sources. The dataset is `CoIR-Retrieval/apps@f22508f96b7a36c2415181ed8bb76f76e04ae2d5`. The model is `intfloat/e5-base-v2@f52bf8ec8c7124536f0efb74aca902b2995e5bcd`, CPU float32, batches of 16, four Torch intraop threads and one interop thread. The diagnostic uses production stage-1 cosine and MTEB passage formatting, then ranks score ties by lexical document ID. Recall is the share of all queries with their single positive training qrel in the first K positions. The existing parser sees the verbatim statement. Truncation means the prefixed input including special tokens exceeds 512 tokens before the model cap. [Raw rows, fixed IDs and exact configuration](../artifacts/retrieval_consistency_run/measurements.json)
+
+| Source | Queries | Recall@50 | Parser coverage | Over 512 formatted tokens |
+|---|---:|---:|---:|---:|
+| AtCoder | 61 (3.49%) | 22/61 (36.07%) | 0/61 (0.00%) | 19/61 (31.15%) |
+| CodeChef | 1,112 (63.69%) | 370/1,112 (33.27%) | 37/1,112 (3.33%) | 464/1,112 (41.73%) |
+| Codeforces | 477 (27.32%) | 140/477 (29.35%) | 474/477 (99.37%) | 314/477 (65.83%) |
+| HackerRank | 96 (5.50%) | 79/96 (82.29%) | 0/96 (0.00%) | 21/96 (21.88%) |
+| **Total** | **1,746** | **611/1,746 (34.99%)** | **511/1,746 (29.27%)** | **818/1,746 (46.85%)** |
+
+| Cutoff | dev-stdin | Documented historical test |
+|---|---:|---:|
+| Recall@10 | 374/1,746 (21.42%) | 19.04% |
+| Recall@50 | 611/1,746 (34.99%) | 31.29% |
+| Recall@100 | 784/1,746 (44.90%) | 38.57% |
+| Recall@200 | 968/1,746 (55.44%) | 48.07% |
+
+**Deterministic replay.** Two independent processes used the validated full query-vector archives and document cache. Both reproduced every ordered top-200 list and all metrics, and independently re-encoded the two historical query batches and the fixed training-passage probe. The complete measurement files were byte-identical with SHA-256 `8981a5054d2c9176352846a512da75e56ab357a59710b252bb22ce2fcdcc6c8d`. The `dev-stdin` ordered query ID SHA-256 is `c7453c957102b794c7ddf7c7fe56bcd709712650f7e019b4ee971dda7e932aff` and its ordered top-200 SHA-256 is `f9a2c8da7822f0bbe5a50d23ec47ecaade1e90a783d4a2644417a0b90cce9c75`. Production MTEB search agreed on every top-200 candidate set and every gold-hit flag at K=10, 50, 100 and 200. It ordered exact-score ties differently for 308 queries. All 39 regression tests passed. Measurements and reproduction commands use read-only production and frozen benchmark inputs. [Reproduction commands](../artifacts/retrieval_consistency_run/README.md)
+
+**INVALID PROXY for the historical test evaluation.** The historical 31.29% came from the notebook's 3,765 test queries against 3,765 test candidates. The separate full MTEB benchmark used 8,765 candidates. Both historical and current protocols are effectively single-gold under the documented binary labels. The notebook kept one qrel by dictionary assignment, scored normalized vectors by dot product, and gave exact ties the same better rank with `1 + count(scores > gold_score)`. It used raw passages, batch size 64 on CUDA and unpinned revisions. The pinned development run filters for positive training qrels and assigns one position per candidate. These are different workloads even when an aggregate recall is close. [Historical stage-1 results](#results) · [Notebook methodology and parser audit](#2026-11-25-example-parser-coverage-and-recall50-audit)
+
+The documented test parser coverage was 2,936/3,765 (77.98%), a 48.71-point difference from `dev-stdin`. The notebook measured regex matches, and the earlier documented audit found the same count with the retained parser. CodeChef and Codeforces make up 91.01% of `dev-stdin` and account for all 511 parser hits. The historical records give no per-source test counts for a matched comparison. The development median statement length was 1,644 characters and the p95 was 3,110.75, versus the early summary's 1,316 and 2,903. Formatted development input had a median of 495.5 tokens and p95 of 959. The development truncation rate was 46.85%, versus the historical estimate of about 27%, whose tokenizer and formatting details are unavailable. Within development, Recall@50 was 31.42% on the longer inputs and 38.15% on the rest. This is a descriptive difference across queries. The frozen panel supports paired, source-level development measurements on its own population. The test comparison uses existing documented measurements and methodology. [Historical data summary](#measurements) · [Historical parser audit](#2026-11-25-example-parser-coverage-and-recall50-audit)
+
+#### Independent training-only completion checks
+
+Re-encoded the ordered 500-query sample from the pinned CPU model. The new query-vector file was byte-identical to the archive. Verified that the two archived 8,765-document replays are byte-identical and regenerated the attribution with read-only training text, labels and candidate keys. It reproduced 311/500 in the archived full-candidate evidence and 345/500 with 5,000 training candidates, the same 34 crossings and zero losses. The new attribution file was byte-identical to its reference. The original two ablation batches recovered the archived order and gold-rank exceptions for `q4336` and `q4630`. No new scoring against the non-training corpus was needed. [Reproduced attribution](../artifacts/dev_stdin_validation/attribution_reproduced.json) · [Fresh sample vectors](../artifacts/dev_stdin_validation/sample_vectors.npz)
+
+Two more independent train-only scoring passes reused the validated `dev-stdin` vectors and reproduced all 349,200 ordered top-200 positions, all metrics and parser and token counts. Both result files match the earlier standalone census byte for byte at SHA-256 `e9a5f695da8a82106e62761024ac19ce05163263998da78d0b99a741f84e9b68`. There were no `dev-stdin` query keys in the production document cache. The production MTEB stage-1 search returned the same top-200 candidate sets and gold-hit flags at all four cutoffs. For all 308 queries whose order differed, every changed position had an exactly equal cosine score. Exact ties crossed the four cutoffs on 2, 10, 8 and 3 queries, respectively. Assigning tied documents the same best rank under the notebook rule added no gold hits on this panel. The notebook's raw regex and the current nonempty-pair parser both found exactly 511 examples on `dev-stdin`. These controls leave the **INVALID PROXY** decision unchanged. All 39 regression tests passed. Frozen input hashes and production files were unchanged. [Two scoring passes](../artifacts/dev_stdin_validation/measurements.json) · [Repeat](../artifacts/dev_stdin_validation/measurements_repeat.json) · [Tie and cache checks](../artifacts/dev_stdin_validation/checks.json)
+
+Reproduce from the repository root with new output filenames.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_audit.py attribute artifacts/dev_stdin_validation/attribution_repro.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_audit.py dev artifacts/dev_stdin_validation/measurements_repro.json --reference artifacts/dev_stdin_validation/measurements.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_audit.py dev artifacts/dev_stdin_validation/measurements_repro_repeat.json --reference artifacts/dev_stdin_validation/measurements_repro.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_validation_checks.py artifacts/dev_stdin_validation/measurements_repro.json artifacts/dev_stdin_validation/measurements_repro_repeat.json artifacts/dev_stdin_validation/checks_repro.json --vectors artifacts/retrieval_consistency_run --cold-sample artifacts/dev_stdin_validation/sample_vectors.npz
+.venv/Scripts/python.exe -B -m unittest discover -s tests -v
+```
+
+### 2026-11-25 Full-corpus dev-stdin baseline and preregistration check
+
+**Historical corpus.** The 31.29% Recall@50 is from `notebook/baseline_recall_and_execution_validation.ipynb`. Code cell indexes are zero-based. Cell 5 filters the corpus with `corpus_t = corpus[corpus.partition == "test"]` and prints 3,765 candidates and 3,765 queries. Cell 9 passes `corpus_t.text` with the `passage: ` prefix into the encoder, and its saved output shows both matrices at `(3765, 768)`. Cell 11 computes `sim = q_emb @ c_emb.T`, ranks each gold as `1 + count(similarity > gold_score)`, and its saved output reports 31.29%. The notebook matches its last tracked bytes at `9a9d20e^`. The separate `evaluate.py` path calls MTEB's AppsRetrieval task and its documented benchmark uses 8,765 candidates. This check read notebook source and archived aggregate evidence. It did not execute the notebook or open test queries or test relevance labels. [Notebook filtering](../notebook/baseline_recall_and_execution_validation.ipynb#L476) · [Notebook metric output](../notebook/baseline_recall_and_execution_validation.ipynb#L987) · [MTEB entry point](../evaluate.py#L67)
+
+**Split saved before comparisons.** Used the fixed 1,746-query training census on APPS revision `f22508f96b7a36c2415181ed8bb76f76e04ae2d5`. Within each hostname, sort IDs and shuffle with `random.Random(f"{20261125}:{source}")`. Assign each source's first half to A, alternating the extra member of odd strata to A then B in hostname order. Membership was determined from query ID and source alone. The split is disjoint, exhaustive and exactly balanced. No per-half retrieval result was used for selection. [Split IDs, source counts and fingerprints](../artifacts/dev_stdin_ab_split.json)
+
+| Source | A | B |
+|---|---:|---:|
+| AtCoder | 31 | 30 |
+| CodeChef | 556 | 556 |
+| Codeforces | 238 | 239 |
+| HackerRank | 48 | 48 |
+| **Total** | **873** | **873** |
+
+**Full-corpus stage-1 baseline.** Reused validated original query embeddings from pinned E5-base-v2 revision `f52bf8ec8c7124536f0efb74aca902b2995e5bcd`. The embeddings use the verbatim statement, `query: `, the production tokenizer's 512-token cap, batch size 16, CPU float32 and L2 normalization. All 8,765 MTEB-formatted `passage: ` inputs resolved from the same read-only content-addressed document cache. Ranked all candidates by MTEB cosine with lexical document ID on exact score ties. Recall uses a single positive training gold per query. NDCG@10 is the mean of `1/log2(rank+1)` through rank 10 and zero thereafter, on the 0–100 scale. Both independent runs and a reversed-corpus-order control reproduced the deterministic rankings. The two saved outputs have the same SHA-256 `0fae2558c285aa96c6e154ebf2f5b5fdc862b87cfb11f52f6dba3d5e4f7feb07`. Unmodified MTEB search agreed on all gold-hit flags and aggregate NDCG@10, and returned the same top-200 membership for all 1,746 queries. Its order matched on 1,565 queries. The fixed lexical tie rule defines this baseline. [Full raw ranks and configuration](../artifacts/dev_stdin_full_baseline.json) · [Independent replay](../artifacts/dev_stdin_full_baseline_repeat.json)
+
+| Metric | Result over 1,746 training queries |
+|---|---:|
+| Recall@10 | 293/1,746 (16.78%) |
+| Recall@50 | 461/1,746 (26.40%) |
+| Recall@100 | 578/1,746 (33.10%) |
+| Recall@200 | 722/1,746 (41.35%) |
+| NDCG@10 | 12.30 |
+
+The earlier 5,000-candidate panel uses the exact same query-vector manifest and gives 611 top-50 golds. All 461 full-pool hits are among those, with 150 additional hits on the smaller pool. This is a comparison of candidate pools under the unchanged query representation. [Prior training-corpus ranks](../artifacts/dev_stdin_train.json)
+
+**Preregistration gap and decision.** The available repository instructions, research artifacts and tracked history supplied a next-experiment note for current head truncation versus an unspecified fixed head-plus-tail allocation at the same 512-token budget. That note gives neither an exact allocation nor a third arm or decision thresholds. The separate example-removal ablation recorded a gain of at least 1.0 Recall@50 point and a paired interval above zero on its original random panel, with CPU and downstream criteria tied to that study. It did not register criteria for this split. The exact three input recipes and their parameters, the paired inference and acceptance rules, and how to select and confirm a winner could not be established. No representation comparison, source effect estimate, CPU overhead estimate, or winner selection was produced on A. B was left for confirmation after the required unchanged full-panel baseline. **REJECT adoption on the available evidence.** No representation has been tested against the requested rules. All 39 regression tests passed. Production code, caches and frozen benchmark files were unchanged.
+
+Reproduce with the existing pinned vectors and a new output filename for each step.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_full_baseline.py split artifacts/dev_stdin_ab_split_repro.json --reference artifacts/dev_stdin_ab_split.json
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_full_baseline.py baseline artifacts/dev_stdin_full_baseline_repro.json --split artifacts/dev_stdin_ab_split_repro.json --reference artifacts/dev_stdin_full_baseline.json
+.venv/Scripts/python.exe -B -m unittest discover -s tests -v
+```
+
+### Query representation preregistration
+
+Registered at **2026-11-25 02:22:06 +05:30** before any scoring for this experiment. Research only. No production changes or commit.
+
+- **Data.** Use all 1,746 `dev-stdin` training queries, the full 8,765-candidate pool and the saved source-stratified A/B split with seed `20261125`. Keep the document embeddings, positive training qrels, MTEB float32 cosine and lexical document-ID tie rule fixed. The primary analysis is the subset exceeding 512 formatted tokens, including the E5 prefix and special tokens. Choose on A only. Use B once for the locked winner only.
+- **C0 current.** First 512 formatted tokens with the unchanged E5 truncation.
+- **V1 head+tail.** First 320 text tokens plus the final `budget - 320` text tokens, maintaining their order. Reserve the original `query: ` prefix and tokenizer special tokens within the same total budget of 512. Use the original token IDs without a decode/re-encode round trip.
+- **V2 windows.** Use a maximum of 512 formatted tokens per window with the same `query: ` prefix and special tokens. Start at text offsets 0, 256, 512 and so on, ending when the last window covers the final text token. The final window may be shorter. Compute each document score as maximum cosine across the windows. The first window has the same IDs as C0 and can reuse its validated vector for ranking.
+- Queries at or below the cap reuse their unchanged C0 rankings in both variants. Full-half metrics include them. The variant-only scores and top-200 orders are saved separately from C0.
+
+Keep a variant only if all gates hold:
+
+1. Truncated A Recall@50 increases by at least **3.0 percentage points** over C0. Its two-sided 95% paired percentile bootstrap interval excludes zero, with **10,000** query-level resamples and seed `20261125`.
+2. The locked variant has the same positive sign on truncated B and improves Recall@50 by at least **1.5 percentage points**.
+3. Full-half NDCG@10 does not drop on either evaluated half.
+4. No source with at least **100 truncated queries** in the evaluated half loses more than **2.0 Recall@50 percentage points**. Report full-half source metrics as well.
+5. Query-side latency increases by no more than **0.1 seconds/query** on this CPU in each evaluated half. Measure the mean over a fixed selection of 32 truncated queries from that half, sampled from sorted IDs with `random.Random(f"20261125:latency:{half}")`. Use the pinned resident CPU model, four Torch threads, one interop thread, batch size 16 and no query-vector cache in the timed arms. Include query formatting, encoding, document cosine and window aggregation. Exclude corpus/cache loading and final ranking. Time two matched batches with the arm order reversed for the second batch. V2 recomputes every window in the timed arm.
+
+Apply the available A gates before opening B. If both variants pass on A, lock the higher A Recall@50. If both pass and their A Recall@50 is exactly equal, the written rule gives no winner and B stays closed pending a tie rule. Report Recall@10/50/100/200, per-source results, plus per-query gold-rank and cutoff transitions. Record **REJECTED** if neither variant qualifies or if the locked variant fails confirmation. No fallback variant is tested on B.
+
+### Query representation experiment results
+
+**REJECTED on A.** V1 failed the preregistered Recall@50 gate. V2 passed all three retrieval and ranking gates and failed the 0.100-second/query latency limit. No winner was locked and no representation was evaluated on B. [Decision and raw timing batches](../artifacts/dev_stdin_query_repr_run/A_results.json)
+
+The A half has 873 queries, 412 over the formatted token limit. The other 461 use their archived C0 results in all arms. The 512-token budget reserves two prefix and two BERT special tokens, leaving 508 for text. V1 used 320 head and 188 tail tokens. V2 used starts spaced 256 text tokens apart and combined the 412 original vectors with 583 newly encoded windows. A compact C0 cosine calculation initially reordered three top-200 lists with no changes to gold ranks. Before evaluating variants, scoring was aligned with the archived matrix shape, which recovered all 412 C0 lists exactly. Shape padding used copies of an A vector. The token-ID encoder matched production C0 IDs and produced byte-identical embeddings on four calibration queries. [Runner](../artifacts/dev_stdin_query_repr.py) · [Recorded calibration and input digests](../artifacts/dev_stdin_query_repr_run/A_results.json)
+
+| Truncated A, n=412 | Recall@10 | Recall@50 | Recall@100 | Recall@200 | Recall@50 delta and 95% paired CI |
+|---|---:|---:|---:|---:|---:|
+| C0 | 63 (15.29%) | 96 (23.30%) | 120 (29.13%) | 158 (38.35%) | — |
+| V1 head+tail | 60 (14.56%) | 97 (23.54%) | 118 (28.64%) | 154 (37.38%) | +0.24 pp [−1.70, +2.18] |
+| V2 windows | 71 (17.23%) | 117 (28.40%) | 139 (33.74%) | 170 (41.26%) | +5.10 pp [+2.43, +8.01] |
+
+| Full A, n=873 | Recall@10 hits | Recall@50 hits | Recall@100 hits | Recall@200 hits | NDCG@10 (0–100) |
+|---|---:|---:|---:|---:|---:|
+| C0 | 151 | 229 | 278 | 351 | 12.487 |
+| V1 | 148 | 230 | 276 | 347 | 12.507 |
+| V2 | 159 | 250 | 297 | 363 | 13.254 |
+
+| Source, truncated A | Queries | C0 top-50 hits | V1 hits (delta pp) | V2 hits (delta pp) |
+|---|---:|---:|---:|---:|
+| AtCoder | 6 | 1 | 1 (0.00) | 1 (0.00) |
+| CodeChef | 239 | 61 | 64 (+1.26) | 72 (+4.60) |
+| Codeforces | 155 | 27 | 25 (−1.29) | 36 (+5.81) |
+| HackerRank | 12 | 7 | 7 (0.00) | 8 (+8.33) |
+
+V1 improved 177 gold ranks, worsened 196 and left 39 unchanged on truncated A. Eight queries entered the top 50 and seven left. V2 improved 198 gold ranks, worsened 175 and left 39 unchanged. Twenty-eight entered the top 50 and seven left. The recorded metrics include both source scopes and query IDs for every transition at 10, 50, 100 and 200. [V1 per-query ranks](../artifacts/dev_stdin_query_repr_run/A_V1_rankings.json) · [V2 per-query ranks](../artifacts/dev_stdin_query_repr_run/A_V2_rankings.json)
+
+The mean query-side wall times over the registered 32-query CPU control on the Intel Core i5-13420H were **1.296 s/query for C0**, **1.251 for V1** (−0.046 s) and **2.812 for V2** (+1.516 s). The two batches processed 32 total windows each for C0 and V1 and 79 for V2. Ranking reused V2's validated first-window vector, while the timing control recomputed all windows to measure a cold query. V2's favorable A interval is exploratory evidence. There is no B confirmation. [Per-batch times and sampled IDs](../artifacts/dev_stdin_query_repr_run/A_results.json)
+
+An independent score replay from the saved embeddings matched all 412 gold ranks and ordered top-200 lists for each arm. All 39 repository regression tests passed. The experiment used training queries and relevance labels, and its changes are confined to research artifacts and this log. [Score replay](../artifacts/dev_stdin_query_repr_run/A_replay.json)
+
+Reproduce treatment scoring with a fresh output directory. Only the A command applies to this decision. The saved split, C0 vectors and document cache retain their pinned identities.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/dev_stdin_query_repr.py A artifacts/dev_stdin_query_repr_repro
+.venv/Scripts/python.exe -B -m unittest discover -s tests -v
+```
+
+### Query representation latency amendment
+
+Registered at **2026-11-25 03:01:52 +05:30**, before any experimental work on B for this study.
+
+> AMENDMENT (latency rule only): rule 5 becomes: mean added query-side latency of V2 over ALL dev-stdin queries <= 0.3 s/query vs C0, measured as below. Rules 1-4 unchanged. B unseen at time of amendment.
+
