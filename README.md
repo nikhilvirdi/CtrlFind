@@ -50,16 +50,7 @@ It checks all selected candidates rather than stopping at the first match. This 
 
 ## System architecture
 
-<!-- ARCHITECTURE SVG PLACEHOLDER
-Create docs/architecture.svg and insert it here as:
 ![CtrlFind architecture](docs/architecture.svg)
-Diagram type: component/data-flow overview.
-Visual style: transparent background, white text, arrows, and box outlines; no accent colours.
-Show the natural-language query, E5 embedding and index, top-K retrieval, example extraction,
-candidate subprocess execution, output verification, reranking, ranked snippets,
-content-addressed version store, embedding cache, and verdict/checkpoint caches.
-Do not add components that are not implemented.
--->
 
 The main path is query → embedding search → top-K candidates → example-based verification → ranked snippets. A versioned snippet store supplies the searchable code, while embedding and verification caches avoid repeating work when their inputs have not changed. The MTEB integration runs this same retrieval and reranking logic during evaluation.
 
