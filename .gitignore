@@ -5,3 +5,4 @@ __pycache__/
 artifacts/emb_cache.npz
 artifacts/emb_cache.tmp.npz
 artifacts/exec_results_live.jsonl
+Problem Statement.pdf

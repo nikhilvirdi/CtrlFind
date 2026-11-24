@@ -1,131 +1,232 @@
-# Execution-verified code retrieval
+# CtrlFind
 
-Given a programming problem in English, find the Python code that solves it. Built for the CoIR APPS benchmark: 3,765 test problems searched against 8,765 solutions, on CPU.
+CtrlFind takes a programming problem written in English and searches for the Python code most likely to solve it. It starts with semantic search, then runs the strongest candidates against an example from the problem statement to check whether their output matches.
 
-Most retrieval systems guess which code matches a question by measuring how similar the two look. This one also checks. Contest problems ship an example input and its expected output, so the top candidates are run on that example, and any that print the right answer move to the top.
+The project focuses on code retrieval, not code generation. It uses a small embedding model and local execution rather than a generative model or a hosted AI API. CtrlFind is still being developed; the results below distinguish the frozen benchmark baseline from later experiments on training data.
 
-## Results
+## The problem
 
-### Baseline
+Searching code by keywords works poorly when the question and the implementation use different words. A problem might describe a game, a route, or a sequence of operations, while the solution is mostly loops, arithmetic, and data structures. The right code can look less similar to the description than an unrelated snippet.
 
-- **NDCG@10**: 19.96
-- **MRR@10**: 19.05
-- **Settings**: K=50, 1.0 s timeout, MTEB 2.21.0
-- **Reproduction**:
-  ```
-  python evaluate.py --mode cached
-  ```
+The task is to take a natural-language query and rank a large collection of code snippets so that the relevant ones appear first. A useful retrieval system also has to keep working as code changes.
 
-AppsRetrieval test split, scored through MTEB.
+CtrlFind addresses three related problems:
+
+- **Retrieval accuracy (P0).** Find the relevant code and put it as high in the results as possible.
+- **Retrieval across versions (P1).** Search a particular version of a code collection without rebuilding everything from scratch after every change.
+- **Evolutionary retrieval.** Search several versions together and distinguish very similar implementations, including working code and versions with small bugs.
+
+The original task is about retrieval. Generating a written answer or explaining the retrieved code is outside its scope.
+
+## The approach
+
+A similarity score is useful for finding candidates, but it does not tell us whether a program solves the problem. Two programs can look almost identical and behave differently because of one operator. Two correct programs can also look very different.
+
+CtrlFind combines two signals. An embedding model first finds code that appears related to the question. Then, where the problem includes a usable input-output example, CtrlFind executes those candidates and checks the result. A candidate that passes the example receives priority, while semantic similarity still determines the order within each group.
+
+Passing one example is evidence, not proof of correctness. An unrelated program can print the expected answer by accident, and a correct program can produce a different valid output. The verifier is deliberately conservative about what counts as a match.
+
+## How CtrlFind works
+
+### Semantic retrieval
+
+CtrlFind uses [E5-base-v2](https://huggingface.co/intfloat/e5-base-v2) to turn the query and Python snippets into vector embeddings. Cosine similarity gives an initial ranking, and the current retrieval configuration keeps the top 50 candidates for verification.
+
+The code embeddings are reused across queries. This first pass is important because execution can only help a correct snippet that made it into the candidate set.
+
+### Execution verification
+
+When the problem statement includes a supported example format, CtrlFind extracts the input and expected output. Each shortlisted program runs in a separate Python subprocess with a temporary working directory and a one-second timeout.
+
+A program counts as passing only if it finishes with exit code 0 and produces the expected output. The verifier normally uses exact comparison. It can ignore trailing spaces and tabs on individual lines for narrowly identified, space-separated integer output; fixed-width and ambiguous layouts keep strict comparison.
+
+Programs that crash, time out, or produce different output do not receive a verification promotion. The current default checks the first usable published example, not every possible input.
+
+### Reranking
+
+Candidates that pass verification move above candidates that do not. Within both groups, CtrlFind preserves their original semantic-similarity order.
+
+It checks all selected candidates rather than stopping at the first match. This matters because unrelated programs sometimes share the same sample input format and produce the same small answer. Verification is a reranking signal, not a replacement for retrieval.
+
+## System architecture
+
+<!-- ARCHITECTURE SVG PLACEHOLDER
+Create docs/architecture.svg and insert it here as:
+![CtrlFind architecture](docs/architecture.svg)
+Diagram type: component/data-flow overview.
+Visual style: transparent background, white text, arrows, and box outlines; no accent colours.
+Show the natural-language query, E5 embedding and index, top-K retrieval, example extraction,
+candidate subprocess execution, output verification, reranking, ranked snippets,
+content-addressed version store, embedding cache, and verdict/checkpoint caches.
+Do not add components that are not implemented.
+-->
+
+The main path is query → embedding search → top-K candidates → example-based verification → ranked snippets. A versioned snippet store supplies the searchable code, while embedding and verification caches avoid repeating work when their inputs have not changed. The MTEB integration runs this same retrieval and reranking logic during evaluation.
+
+## Retrieval across versions
+
+The CoIR APPS corpus is a snapshot, so CtrlFind uses a generated three-version history to exercise version-aware retrieval. These are synthetic changes, not an imported Git history from a real software repository.
+
+| Version | Changes |
+|---|---|
+| `v1` | Original snippets. |
+| `v2` | Some snippets are reformatted; some receive a small injected bug. |
+| `v3` | Some bugs are fixed, others introduced, with additional formatting changes. |
+
+### Content-addressed storage
+
+Each distinct snippet is stored under a hash of its content. A version maps document IDs to those stored contents. If identical code appears in several versions, it needs only one stored copy and one embedding.
+
+This also gives the cache a useful identity: a changed snippet has a different content hash, so its old embedding or execution verdict should not be silently reused for the new code.
+
+### Incremental indexing
+
+When a new version is created, unchanged snippets reuse existing embeddings. Only new or modified content needs to be encoded. The amount of re-indexing therefore depends on what changed, rather than automatically processing the whole collection again.
+
+The repository includes simulated-change and version-comparison tooling. Historical indexing timings appear under **Performance**; those measurements used a T4 GPU and should not be mistaken for CPU-only indexing results.
+
+## Evolutionary retrieval
+
+CtrlFind can search the combined pool of versions. Identical snippets are deduplicated, so they are embedded and verified once even if several versions reference them.
+
+The difficult cases are snippets that differ by a single token. An embedding may give a working version and a buggy version nearly the same similarity score. If the example exposes the bug, execution separates them. If both happen to pass, their similarity order is preserved; a sample that misses the bug cannot establish which version is correct.
+
+This version search has been tested on the generated history. The number of contested cases remains small, so the results are evidence for that experiment, not a general claim about real repository histories.
+
+## Evaluation and results
+
+### Dataset and evaluation metrics
+
+The main benchmark is [CoIR AppsRetrieval](https://huggingface.co/datasets/CoIR-Retrieval/apps), built from programming problems and Python solutions in APPS. Its evaluated test split contains **3,765 queries** and a corpus of **8,765 snippets**. CtrlFind uses [MTEB](https://docs.mteb.org/) for scoring.
+
+- **NDCG@10** rewards placing relevant results near the top of the first ten results.
+- **MRR@10** measures how early the first relevant result appears within the first ten.
+- **Recall@K** tells us whether the relevant snippet was retrieved among the first K candidates, before verification has a chance to help.
+
+The published test result has been frozen. Subsequent verifier experiments use training queries; their scores are not presented as updated test-set results.
+
+### Baseline and comparisons
+
+The following numbers are for AppsRetrieval and use NDCG@10 on a 0–100 scale. The reference-model rows come from the [CoIR paper](https://aclanthology.org/2025.acl-long.1072/); the CtrlFind row is the repository's frozen result.
 
 | Model | Size | NDCG@10 |
-|---|---|---|
-| BM25 | | 0.95 |
+|---|---:|---:|
+| BM25 | — | 0.95 |
 | UniXcoder | 123M | 1.36 |
 | E5-base | 110M | 11.52 |
-| **E5-base + execution verification (this repo)** | **110M** | **19.96** |
+| **E5-base + execution verification (CtrlFind)** | **110M** | **19.96** |
 | E5-Mistral | 7B | 21.33 |
 | Voyage-Code-002 | API | 26.52 |
 
-Reference rows are from the CoIR paper (ACL 2025, Table 3). Our E5-base baseline reproduces its 11.52 exactly.
+These are benchmark comparisons, not claims of equal compute, model access, or inference cost. The E5-base retrieval baseline matches the paper's reported 11.52.
 
-| | Baseline | With verification |
-|---|---|---|
+### Retrieval results
+
+| Metric | E5-base retrieval | CtrlFind frozen baseline |
+|---|---:|---:|
 | NDCG@10 | 11.52 | **19.96** |
 | MRR@10 | 9.88 | **19.05** |
 
-Across the 3,765 test queries, verification improved 420, made 10 worse, and left 3,335 unchanged.
+In the original 3,765-query evaluation, verification improved the ranking for **420** queries, worsened it for **10**, and left **3,335** unchanged.
 
-## How it works
+The frozen result is saved in [`artifacts/baseline_frozen.json`](artifacts/baseline_frozen.json). It predates the later execution-correctness changes, so **19.96 / 19.05 are not claimed as final scores for the current working implementation**.
 
-**Stage 1, meaning.** E5-base-v2 embeds the problem and every snippet, and cosine similarity picks the 50 closest. Keyword search is useless here: a problem about accordions and the code that solves it share almost no words, which is why BM25 scores 0.95.
+### Version retrieval results
 
-**Stage 2, verification.** The example input and expected output are parsed out of the problem. Each of the 50 candidates runs in its own Python process, in a throwaway directory, with a one-second limit. Candidates that print the expected output move above the rest, and both groups keep their stage 1 order.
+An earlier experiment searched the three synthetic versions together: **10,819 distinct snippet contents** across **191 problems** with usable examples. Only **22** of those problems had a buggy version competing in the top 50.
 
-Collecting every passing candidate matters. Similar problems often share the same input format and a small integer answer, so a wrong snippet sometimes passes too. Stopping at the first pass picked the wrong one 7 times out of 15 in an early test. Ranking all passers by similarity puts the right one first or second instead.
-
-**Why stage 2 has limits.** It only helps when the right answer is already in the top 50, which happens for 31% of queries, and when the problem includes a parseable example, which 78% do. Everything else keeps its stage 1 rank. A stronger stage 1 model is the biggest remaining lever.
-
-## Speed
-
-Measured on Colab's free tier, 2 CPU cores for execution.
-
-| Step | Time |
-|---|---|
-| Encode one query, CPU | a fraction of a second |
-| Search 8,765 snippets | a few milliseconds |
-| Run 50 candidates on the example | about 3.6 s |
-| Build the full index, T4 GPU | 134 s |
-
-Verification cost grows linearly with the number of candidates, at roughly 60 ms each, almost all of it Python interpreter startup. More threads than CPU cores makes it slower, not faster: starved processes hit the timeout even when they only needed 60 ms of work.
-
-## Retrieval across versions (P1)
-
-CoIR APPS is a single snapshot, so `versions.py build` generates a history:
-
-| Version | What changed |
-|---|---|
-| v1 | the original snippets |
-| v2 | some snippets reformatted, behaviour unchanged; some given a one-token bug (`<` to `<=`, `+` to `-`, `n` to `n + 1`) |
-| v3 | some bugs fixed, some new ones introduced, more reformatting |
-
-Versions are stored the way git stores files. Each distinct snippet text is saved once, keyed by its hash, and a version is a list of doc ids pointing at those hashes. Embeddings and execution results are cached by the same hashes, so moving to a new version only encodes and runs the snippets that changed. Everything unchanged is reused.
-
-```
-python versions.py build          generate v1, v2, v3 and index each one
-python versions.py list
-python versions.py diff v1 v2
-python index.py --simulate-edits 100   time an incremental rebuild
-```
-
-Measured on a T4:
-
-| Build | Snippets changed | Encoded | Time |
-|---|---|---|---|
-| Full index, from nothing | 8,765 | 8,754 | 128 s |
-| v1 to v2 | 1,353 | 1,353 | 20 s |
-| v2 to v3 | 701 | 701 | 11 s |
-
-Rebuild cost tracks what changed, not the size of the codebase. Retrieval runs on every version (stage 1 NDCG@10: v1 11.52, v2 11.32, v3 11.30; the small drop comes from the broken and reformatted snippets).
-
-## Searching all versions at once (bonus)
-
-All versions share one pool. A snippet that did not change between versions is one entry, embedded once and run once.
-
-The hard part is ranking. A working version and a buggy version of the same snippet differ by a single token, so their embeddings are almost identical and similarity cannot tell them apart. Running them can: the buggy version prints the wrong answer on the problem's example. So the same verification step that lifts P0 also separates good versions from broken ones.
-
-When a buggy version happens to pass the example too, the two stay in similarity order, so verification never ranks worse than similarity alone.
-
-`evaluate_versions.py` measures this against two baselines: similarity alone, and similarity with the newest version preferred. For the tracked problems, whether the newest version is the buggy one is a coin flip, so "always pick the newest" cannot game the test.
-
-```
-python evaluate_versions.py       writes artifacts/versions_report.json
-```
-
-Results over 191 test problems with a usable example, searching all three versions at once (10,819 distinct entries):
-
-| Ranking | Working version ranked first | NDCG@10 |
-|---|---|---|
-| Similarity | 72.7% | 11.88 |
+| Ranking method | Working version first (22 contested problems) | NDCG@10 (191 problems) |
+|---|---:|---:|
+| Similarity only | 72.7% | 11.88 |
 | Similarity, newest version preferred | 68.2% | 11.83 |
-| **Similarity + execution** | **100%** | **23.03** |
+| Similarity + execution | **100%** | **23.03** |
 
-Every buggy version that reached the top 50 failed the example, 22 out of 22. Preferring the newest version did slightly worse than similarity alone, which confirms the test does not reward recency.
+The 100% figure means **22 out of 22 contested cases**, not 191 out of 191. Also, NDCG@10 measures the full retrieval improvement, not just how well the system chooses between versions. A larger version experiment is still needed.
 
-Two caveats. The 100% comes from the 22 problems where a buggy version competed in the top 50, a small sample. And the NDCG column mixes two effects: execution lifting the right snippet in general, as in P0, and picking the right version. The version-specific result is the first column.
+## Performance
 
+Execution is the expensive part of the current pipeline. Embedding lookup and cosine ranking are much cheaper than starting and running dozens of Python programs.
 
-## Integrating with MTEB
+| Measurement | Observed result | Conditions |
+|---|---|---|
+| Execute 50 candidates | About 3.6 s per query | Earlier run, two CPU cores |
+| Execute 50 candidates | 2.94 s median; 4.14 s p95 | Later 40-query training replay |
+| Full index build | 128 s | Historical T4 GPU measurement |
+| Incremental build, `v1` → `v2` | 20 s for 1,353 changed snippets | Historical T4 GPU measurement |
+| Incremental build, `v2` → `v3` | 11 s for 701 changed snippets | Historical T4 GPU measurement |
 
-MTEB calls an encoder and computes similarity itself, so a reranker cannot sit inside the encoder. It sits one level up. MTEB uses any model that already satisfies `SearchProtocol` without wrapping it, so `src/mteb_wrappers.py` subclasses `SearchEncoderWrapper` and reorders results after the embedding search.
+The execution measurements come from different runs and should not be read as a controlled speedup. The next performance work targets subprocess overhead, caching, and candidate handling, with correctness checked before accepting an optimization. The intended retrieval and verification runtime is CPU-based; the historical T4 figures describe indexing experiments only.
 
-Two things that cost time to find, in MTEB 2.21:
+## Research and experiments
 
-- the model needs a `ModelMeta`, including `loader` and `memory_usage_mb`, or evaluation finishes and then crashes while caching the result
-- the results contain datetimes, so saving them needs `json.dump(..., default=str)`
+The project keeps its experiment history in [`docs/research-log.md`](docs/research-log.md), including approaches that were tested and rejected.
 
-## Limitations
+Several findings have already changed the verifier:
 
-- Only the first example in a problem is used. Problems with several examples could be checked more strictly.
-- 27% of known answers fail their own example in a sampled check. The causes are not yet diagnosed; likely candidates are output formatting (trailing spaces, float precision) and multi-case inputs. Each one fixed converts directly into score.
-- Snippets run as plain subprocesses with a timeout and a temporary working directory. Docker adds container isolation, but this is not a hardened sandbox for untrusted code.
+- **Exit status matters.** A program can print the expected answer and then crash. Matching stdout alone was giving those programs credit; verification now requires a successful exit.
+- **Output formatting needs care.** Narrow trailing-whitespace normalization recovered some valid outputs. Broad normalization was rejected because it can accept incorrectly formatted fixed-width output.
+- **More examples are not automatically better.** Requiring two examples removed false promotions but also removed too many correct ones, reducing ranking accuracy on a fixed training sample.
+- **More parsing is not automatically safer.** Expanded example extraction found additional correct matches, but it also created additional incorrect promotions. That experimental parser was not retained.
+
+In the latest training audit, the retained verifier passed **394/511 (77.10%)** gold snippets with parseable examples, while **2/2,555 (0.0783%)** sampled unrelated snippets passed. Repeated runs varied slightly because some programs are nondeterministic or close to the timeout. These are verification-audit figures, not AppsRetrieval test NDCG or MRR results, and the unrelated snippets are not representative of every retrieved candidate.
+
+## Tech stack
+
+| Area | Technology |
+|---|---|
+| Language | Python |
+| Embedding model | E5-base-v2 |
+| Embedding inference | Sentence Transformers, PyTorch |
+| Dataset handling | Hugging Face Datasets |
+| Vector ranking | NumPy, cosine similarity |
+| Retrieval evaluation | MTEB |
+| Execution checking | Python subprocesses, temporary directories |
+| Interactive interface | Gradio |
+| Versioning and caching | Content hashes, local cached artifacts |
+| Packaging | Docker |
+
+The retrieval pipeline does not call a generative LLM or require an external model API key.
+
+## Testing and reproducibility
+
+The frozen benchmark result is kept separately from experimental training runs. Research scripts and audit artifacts record the candidate samples, settings, and observed verification outcomes, while [`docs/research-log.md`](docs/research-log.md) explains why changes were retained or reverted.
+
+The latest verification review reported **21 passing regression tests**, covering crashes after matching output, timeouts, output comparison, cache identity, checkpoint recovery, and version-related behavior. A 40-query replay returned identical rankings from cold and warm checkpoints; the warm run executed no candidates.
+
+These checks establish the reviewed verifier behavior on the tested cases. They do not make a one-example execution check a complete correctness proof, and the final test-set evaluation has not yet been rerun with the retained changes.
+
+## Limitations and future work
+
+- **First-stage recall is the main ceiling.** In the earlier analysis, the relevant snippet reached the top 50 for roughly 31% of queries. Verification cannot recover snippets that were never retrieved.
+- **Example coverage is limited.** The retained parser extracted a usable example for **511/5,000 training problems (10.22%)** in the audit. Earlier notebook figures used a different split and parsing method, so they are not interchangeable.
+- **One example is weak evidence.** Incorrect programs can pass by coincidence, and correct programs can emit different valid outputs. General-purpose checking cannot resolve every problem-specific output rule safely.
+- **Execution can be unstable.** CPU contention, timeouts, and randomized programs can change a verdict between runs. Some transient timeout failures can remain cached.
+- **Executing arbitrary code is risky.** A subprocess timeout and temporary directory are not a hardened sandbox. Docker helps isolate environments, but the execution system still needs stronger controls before handling untrusted code in a publicly accessible service.
+- **Version evaluation is synthetic.** The current history is generated from a static dataset. Real Git histories and a larger contested-version sample have not yet been validated.
+- **Generalization is unproven.** The current system targets Python programming-problem solutions; its performance on large, mixed-language software repositories has not been established.
+
+The remaining work is to improve execution speed without changing verdicts, raise first-stage retrieval coverage, strengthen version experiments, and repeat the final benchmark under a documented configuration.
+
+## References
+
+### Research papers
+
+| Paper | Link |
+|---|---|
+| CoIR: A Comprehensive Benchmark for Code Information Retrieval Models (ACL 2025) | [Paper](https://aclanthology.org/2025.acl-long.1072/) |
+| Measuring Coding Challenge Competence With APPS (2021) | [Paper](https://arxiv.org/abs/2105.09938) |
+| MTEB: Massive Text Embedding Benchmark | [Paper](https://arxiv.org/abs/2210.07316) |
+| Text Embeddings by Weakly-Supervised Contrastive Pre-training (E5) | [Paper](https://arxiv.org/abs/2212.03533) |
+| CodeSearchNet Challenge: Evaluating the State of Semantic Code Search | [Paper](https://arxiv.org/abs/1909.09436) |
+
+### Datasets, models and documentation
+
+| Resource | Link |
+|---|---|
+| CoIR benchmark | [GitHub](https://github.com/CoIR-team/coir) |
+| CoIR AppsRetrieval dataset | [Hugging Face](https://huggingface.co/datasets/CoIR-Retrieval/apps) |
+| Original APPS dataset | [GitHub](https://github.com/hendrycks/apps) |
+| E5-base-v2 model | [Hugging Face](https://huggingface.co/intfloat/e5-base-v2) |
+| CodeSearchNet dataset and tools | [GitHub](https://github.com/github/CodeSearchNet) |
+| MTEB | [Documentation](https://docs.mteb.org/) |
+| Sentence Transformers | [Documentation](https://www.sbert.net/) |
