@@ -1,9 +1,43 @@
+# Virtual environments
 venv/
 .venv/
+env/
+ENV/
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-artifacts/emb_cache.npz
-artifacts/emb_cache.tmp.npz
+*.py[cod]
+*$py.class
+
+# Temporary and checkpoint files
+*.tmp
+*.tmp.*
 artifacts/exec_results_live.jsonl
+
+# Large local caches
+artifacts/emb_cache.npz
+
+# Local untracked research notebooks & specs (preserved locally)
 Problem Statement.pdf
 notebook/
+.ipynb_checkpoints/
+
+# Operating system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# Editor and IDE directories
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing and coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
