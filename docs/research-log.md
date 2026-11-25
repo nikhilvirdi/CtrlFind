@@ -1322,3 +1322,154 @@ At **2026-11-25 03:28:59 +05:30** the completed-checkpoint inventory contained 3
 The 03:22:32 IST registration specified a shared K200 run and a 40-query cold timing sample. The subsequent closure request required two independent full K50 controls, comparison with earlier passer counts, four Torch threads for timing, and mandatory stopping conditions in the protocol before any execution. The original registration omitted these requirements. Candidate execution had already begun when the closure request arrived. The K200 prefix and a cached replay cannot establish the independent K50 noise floor. The collector was interrupted and the registration and completed checkpoints were preserved.
 
 Step 3 remains open. No arm received a qualification decision. No further scoring, timing, test-set access, regression run, or closing commit took place after the stop. K50 remains the existing production policy.
+
+### Registration v1 voided
+
+"The closure requirements were added after the first execution checkpoint. The original registration omitted two independent full K50 control runs and mandatory stop conditions. No arm results had been analyzed."
+
+The previous stop record and the interrupted shell invocation independently establish the boundary. The shell started the collection command and was interrupted in that command. The script computes arm comparisons only in its separate summarization path, which was never invoked. The original directory was renamed intact to artifacts/verification_depth_run_voided before new experimental work. Its contents are excluded from every v2 operation.
+
+### Registration v2
+
+Registered at **2026-11-25 03:32:40 +05:30 IST**. Registration v2 supersedes and voids the 03:22:32 registration. All new observations require fresh execution. Candidate results from the voided run are ineligible.
+
+```text
+STEP 3 FINISH. Research only. No production code changes. No test
+queries or test labels. Do not push.
+
+PART A: PREREGISTER (before any scoring)
+Write the plan below into docs/research-log.md with a timestamp.
+
+Data: dev-stdin vs the full 8,765 pool, halves A/B (seed 20261125).
+Evaluate on the Codeforces queries only (477: A 238, B 239), since
+verification applies only there. Other sources stay stage-1 only and
+unchanged.
+
+Arms, fixed, no tuning:
+  K50 control (current).
+  K100.
+  K200.
+  ADAPT: verify the top 50; if none pass, extend to 200.
+Ranking rule unchanged: passers first, ordered by stage-1 similarity,
+then non-passers in stage-1 order. Same verifier policy as the current
+main branch. Reuse cached verdicts where valid.
+
+Gates for an arm to QUALIFY (all required):
+  1. Pooled NDCG@10 gain >= 1.0 vs K50, paired bootstrap 95% CI
+     (10,000 resamples over queries) excludes 0.
+  2. A and B each have the same sign of gain.
+  3. False passes <= 0.2% of attempted candidates.
+No latency gate. Report cost instead.
+
+PART B: RUN
+1. Noise floor: run K50 verification twice and report how many
+   per-query verdicts differ (timeouts and nondeterminism). Use this
+   to interpret small gains.
+2. Run all four arms on A and B. Report per arm, A, B, and pooled:
+   NDCG@10, MRR@10, Recall@10 after rerank; passers per query; gold
+   rank among passers; false passes per attempted candidate; cold
+   execution seconds/query (mean, p95, 4 threads, nothing else
+   running); per-query wins/losses vs K50; bootstrap CI on the NDCG@10
+   difference.
+3. Mark each arm QUALIFIED or REJECTED with the failing gate named.
+4. Cost-gain curve: NDCG@10 gain vs seconds/query for each arm.
+
+PART C: CLOSE STEP 3
+Add a "Step 3 summary" section to docs/research-log.md, one line per
+experiment with its key number and reason:
+  example stripping: REJECTED
+  head+tail V1: REJECTED
+  window max-pooling V2: REJECTED on latency, parked for Step 5 as an
+    opt-in mode with its own registered rules, B unopened
+  callable verification: REJECTED
+  expanded stdin parser: NOT INTEGRATED
+  K sweep: result from Part B
+State the decision: either one K setting recommended for Step 5
+(the cheapest qualifying arm that captures most of the gain), or "no
+gain, baseline stands".
+
+Also: README.md must state which candidate pool each recall number
+uses (3,765 for the historical 31.29% Recall@50, 8,765 for MTEB).
+Run the regression tests (39 must pass). Confirm the frozen baseline
+(19.96 NDCG@10 / 19.05 MRR@10) is untouched.
+
+COMMITS (short messages, two commits)
+  1. "add k sweep results and step 3 summary" (log, README, results)
+  2. "add k sweep scripts" (scripts only)
+Show git status before each commit.
+
+STOP CONDITIONS
+Stop and report instead of continuing if: tests fail, the K50 control
+does not match the earlier pass counts within the noise floor, an arm's
+numbers look inconsistent, or any rule is unclear. Do not reinterpret
+or amend the registered gates after seeing results.
+
+When finished, show: the results table, the QUALIFIED/REJECTED line per
+arm, the Step 3 summary section, git status, and the commit hashes.
+```
+
+Run K50 twice as independent full cold runs over all 477 Codeforces training queries, with separate fresh checkpoints and no replay of saved prefixes. Both controls must finish and be validated before any deeper arm runs. Use the unchanged production execution policy, including the one-second timeout, default verifier worker count, exit-code check and Windows Job Object. Set Torch to four intra-op threads and one inter-op thread. Time the verifier with no concurrent research workload. Every source uses its existing stage-1 ranking. Parser abstentions contribute zero attempts and remain in query denominators.
+
+The source-filtered IDs and their order come from artifacts/dev_stdin_ab_split.json and artifacts/dev_stdin_full_baseline.json. Use stable promotion, the saved order and the unique positive training qrel. Report metrics on a 0–100 scale. Compute the two-sided percentile CI over query-paired differences with NumPy's default random generator, seed 20261125, 10,000 draws, separately for A, B and the pooled sample. Report actual elapsed verification time, including both batches where ADAPT extends, with a nearest-rank P95. Separate genuinely cold timing from disk replay.
+
+Compare earlier passer counts on the identical available training workloads. For the full-corpus historical retrieval diagnostic, match the Codeforces query, parser applicability and ordered top-50 list on rows actually executed. Report comparison coverage explicitly. Use the difference between the two fresh controls on the same matched rows as the observed count noise floor. Examine candidate-level disagreements and timeout transitions separately from pass-count drift. Do not extrapolate totals from another population. Establish the control comparison before interpreting sweep outcomes.
+
+For safety, use independently supported counterexamples or proof against the actual problem specification. Record confirmed incorrect, independently supported correct and unresolved passes. Report uncertainty bounds if needed. Stop if unresolved classifications can change the safety decision. Execution costs have no qualification threshold.
+
+Stop and report without committing if:
+
+- Registration v2 was not written before execution.
+- Any requirement or acceptance criterion is ambiguous.
+- The independent K50 controls fail the required consistency check.
+- Passing-candidate counts disagree with historical measurements beyond the observed noise floor.
+- Any arm produces inconsistent verdicts, rankings, or metrics.
+- The false-pass gate cannot be established reliably.
+- Regression tests fail.
+- Frozen baseline integrity cannot be confirmed.
+- Test-data isolation cannot be confirmed.
+
+Do not retrospectively modify the protocol, reinterpret thresholds, or continue after a stop condition.
+
+### Registration v2 results and mandatory stop
+
+The sweep stopped at **2026-11-25 04:05:21 IST** on the fourth Codeforces A query. A genuine cold K200 observation and a genuine cold ADAPT observation gave different verdicts for the same gold candidate. Step 3 remains open. No experimental arm received a qualification decision.
+
+Both independent K50 controls finished. Each used fresh candidate interpreters and a separate empty verdict checkpoint directory. Four Torch intra-op threads, one inter-op thread, 12 production verifier workers and a one-second candidate timeout were used on the Intel Core i5-13420H. Timing excluded loading the dataset, the saved rankings, and the model. The three parser abstentions were all in A. The 1,269 other dev-stdin queries remained stage-1 only. [Configuration](../artifacts/verification_depth_v2_run/machine.json) · [Fixed queries and stage-1 order](../artifacts/verification_depth_v2_run/plan.json)
+
+| K50 population | Attempts per run | Passes per run | NDCG@10 | MRR@10 | Recall@10 | Timeouts, runs 1 / 2 | Mean cold seconds, runs 1 / 2 | P95 cold seconds, runs 1 / 2 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| A (238) | 11,750 | 74 | 13.52 | 13.28 | 34/238 (14.29%) | 137 / 159 | 1.347 / 1.571 | 2.064 / 2.338 |
+| B (239) | 11,950 | 70 | 15.19 | 14.85 | 39/239 (16.32%) | 138 / 151 | 1.368 / 1.531 | 2.040 / 2.119 |
+| Pooled (477) | 23,700 | 144 | 14.36 | 14.06 | 73/477 (15.30%) | 275 / 310 | 1.357 / 1.551 | 2.049 / 2.227 |
+
+The controls took 647.47 and 739.93 seconds of verification time. All 23,700 candidate verdicts agreed. Forty-seven pairs changed timeout status (28 in A, 19 in B) and remained nonpasses both times. Zero queries changed passing count, passer membership, ranking or gold rank. Mean passers per query was 74/238 in A, 70/239 in B and 144/477 overall. Of the 144 pooled passes, 65 were designated gold and 79 were non-gold. The latter span 42 queries. No independent false-pass adjudication was completed. [Per-query controls and noise floor](../artifacts/verification_depth_v2_run/noise.json)
+
+The prior full-corpus training diagnostic supplied eight exactly matching executable top-50 batches. Both controls matched all 400 historical candidate verdicts and all eight historical passes. The earlier 200-query performance panel shared 190 query IDs but no identical ordered top 50. Its total pass count has a different denominator. A fresh read-only replay reproduced the complete control comparison. The research harness initially rejected replay across desktop commands because each command has its own receipt and disposable Windows directory. Reconstructing the original receipt and scratch directory in a copy of the metadata reproduced the entire archived environment hash. The five varying fields were the command receipt, local application data path, two temporary-directory variables and the derived TorchInductor cache path. Each cold phase kept its complete actual fingerprint. Candidate environments were left intact. [Control validation](../artifacts/verification_depth_v2_run/control_validation.json)
+
+**Stopping observation.** On training query q2111, gold d2111 was stage-1 rank 129. Both policies received the same published input and expected answer 2. K200 timed out on this candidate after 1.182 s of observed launch and cleanup time. ADAPT found zero passers in the first 50, ran its extension, and received stdout consisting of 2 and a newline, empty stderr and exit code 0 after 0.982 s. The output length and SHA-256 match those bytes. K200 promoted candidates from ranks 82, 91 and 178, leaving gold at rank 130. The direct ADAPT execution placed gold third among its four passers. The timing boundary explains the different verdicts. The observations cannot isolate the scheduler's contribution from other launch and batch costs. Both observations were fresh cache misses. [Discrepancy and per-arm times](../artifacts/verification_depth_v2_run/inconsistency.json) · [K200 observations](../artifacts/verification_depth_v2_run/shared/q2111.json) · [ADAPT extension](../artifacts/verification_depth_v2_run/direct/q2111_extension.json)
+
+The completed deeper observations cover q2056, q1, q2137 and q2111 in A and no queries in B. The runner halted automatically and the discrepancy was preserved without a retry. Four queries cannot supply the registered pooled accuracy, bootstrap intervals, cold cost curve or safety decision. K100, K200 and ADAPT are unclassified. The prepared independent witness cases were never executed. K50 remains the current policy.
+
+Before the sweep, the frozen aggregate reproduced 19.96 NDCG@10 and 19.05 MRR@10. The saved SHA-256 values matched for the frozen JSON, published JSON, execution-verdict archive, document IDs and embedding cache. Only frozen aggregate scores and byte hashes were used. The query loader filtered to training rows and used the training qrel file. No test queries, test labels or fresh test evaluation were used. Under the mandatory stop, the closing regression suite, README edit, Step 3 summary and commits were not performed. [Frozen-hash comparison](../artifacts/verification_depth_v2_run/frozen_before_sweep.json)
+
+The completed v2 controls can be replayed without launching candidates:
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/verification_depth_v2.py compare-controls
+```
+
+### Registration v3
+
+Registered at **2026-11-25 18:45:48 +05:30 IST**, before new candidate execution, scoring or timing. Registration v3 supersedes the v2 arm design. The v2 arm executions are void for comparisons. The two independent full cold v2 K50 controls are retained. They finished before arm analysis, and their protocol is unchanged. On q2111, gold at stage-1 rank 129 passed in 0.982 s in the independent ADAPT extension and timed out in 1.182 s in K200. This is evidence of instability near the one-second timeout. The v1 directory remains excluded.
+
+**Data and policies.** Use the fixed 477 Codeforces training queries on dev-stdin (A 238, B 239, seed 20261125) and the existing E5-base-v2 top-200 order against all 8,765 snippets. Use the exact query IDs and ordering in the retained plan, the production example parser, verifier, one-second timeout, Windows containment, 12 verifier workers and four Torch threads. The three parser abstentions remain in all query denominators with zero attempts. The other 1,269 dev-stdin queries keep stage-1 rankings. No test queries or test labels, fresh test evaluation, production changes or push.
+
+**Shared executions.** Run the 477-query K200 census twice, cold, with separate empty verdict stores and identical order. In each replicate, execute each eligible (query, candidate) exactly once. K50 and K100 are prefixes of those verdicts, K200 uses all of them, and ADAPT uses the first 50 if any pass, otherwise all 200. No arm runs candidates separately. Put passers first in stage-1 order and retain stage-1 order for all remaining candidates. Compare each arm with its own replicate's K50 prefix. Both replicates must meet every gate independently.
+
+1. Pooled NDCG@10 gain must be at least 1.0 point over K50 and the paired 95% interval must exclude zero. For A, B and pooled use 10,000 paired query bootstrap draws with replacement, NumPy default_rng seed 20261125 and percentile endpoints. Use single-positive training relevance, NDCG and MRR truncated at 10 and a 0–100 scale.
+2. A and B must each have the same positive sign of NDCG@10 gain over K50.
+3. Replace the 0.2% gate. The historical v2 registration distinguished confirmed false passes from unknown non-gold passes. For v3 the operational numerator is explicitly **every pass other than the designated training gold**. The retained K50 control itself has 79/23,700 (0.333333%) on that measure. Use the exact pooled cap 1.5 × 79/23,700 = 0.500000% of attempted candidates in each replicate. Also report the number of queries where a non-gold passer moves from below gold in the K50 ranking to above gold under the arm, and separately count net gold-rank regressions. An unmatched relevance ID alone does not prove an incorrect solution.
+
+**Measurements and cost.** Report A, B and pooled NDCG@10, MRR@10, Recall@10, passers including zero-pass queries, final gold rank and position among passers, non-gold passes per attempt, wins/losses/ties and newly overtaking passers. Save ranks, per-candidate verdicts, timings, bootstraps and exact denominators. Log discrepancies in verdict and timeout status by candidate across replicates and against both retained K50 controls. Report actual cold K200 elapsed time, K50 control timings and logical attempts for every arm. For the derived policies report the time in the shared batch until every required prefix verdict is available, or full wall time when the policy uses 200. That is a prefix timing observed under K200 concurrency. Independent deployment latency for K100 and ADAPT cannot be directly measured under this protocol. Report mean and nearest-rank P95 with setup and embedding excluded. No latency gate.
+
+**Stops and closure.** Stop only for a regression test failure, frozen-hash mismatch or script error. Log verdict differences as noise and continue. Check deterministic replay and the frozen reference hashes and scores. Run all 39 regression tests. Update the README corpus descriptions and append the Step 3 summary with the five historical decisions and this sweep. Report the cheapest qualifying setting capturing most of the measured gain if one qualifies, otherwise record “No gain, baseline stands.” Leave the integration decision to the architect. First commit the v2 stop record and retained control evidence. After validation, commit results and documentation, then research scripts, using the previously specified messages. Do not push.

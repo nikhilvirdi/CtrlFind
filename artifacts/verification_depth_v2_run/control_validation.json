@@ -1,0 +1,11 @@
+{
+  "continue": true,
+  "noise_sha256": "872f2f749059d224857321e04f13cf7cccd82f3cf8e32dadf672a85770788951",
+  "controls_replayed_identically": true,
+  "matched_historical_batches": 8,
+  "matched_historical_verdicts": 400,
+  "other_performance_panel_common_queries": 190,
+  "other_performance_panel_identical_top50s": 0,
+  "frozen_preflight_sha256": "dfec2be115d2f4bb84e146942f0ec5f33d207d1236d6dab138759b2db3267eed",
+  "earlier_counts_within_floor": true
+}

@@ -1,0 +1,12 @@
+{
+  "baseline_git_head": "401b916d88302b926d674fb9fb77eac37dbc3533",
+  "cpu": "13th Gen Intel(R) Core(TM) i5-13420H",
+  "logical_processors": 12,
+  "verifier_workers": 12,
+  "torch_intraop_threads": 4,
+  "torch_interop_threads": 1,
+  "candidate_timeout_seconds": 1,
+  "stage1": "Saved E5-base-v2 full-corpus rankings; no encoding or model load in timed batches",
+  "timing": "Serial queries, perf_counter around production verify; excludes disk writes and ranking; four Torch threads are independent of verifier workers.",
+  "cache": "No cross-run cache reads for either full K50 control. Each phase uses a fresh checkpoint namespace."
+}
