@@ -1,4 +1,5 @@
 """Windows job lifetime and candidate isolation checks."""
+import ctypes
 from pathlib import Path
 import os
 import subprocess
@@ -7,7 +8,7 @@ import tempfile
 import time
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, call, patch
 
 from src import execute
 
@@ -82,6 +83,83 @@ class WindowsJobTests(unittest.TestCase):
                 _windows_job.run(args, input="x" * (1 << 20), timeout=1, cwd=root)
             self.assertLess(time.monotonic() - start, 3)
             self.assert_tree_stopped(root)
+
+    def test_member_wait_reports_timeout_and_rejects_unexpected_status(self):
+        for status, error_type, diagnostic in (
+            (0x102, TimeoutError, r"PID 123.*WAIT_TIMEOUT"),
+            (0x80, OSError, r"0x00000080.*PID 123"),
+        ):
+            close = Mock()
+            kill = Mock(return_value=1)
+            close_job = Mock()
+
+            def wait_for_member(handle, remaining):
+                kill.assert_called_once_with(10, 1)
+                self.assertGreaterEqual(remaining, 0)
+                self.assertLessEqual(remaining, 1000)
+                close.assert_not_called()
+                if handle == 20:
+                    close_job.assert_not_called()
+                    return status
+                close_job.assert_called_once_with()
+                return _winapi.WAIT_OBJECT_0
+
+            wait = Mock(side_effect=wait_for_member)
+            with (
+                self.subTest(status=status),
+                patch.multiple(_windows_job, _set_job_info=Mock(return_value=1),
+                               _member_ids=Mock(return_value=[123, 456]),
+                               _open_process=Mock(side_effect=[20, 21]), _kill_job=kill,
+                               _wait=wait, _close=close, _query_job=Mock()),
+            ):
+                with self.assertRaisesRegex(error_type, diagnostic) as caught:
+                    _windows_job._stop_job(10, close_job)
+                self.assertIs(type(caught.exception), error_type)
+                self.assertEqual([entry.args[0] for entry in wait.call_args_list], [20, 21])
+                self.assertLessEqual(wait.call_args_list[1].args[1], wait.call_args_list[0].args[1])
+                self.assertEqual(close.call_args_list, [call(21), call(20)])
+                _windows_job._query_job.assert_not_called()
+
+    def test_wait_failure_after_process_exit_releases_blocked_stdin_and_stops_tree(self):
+        real_wait = _windows_job._wait
+        real_popen = subprocess.Popen
+        observed = []
+        launched = []
+
+        def capture_process(*args, **kwargs):
+            process = real_popen(*args, **kwargs)
+            launched.append(process)
+            return process
+
+        def fail_after_exit(handle, remaining):
+            result = real_wait(handle, remaining)
+            observed.append(result)
+            if len(observed) > 1 or result != _winapi.WAIT_OBJECT_0:
+                return result
+            ctypes.set_last_error(6)  # ERROR_INVALID_HANDLE
+            return 0xffffffff  # WAIT_FAILED
+
+        with tempfile.TemporaryDirectory() as root:
+            args = [sys.executable, "-c", self.start_tree("time.sleep(4)", inherit=True)]
+            start = time.monotonic()
+            with (
+                patch.object(_windows_job, "_wait", side_effect=fail_after_exit),
+                patch("subprocess.Popen", side_effect=capture_process),
+                self.assertRaises(OSError) as caught,
+            ):
+                _windows_job.run(args, input="x" * (1 << 20), timeout=1, cwd=root)
+            self.assertLess(time.monotonic() - start, 3)
+            self.assertGreaterEqual(len(observed), 2)
+            self.assertEqual(set(observed), {_winapi.WAIT_OBJECT_0})
+            self.assert_tree_stopped(root)
+            self.assertEqual(len(launched), 1)
+            process = launched[0]
+            self.assertIsNotNone(process.returncode)
+            self.assertTrue(all(pipe.closed for pipe in (process.stdin, process.stdout, process.stderr)))
+            error = caught.exception
+            self.assertNotIsInstance(error, TimeoutError)
+            self.assertEqual(error.winerror, 6)
+            self.assertRegex(str(error), r"WaitForSingleObject failed for candidate job member PID \d+")
 
     def test_failed_cleanup_rejects_successful_output(self):
         with patch.object(_windows_job, "_kill_job", return_value=0):

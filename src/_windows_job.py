@@ -20,6 +20,9 @@ _SNAP_THREADS = 0x00000004
 _THREAD_SUSPEND_RESUME = 0x0002
 _INVALID_HANDLE = ctypes.c_void_p(-1).value
 _DWORD_ERROR = 0xffffffff
+_WAIT_OBJECT_0 = 0
+_WAIT_TIMEOUT = 0x102
+_WAIT_FAILED = _DWORD_ERROR
 _ERROR_INVALID_PARAMETER = 87
 _ERROR_MORE_DATA = 234
 
@@ -138,7 +141,7 @@ def _stop_job(job, close_job):
                 handle = _open_process(_SYNCHRONIZE, False, pid)
                 if handle:
                     handles.callback(_close, handle)
-                    members.append(handle)
+                    members.append((pid, handle))
                 elif ctypes.get_last_error() != _ERROR_INVALID_PARAMETER:
                     _checked(handle)
         finally:
@@ -148,10 +151,27 @@ def _stop_job(job, close_job):
 
         # Job accounting can reach zero before pending I/O and cwd handles are released.
         deadline = time.monotonic() + 1.0
-        for handle in members:
+        wait_error = None
+        for pid, handle in members:
             remaining = max(0, int((deadline - time.monotonic()) * 1000))
-            if _wait(handle, remaining) != 0:
-                raise TimeoutError("candidate job member did not terminate")
+            status = _wait(handle, remaining)
+            if status == _WAIT_OBJECT_0:
+                continue
+            if status == _WAIT_FAILED:
+                error = ctypes.get_last_error()
+                failure = ctypes.WinError(
+                    error, f"WaitForSingleObject failed for candidate job member PID {pid} (Win32 error {error})"
+                )
+            elif status == _WAIT_TIMEOUT:
+                failure = TimeoutError(f"Candidate job member PID {pid} did not signal (WAIT_TIMEOUT, {remaining} ms)")
+            else:
+                failure = OSError(f"Unexpected WaitForSingleObject status 0x{status:08x} for candidate job member PID {pid}")
+            if wait_error is None:
+                wait_error = failure
+                # Release the job while the other process handles are still open.
+                close_job()
+        if wait_error is not None:
+            raise wait_error from termination_error
         if termination_error is not None:
             raise termination_error
         accounting = _JobAccounting()

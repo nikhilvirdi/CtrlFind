@@ -41,3 +41,11 @@ ehthumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Archived and voided verification-depth experiments
+/artifacts/verification_depth_run_voided/
+/artifacts/verification_depth_v2_run/control_review_inputs.json
+/artifacts/verification_depth_v2_run/direct/
+/artifacts/verification_depth_v2_run/shared/
+/artifacts/verification_depth_v2_run/sweep_plan.json
+/artifacts/verification_depth_v2_run/sweep_shell.json
