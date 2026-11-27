@@ -179,6 +179,8 @@ The verification-depth study used **477 Codeforces training queries** and **8,76
 
 A separate standalone study used **120 Codeforces training queries** from the same candidate corpus. ADAPT was faster on average than K200, with higher P95 in both repeats. It left two queries without results after Windows output-capture errors. On the 118 complete queries it gained **10.17 NDCG@10** over K50 (paired 95% CI **5.08–16.10**). It failed standalone validation and remains an opt-in research policy. Independent follow-up examples confirmed nine consequential non-gold passes were incorrect. [Depth study](docs/research-log.md#registration-v3-results) · [Standalone results](docs/research-log.md#standalone-measurements)
 
+The subsequent Windows reliability check completed both affected queries without promoting a candidate or caching the incomplete results. It did not repeat the latency study. Eight of the nine independently confirmed incorrect passes stopped ADAPT before it reached a gold candidate that K200 verified. K50 remains the default. K200 is available with `--mode full --k 200` for an authorized evaluation, and ADAPT remains experimental. [Windows reliability evidence](docs/research-log.md#phase-a--execution-reliability)
+
 ## Tech stack
 
 | Area | Technology |
@@ -202,10 +204,10 @@ python -m unittest discover -s tests -v
 
 Windows process-tree tests run on Windows. Evaluation commands write new reports under `artifacts/evaluation_runs/` by default. Use `--output` with an unused JSON path for another run. The `cached` mode replays the original verdict ledger. See the [research log](docs/research-log.md#2026-11-25-e5-retrieval-and-live-verification-funnel) for the cache-only procedure and its required inputs.
 
-The normal evaluator targets the held-out benchmark. If you are authorized to run it, use `python evaluate.py --mode full --output path/to/new-report.json` for live K50 and add `--adapt` to opt in. For training-only ADAPT validation, run the following from the repository root with the pinned dataset cached locally. Omit `--benchmark` to replay archived rankings without launching candidates.
+The normal evaluator targets the held-out benchmark. If you are authorized to run it, use `python evaluate.py --mode full --output path/to/new-report.json` for live K50 and add `--adapt` to opt in. For training-only archive validation, run the following from the repository root with the pinned dataset cached locally. Add `--live` to rerun only the two affected training queries.
 
 ```sh
-python -B -X utf8 artifacts/step5_adapt_validation.py artifacts/step5_adapt_repro --benchmark
+python -B -X utf8 artifacts/phase_a_validation.py artifacts/phase_a_repro.json
 ```
 
 The frozen benchmark result is kept separately from experimental training runs. Research scripts and audit artifacts record the candidate samples, settings, and observed verification outcomes, while [`docs/research-log.md`](docs/research-log.md) explains why changes were retained or reverted.

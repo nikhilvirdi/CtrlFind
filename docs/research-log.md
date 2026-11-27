@@ -1769,3 +1769,34 @@ Reproduce from the repository root with the pinned training data cached. Use fre
 | Licensing and redistribution | BLOCKED | Project license and redistribution provenance for dataset-derived assets require a decision. |
 
 Keep K50 as the default. Before architectural signoff, resolve the repeatable capture errors and investigate the Windows cleanup deadline, then reassess the registered gates and the full-list retrieval cost. Validate the container with training or synthetic startup data and resolve redistribution requirements before release. Require separate authorization before running a fresh held-out evaluation.
+
+## Phase A — Execution reliability
+
+The Step 5 integration reproduced the archived ADAPT rankings and improved ranking on the 118 complete training queries. Standalone ADAPT had higher P95 than K200 in both cold repeats. Independent follow-up examples confirmed nine incorrect non-gold passes. Eight of those passes stopped ADAPT before it reached a gold candidate that K200 verified. Keep K50 as the default. ADAPT remains an experimental opt-in and is unsuitable as the default. K200 is the fixed-depth research reference and can be selected with `--mode full --k 200` when that evaluation is authorized. This phase did not repeat ranking experiments, change either depth policy, or load held-out queries or relevance.
+
+### Windows capture and containment
+
+Step 5 ran the parent with `-X utf8`. A controlled probe confirmed that the separately launched child used code page 1252 for both output streams. At q2346/d978 the UTF-8 reader failed on stdout after the child exited zero. At q1696/d2279 it failed on stderr after a nonzero exit. CPython text capture decodes in reader threads. A decode exception can leave an empty capture buffer whose result is `None`. The runner now collects bytes, completes teardown, then strictly decodes using the existing parent encoding and universal-newline handling. Invalid bytes remain unverified. No output replacement or relaxation of the exact comparison rule was needed. [Python subprocess documentation](https://docs.python.org/3.13/library/subprocess.html)
+
+Verification distinguishes matching exit-zero output (`PASS`), definite mismatch or nonzero exit with reliable capture (`FAIL`), candidate deadline (`TIMEOUT`) and an unreliable capture or temporary-file failure (`INFRASTRUCTURE_ERROR`). A recoverable infrastructure error leaves the candidate in its original nonpassing group, allows other candidates to complete, and prevents a definitive checkpoint for the affected live batch. Version and demo caches omit the failed candidate and can reuse completed candidate verdicts. Windows launch and unresolved containment or cleanup errors raise and prevent the batch from returning promotions. The normal candidate timeout remains one second. Logs identify the failed stream without exposing its contents.
+
+The archived q2286/d843 `WAIT_TIMEOUT` was a genuine nonsignaled native wait at the deadline. The runner closed the job, reaped the direct process and later found the indicated PID absent. This establishes a deadline miss without evidence of a persistent survivor. The archived handle was not checked for job membership, so neither delayed process teardown nor PID reuse can be assigned as its specific cause after the fact. The runner now checks `IsProcessInJob` before waiting on a reopened PID and explicitly closes the owned process handle and all three streams, including when an exception retains the Popen object. Tests inject wait failures and PID reuse and exercise blocked stdin, inherited pipes, and descendant shutdown. The allocation-heavy historical candidate was not restarted in Phase A. [Archived cleanup observation](../artifacts/step5_adapt_run/cold_comparison.json) · [Wait status](https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-waitforsingleobject) · [Job membership API](https://learn.microsoft.com/en-us/windows/win32/api/jobapi/nf-jobapi-isprocessinjob)
+
+### Phase A evidence
+
+| Live training query | Launches | FAIL | TIMEOUT | INFRASTRUCTURE_ERROR | Promoted | Checkpoint |
+|---|---:|---:|---:|---:|---:|---|
+| q2346 | 200 | 192 | 7 | 1 | 0 | No |
+| q1696 | 200 | 143 | 1 | 56 | 0 | No |
+
+Both previously aborted queries completed with their archived candidate order. In q1696, the candidate-level handling exposed 55 additional capture failures beyond d2279. Neither query produced an unexpected promotion. Both archived K50 controls replayed all **23,700** candidate verdicts each, with zero pass/fail changes and all 477 final rankings preserved. The corresponding v3 ledgers differed in timeout status on 86 and 36 nonpasses. Both ADAPT archive replays reproduced all 477 rankings and 79,650 ordered verdict selections each. Warm replay returned identical orders without invoking the verifier. These replay checks launch no candidates and complement the live failure-path tests. [Phase A validation receipt](../artifacts/phase_a_validation.json)
+
+Hash validation matched all five frozen inputs, 13 v3 artifacts, eight Step 4 research files, and 21 Step 5 files covered by the release receipt. The frozen aggregate remains **19.96 NDCG@10 / 19.05 MRR@10**. The original standalone scripts and evidence retain their checksums. Use the Phase A driver for comparison with the current outcome API. [Step 5 receipt](../artifacts/step5_adapt_run/release_checks.json)
+
+The full regression suite exited **0** with **61 tests in 11.156 seconds, OK**. The standalone Windows suite also exited 0 with 19 tests, including binary capture, failure paths, and descendant cleanup. All 57 Python files compiled, the architecture diagram parsed, and the 16 Docker COPY inputs matched the allowlist. The working-tree and index whitespace checks passed, with the archived unittest progress output preserved through file-specific attributes. [Full regression output](../artifacts/phase_a_regression_tests.txt)
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/phase_a_validation.py artifacts/phase_a_repro.json --live
+```
+
+The engineering checks and Git closure are separate. The worktree began with an empty index at `1e542d9` and overlapping hygiene and Step 5 edits. A concurrent writer staged the shared files during validation and created mixed commit `380b09d`, then committed the demo status and test follow-up as `5c7735c`. The first commit preserves the Step 5 evidence bytes, and its Phase A regression log was staged while empty. The completed regression log and documentation updates remain separate. The requested separation between hygiene and reliability commits is blocked. This audit left the Git history and index intact.

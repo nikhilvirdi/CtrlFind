@@ -8,3 +8,4 @@
 /artifacts/step5_adapt_final_replay/** -text
 /artifacts/step5_adapt_preflight/** -text
 /artifacts/step5_adapt_run/regression_tests.txt whitespace=cr-at-eol,-blank-at-eol
+/artifacts/phase_a_regression_tests.txt -text whitespace=cr-at-eol,-blank-at-eol
