@@ -73,6 +73,7 @@ _VERDICTS: dict[tuple[int, str, str, str, bool], bool] = {}
 VERDICT_TEXT = {
     "passed": "Produced the expected output",
     "failed": "Wrong output or crashed",
+    "unavailable": "Execution could not be verified",
     "skipped": "Not run",
 }
 
@@ -144,7 +145,7 @@ def search(query: str, scope: str, k: int, do_verify: bool):
                     _VERDICTS[cache_keys[i]] = outcome is VerificationOutcome.PASS
             t_verify = time.perf_counter() - t
         passed = {i: _VERDICTS.get(cache_keys[i], False) for i in cand}
-        verdicts = {i: ("skipped" if i in failed_capture else "passed" if ok else "failed")
+        verdicts = {i: ("unavailable" if i in failed_capture else "passed" if ok else "failed")
                     for i, ok in passed.items()}
         if failed_capture:
             note = f"Execution could not verify {len(failed_capture)} candidate(s). These results were not cached."

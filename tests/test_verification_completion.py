@@ -197,6 +197,14 @@ class DemoVerificationTests(unittest.TestCase):
             stats, cards = run(scoped, "Original", 2, True)
         self.assertIn("2 reused", stats)
         self.assertEqual(cards, "1:passed 0:failed ")
+        scope["POOL_TEXT"][0] += "\n# Force a new verification cache key"
+        failed = execute.VerificationOutcome.INFRASTRUCTURE_ERROR
+        with patch.dict(scope, verify=Mock(return_value=[failed])) as functions:
+            for _ in range(2):
+                stats, cards = run(scoped, "Original", 2, True)
+                self.assertIn("Execution could not verify 1 candidate", stats)
+                self.assertEqual(cards, "1:passed 0:unavailable ")
+            self.assertEqual(functions["verify"].call_count, 2)
 
 
 class EvaluationModeTests(unittest.TestCase):
