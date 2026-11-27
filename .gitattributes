@@ -1,0 +1,5 @@
+# The audit receipt fingerprints the exact bytes of the saved v3 run.
+/artifacts/verification_depth_v3_run/** -text
+/artifacts/verification_depth_v3_post_stop_audit.json -text
+# Preserve the runner's interrupted progress line and original CRLF endings.
+/artifacts/verification_depth_v3_run/regression_tests.txt whitespace=cr-at-eol,-blank-at-eol

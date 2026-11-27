@@ -113,6 +113,8 @@ These are benchmark comparisons, not claims of equal compute, model access, or i
 
 ### Retrieval results
 
+The historical E5 Recall@50 of **31.29%** used **3,765 candidate snippets**. The frozen MTEB NDCG@10 and MRR@10 figures below used the full **8,765-snippet** candidate corpus.
+
 | Metric | E5-base retrieval | CtrlFind frozen baseline |
 |---|---:|---:|
 | NDCG@10 | 11.52 | **19.96** |
@@ -159,7 +161,9 @@ Several findings have already changed the verifier:
 - **More examples are not automatically better.** Requiring two examples removed false promotions but also removed too many correct ones, reducing ranking accuracy on a fixed training sample.
 - **More parsing is not automatically safer.** Expanded example extraction found additional correct matches, but it also created additional incorrect promotions. That experimental parser was not retained.
 
-In the latest training audit, the retained verifier passed **394/511 (77.10%)** gold snippets with parseable examples, while **2/2,555 (0.0783%)** sampled unrelated snippets passed. Repeated runs varied slightly because some programs are nondeterministic or close to the timeout. These are verification-audit figures, not AppsRetrieval test NDCG or MRR results, and the unrelated snippets are not representative of every retrieved candidate.
+In a paired training audit, the retained verifier passed **393/511 (76.91%)** gold snippets with parseable examples, up from 390/511 under the original rule. Passes among the 2,555 sampled unrelated snippets fell from three to two. Repeat counts varied slightly with nondeterministic outputs and timeouts. These figures describe the sampled training candidates. [Paired verifier audit](docs/research-log.md#2026-11-24-verifier-audit-and-execution-performance-reference)
+
+The v3 verification-depth study used 477 Codeforces training queries. K100, K200 and ADAPT met the registered research thresholds in both cold replicates. ADAPT reached **25.74 NDCG@10** versus **14.36** for K50, a gain of **11.38 points** (paired 95% CI **8.65–14.23**). It used 79,650 logical attempts versus 94,800 for K200. The study used a shared K200 execution batch, so standalone ADAPT latency remains unmeasured. Its non-gold pass count tracks disagreement with the designated relevance label and leaves semantic correctness undetermined. K50 remains the production default. [Depth study](docs/research-log.md#registration-v3-results)
 
 ## Tech stack
 
@@ -182,16 +186,14 @@ The retrieval pipeline does not call a generative LLM or require an external mod
 
 The frozen benchmark result is kept separately from experimental training runs. Research scripts and audit artifacts record the candidate samples, settings, and observed verification outcomes, while [`docs/research-log.md`](docs/research-log.md) explains why changes were retained or reverted.
 
-The latest verification review reported **21 passing regression tests**, covering crashes after matching output, timeouts, output comparison, cache identity, checkpoint recovery, and version-related behavior. A 40-query replay returned identical rankings from cold and warm checkpoints; the warm run executed no candidates.
-
-These checks establish the reviewed verifier behavior on the tested cases. They do not make a one-example execution check a complete correctness proof, and the final test-set evaluation has not yet been rerun with the retained changes.
+The archived v3 regression run reported **39 passing tests**, including Windows process-tree containment, output comparison and checkpoint recovery. A reporting-script error stopped the original registered closing procedure. A separate post-stop audit verified the suite footer, reproduced the saved rankings, bootstrap draws and noise ledger, and matched all five frozen hashes. Step 3 closed on that audited evidence. ADAPT is approved for Step 5 evaluation behind a config flag, with K50 as the default until Step 5 validation. The frozen scores still describe the historical evaluation. [Step 3 closure](docs/research-log.md#step-3-closure)
 
 ## Limitations and future work
 
 - **First-stage recall is the main ceiling.** In the earlier analysis, the relevant snippet reached the top 50 for roughly 31% of queries. Verification cannot recover snippets that were never retrieved.
 - **Example coverage is limited.** The retained parser extracted a usable example for **511/5,000 training problems (10.22%)** in the audit. Earlier notebook figures used a different split and parsing method, so they are not interchangeable.
 - **One example is weak evidence.** Incorrect programs can pass by coincidence, and correct programs can emit different valid outputs. General-purpose checking cannot resolve every problem-specific output rule safely.
-- **Execution can be unstable.** CPU contention, timeouts, and randomized programs can change a verdict between runs. Some transient timeout failures can remain cached.
+- **Execution can be unstable.** CPU contention, timeouts, and randomized programs can change a verdict between runs. Some transient timeout failures can remain cached. One Windows candidate-job cleanup error in v3 remains unresolved.
 - **Executing arbitrary code is risky.** A subprocess timeout and temporary directory are not a hardened sandbox. Docker helps isolate environments, but the execution system still needs stronger controls before handling untrusted code in a publicly accessible service.
 - **Version evaluation is synthetic.** The current history is generated from a static dataset. Real Git histories and a larger contested-version sample have not yet been validated.
 - **Generalization is unproven.** The current system targets Python programming-problem solutions; its performance on large, mixed-language software repositories has not been established.

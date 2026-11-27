@@ -1473,3 +1473,133 @@ Registered at **2026-11-25 18:45:48 +05:30 IST**, before new candidate execution
 **Measurements and cost.** Report A, B and pooled NDCG@10, MRR@10, Recall@10, passers including zero-pass queries, final gold rank and position among passers, non-gold passes per attempt, wins/losses/ties and newly overtaking passers. Save ranks, per-candidate verdicts, timings, bootstraps and exact denominators. Log discrepancies in verdict and timeout status by candidate across replicates and against both retained K50 controls. Report actual cold K200 elapsed time, K50 control timings and logical attempts for every arm. For the derived policies report the time in the shared batch until every required prefix verdict is available, or full wall time when the policy uses 200. That is a prefix timing observed under K200 concurrency. Independent deployment latency for K100 and ADAPT cannot be directly measured under this protocol. Report mean and nearest-rank P95 with setup and embedding excluded. No latency gate.
 
 **Stops and closure.** Stop only for a regression test failure, frozen-hash mismatch or script error. Log verdict differences as noise and continue. Check deterministic replay and the frozen reference hashes and scores. Run all 39 regression tests. Update the README corpus descriptions and append the Step 3 summary with the five historical decisions and this sweep. Report the cheapest qualifying setting capturing most of the measured gain if one qualifies, otherwise record “No gain, baseline stands.” Leave the integration decision to the architect. First commit the v2 stop record and retained control evidence. After validation, commit results and documentation, then research scripts, using the previously specified messages. Do not push.
+
+### Registration v3 results
+
+**K100, K200 and ADAPT all qualified on both cold replicates. Recommend ADAPT for possible Step 5 integration.** It recovered 95.8% of K200's NDCG gain using 15,150 fewer attempts per 477 queries. K100 was cheaper and recovered 50.8% of the gain. The recommendation reflects that measured trade-off. Qualification had no latency gate.
+
+Each replicate ran the production verifier once per eligible query on the same ordered top 200. There were 94,800 attempts per replicate, zero cold cache hits, 474 parsed queries and three abstentions. Both K50 prefixes, both K100 prefixes and both ADAPT decisions came from their own replicate's K200 ledger. Only training query rows and the training qrel file were used. E5 scores, the 8,765-snippet corpus order, lexical tie-breaking and stable promotion came from the fixed full-corpus baseline. The retained v2 controls fixed the gate-3 reference. The voided arm runs contributed no verdicts. [Registration, IDs, fixtures and fingerprints](../artifacts/verification_depth_v3_run/plan.json) · [Machine and software](../artifacts/verification_depth_v3_run/machine.json)
+
+**Accuracy.** Both replicates produced identical pass flags, rankings, metrics and bootstrap intervals. Each line below therefore reports both replicates. Metrics are on a 0–100 scale. The confidence interval is the 2.5th to 97.5th percentile of 10,000 paired query-level NDCG differences against the same replicate's K50, computed separately for A, B and pooled. Wins, losses and ties use full gold rank. An overtake counts a query once if at least one non-gold passer moved from below its gold in K50 to above gold. [Aggregate results](../artifacts/verification_depth_v3_run/results.json) · [Bootstrap distributions](../artifacts/verification_depth_v3_run/bootstrap.npz)
+
+| Population | Arm | NDCG@10 | Gain [95% CI] | MRR@10 | Recall@10 | Wins/losses/ties | Overtaken queries |
+|---|---|---:|---:|---:|---:|---:|---:|
+| A | K50 | 13.52 | 0.00 [0.00, 0.00] | 13.28 | 34/238 (14.29%) | 0/0/238 | 0 |
+| A | K100 | 18.70 | 5.18 [2.66, 8.09] | 18.25 | 48/238 (20.17%) | 14/0/224 | 0 |
+| A | K200 | 25.54 | 12.01 [8.12, 16.19] | 24.83 | 66/238 (27.73%) | 32/0/206 | 0 |
+| A | ADAPT | 24.98 | 11.45 [7.62, 15.66] | 24.48 | 63/238 (26.47%) | 29/0/209 | 0 |
+| B | K50 | 15.19 | 0.00 [0.00, 0.00] | 14.85 | 39/239 (16.32%) | 0/0/239 | 0 |
+| B | K100 | 22.07 | 6.87 [3.95, 10.22] | 21.65 | 56/239 (23.43%) | 17/0/222 | 0 |
+| B | K200 | 26.94 | 11.74 [7.90, 15.85] | 26.46 | 68/239 (28.45%) | 29/1/209 | 1 |
+| B | ADAPT | 26.49 | 11.30 [7.53, 15.48] | 26.14 | 66/239 (27.62%) | 27/1/211 | 1 |
+| pooled | K50 | 14.36 | 0.00 [0.00, 0.00] | 14.06 | 73/477 (15.30%) | 0/0/477 | 0 |
+| pooled | K100 | 20.39 | 6.03 [4.03, 8.19] | 19.95 | 104/477 (21.80%) | 31/0/446 | 0 |
+| pooled | K200 | 26.24 | 11.88 [9.10, 14.78] | 25.65 | 134/477 (28.09%) | 61/1/415 | 1 |
+| pooled | ADAPT | 25.74 | 11.38 [8.65, 14.23] | 25.31 | 129/477 (27.04%) | 56/1/420 | 1 |
+
+**Promotion evidence.** Gate 3 used all non-gold passes per candidate attempted, with an inclusive cap of 0.500% from 1.5 × 79/23,700. Semantic correctness of non-gold solutions was unadjudicated. Passers per query includes all abstentions and zero-pass queries. In the position column, 2×3 means gold was the second passer on three queries. Each query's final gold rank, passer position, passing IDs, complete reranked top 200 and overtaking IDs are in the two ranking ledgers. On q2323, d7089 moved ahead of the designated gold d2323, pushing it from 75th to 76th under K200 and ADAPT. This was the only net gold-rank regression. [Replicate 1 rankings](../artifacts/verification_depth_v3_run/rankings1.json.gz) · [Replicate 2 rankings](../artifacts/verification_depth_v3_run/rankings2.json.gz)
+
+| Population | Arm | Passes | Passers/query | Zero-pass queries | Median gold rank | Gold passer position × queries | Non-gold passes/attempts |
+|---|---|---:|---:|---:|---:|---|---:|
+| A | K50 | 74 | 0.311 | 187 | 594 | 1×29, 2×1 | 44/11,750 (0.374%) |
+| A | K100 | 133 | 0.559 | 170 | 594 | 1×40, 2×2, 5×1, 8×1 | 89/23,500 (0.379%) |
+| A | K200 | 212 | 0.891 | 148 | 594 | 1×54, 2×4, 3×2, 5×1, 8×1 | 150/47,000 (0.319%) |
+| A | ADAPT | 124 | 0.521 | 148 | 594 | 1×54, 2×3, 3×2 | 65/39,350 (0.165%) |
+| B | K50 | 70 | 0.293 | 189 | 541 | 1×34, 2×1 | 35/11,950 (0.293%) |
+| B | K100 | 118 | 0.494 | 165 | 541 | 1×50, 2×1, 4×1 | 66/23,900 (0.276%) |
+| B | K200 | 188 | 0.787 | 148 | 541 | 1×61, 2×2, 4×1 | 124/47,800 (0.259%) |
+| B | ADAPT | 130 | 0.544 | 148 | 541 | 1×61, 2×1 | 68/40,300 (0.169%) |
+| pooled | K50 | 144 | 0.302 | 376 | 572 | 1×63, 2×2 | 79/23,700 (0.333%) |
+| pooled | K100 | 251 | 0.526 | 335 | 572 | 1×90, 2×3, 4×1, 5×1, 8×1 | 155/47,400 (0.327%) |
+| pooled | K200 | 400 | 0.839 | 296 | 572 | 1×115, 2×6, 3×2, 4×1, 5×1, 8×1 | 274/94,800 (0.289%) |
+| pooled | ADAPT | 254 | 0.532 | 296 | 572 | 1×115, 2×4, 3×2 | 133/79,650 (0.167%) |
+
+**Cold cost.** Both runs used the same Intel i5-13420H, 12 verifier workers, four Torch intra-op threads and the one-second timeout. Queries ran serially with fresh candidate interpreters and empty verifier stores. No concurrent research benchmark was launched. Cold collection took 2,639.65 and 1,950.13 seconds, including writing checkpoints. The verifier itself took 2,637.54 and 1,949.32 seconds. For K200 the clock measures the complete verifier call. Shorter policies use the elapsed time at which every required candidate output was available inside the shared K200 batch. Those times include contention from later candidates and exclude the cost of a separate ADAPT decision barrier. Standalone K100 and ADAPT latency remains unmeasured. The retained independent K50 controls measured means of 1.357 and 1.551 s/query, with P95s of 2.049 and 2.227. Attempt counts below are the logical cost of each policy. The physical total of 189,600 spans both shared replicates. [First cold receipt](../artifacts/verification_depth_v3_run/cold1_receipt.json) · [Second cold receipt](../artifacts/verification_depth_v3_run/cold2_receipt.json)
+
+| Population | Arm | Attempts | Extra attempts vs K50 | Attempts/query | Run 1 mean / P95 (s) | Run 2 mean / P95 (s) |
+|---|---|---:|---:|---:|---:|---:|
+| A | K50 | 11,750 | 0 | 49.37 | 1.988 / 3.076 | 1.272 / 1.889 |
+| A | K100 | 23,500 | 11,750 | 98.74 | 3.473 / 5.082 | 2.218 / 2.839 |
+| A | K200 | 47,000 | 35,250 | 197.48 | 6.254 / 9.031 | 4.017 / 4.792 |
+| A | ADAPT | 39,350 | 27,600 | 165.34 | 5.409 / 9.031 | 3.425 / 4.791 |
+| B | K50 | 11,950 | 0 | 50.00 | 1.501 / 2.813 | 1.299 / 1.881 |
+| B | K100 | 23,900 | 11,950 | 100.00 | 2.651 / 4.812 | 2.295 / 2.896 |
+| B | K200 | 47,800 | 35,850 | 200.00 | 4.808 / 8.594 | 4.156 / 4.827 |
+| B | ADAPT | 40,300 | 28,350 | 168.62 | 4.146 / 8.452 | 3.546 / 4.771 |
+| pooled | K50 | 23,700 | 0 | 49.69 | 1.744 / 2.913 | 1.286 / 1.881 |
+| pooled | K100 | 47,400 | 23,700 | 99.37 | 3.061 / 4.969 | 2.257 / 2.881 |
+| pooled | K200 | 94,800 | 71,100 | 198.74 | 5.529 / 8.931 | 4.087 / 4.812 |
+| pooled | ADAPT | 79,650 | 55,950 | 166.98 | 4.777 / 8.931 | 3.486 / 4.787 |
+
+ADAPT stopped at 50 on 101 eligible queries, saving 150 attempts on each. Extending those 101 queries to 200 bought another 0.50 pooled NDCG points and five additional top-ten golds. K100 improved 31 gold ranks at 47,400 attempts. ADAPT improved 56 at 79,650 attempts and K200 improved 61 at 94,800 attempts. All three cleared the 1.0-point pooled gain, positive interval, positive A and B gains, and non-gold-rate requirements in each replicate. K50 is the reference.
+
+**Noise and replay.** Zero of 94,800 paired verdicts differed between replicates. Timeouts fell from 1,344 to 1,106, with 256 timeout-state changes (183 in A, 73 in B), all on nonpasses. Each replicate also matched both retained K50 controls on all 23,700 prefix verdicts. Against controls 1 and 2 respectively, 86 and 73 pairs changed timeout status in replicate 1, and 33 and 36 did so in replicate 2. One replicate-2 nonpass, q2286/d843, recorded a Windows candidate-job cleanup error. The first replicate had timed out on that candidate. The research driver completed both runs. The saved observations do not establish the cause of the machine-wide timing difference. On the v2 timeout-boundary case q2111/d2111, both v3 launches exited zero (0.412 and 0.503 s). Both K200 and ADAPT moved gold from 129th to third in both replicates. Independent sorting checks and a second archive replay reproduced every ranking. The warm replays read 94,800 verdicts each in 0.569 and 0.536 seconds with zero launches. [Per-candidate noise ledger](../artifacts/verification_depth_v3_run/noise.json) · [First cold observations](../artifacts/verification_depth_v3_run/cold1.jsonl.gz) · [Second cold observations](../artifacts/verification_depth_v3_run/cold2.jsonl.gz)
+
+The other 1,269 dev-stdin queries retained their original stage-1 results. On AtCoder (61 queries), NDCG@10/MRR@10 were 6.93/5.43 and Recall@10 was 7/61. On CodeChef (1,112), these were 12.13/10.63 and 188/1,112. On HackerRank (96), they were 52.51/48.56 and 62/96. No other source underwent execution reranking.
+
+All 39 regression tests passed, including the Windows containment suite. Five frozen SHA-256 hashes matched before collection and after both runs. The archived aggregate still rounds to 19.96 NDCG@10 and 19.05 MRR@10. No test queries or test relevance labels were loaded, no fresh test evaluation occurred, and production code was untouched. [Regression output](../artifacts/verification_depth_v3_run/regression_tests.txt) · [Frozen reference hashes](../artifacts/verification_depth_v3_run/frozen_before.json)
+
+Reproduce from the repository root using the pinned local data. The first command replays the saved observations into a fresh destination. The last two commands perform a new cold study.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/verification_depth_v3.py analyze --output artifacts/verification_depth_v3_replay
+.venv/Scripts/python.exe -B -X utf8 artifacts/verification_depth_v3.py collect --folder artifacts/verification_depth_v3_repro
+.venv/Scripts/python.exe -B -X utf8 artifacts/verification_depth_v3.py analyze --folder artifacts/verification_depth_v3_repro
+```
+
+## Step 3 summary
+
+| Experiment | Decision | Key finding |
+|---|---|---|
+| Example stripping | **REJECTED** | Recall@50 fell from 69.00% to 68.40% on 500 queries and from 29.50% to 29.00% on 200. Neither panel gained a top-50 gold. |
+| Head+tail V1 | **REJECTED** | Truncated-A Recall@50 gained 0.24 pp, with a 95% CI of [−1.70, +2.18]. |
+| Window max-pooling V2 | **REJECTED on latency** | Truncated-A Recall@50 gained 5.10 pp. The latency limit was amended after A and before B scoring. Added latency was 0.784 s/query against the amended 0.300 s limit. V2's B split remains unopened. Parked for possible Step 5 opt-in evaluation under separately registered rules. Production approval remains deferred. |
+| Callable verification | **REJECTED** | Signature matching supplied nearly all the gain. Execution added 0.15 NDCG points over signatures on the training corpus at 0.637–0.657 s per eligible query. |
+| Expanded stdin/stdout parser | **NOT INTEGRATED** | Coverage rose from 511 to 845 of 5,000, introducing two independently confirmed incorrect matches. |
+| Verification depth | **K100, K200 and ADAPT QUALIFIED** | Both replicates gave pooled gains of 6.03, 11.88 and 11.38 NDCG points respectively, at 47,400, 94,800 and 79,650 attempts. |
+
+**Step 3 decision. Recommend ADAPT for possible Step 5 integration.** It retained 95.8% of K200's gain at 84.0% of its candidate cost, with a pooled non-gold pass rate of 0.167% and one gold-rank regression outside the top ten. Production integration is deferred to architectural review.
+
+### Closing validation stopped
+
+The independent second-process replay matched the complete metric and qualification results, except for elapsed warm-replay time. Both compressed ranking ledgers, the raw bootstrap archive and the candidate noise ledger matched byte for byte. The subsequent reporting script raised an AssertionError before writing its validation receipt. Its extra text check expected 39 same-line occurrences of “ ... ok”. There are 37 such lines and two standalone “ok” lines. A dependency deprecation warning interrupted the live-mode test line and a progress display interrupted the legacy-checkpoint test line. The actual regression runner returned exit code 0 and reported “Ran 39 tests in 21.621s” and “OK”. [Raw unittest output](../artifacts/verification_depth_v3_run/regression_tests.txt)
+
+Registration v3 requires stopping on a script error. The empirical decisions above stand, and formal Step 3 closure is pending. The prior control-evidence commit is d331de44562932a23c53810ab4c52a5a9b06f2ee. The results, README correction and research scripts remain local and unstaged. Neither closing commit was made and nothing was pushed.
+
+### Post-stop audit of Registration v3
+
+Recorded at **2026-11-27 17:03:09 +05:30 IST**. This corrective audit validates the saved evidence. The original registration remains stopped on the closing reporting-script error, and formal Step 3 closure remains pending. The original registration, stop record and all 13 files in the archived v3 run were preserved.
+
+The original command exited successfully and the saved unittest footer reports **39 tests in 21.621 seconds, OK**. The corrected reporting check reads the suite count and final status. The original verbose log passes even with its two split result lines. Checks using modified copies rejected a wrong count, a missing footer, a failure and a skipped test. The audit did not run the test suite again. [Original regression output](../artifacts/verification_depth_v3_run/regression_tests.txt) · [Corrected audit script](../artifacts/verification_depth_post_stop_audit.py)
+
+A fresh process replayed the archived verdicts in a disposable directory with candidate execution blocked. The replay checked the fixed training split, ordered candidates, execution fingerprints, and successful-exit requirement. The two ranking files, bootstrap archive and noise ledger matched byte for byte. The full results JSON agreed after excluding measured warm-replay time. Both cold archives matched their recorded SHA-256 hashes and contained 94,800 attempts each with zero cache hits. There were zero pass/fail differences and 256 timeout-state changes. All five frozen hashes matched their retained reference. The historical aggregate remains 19.96 NDCG@10 and 19.05 MRR@10. [Post-stop audit receipt](../artifacts/verification_depth_v3_post_stop_audit.json)
+
+K100, K200 and ADAPT still meet the three registered gates on both archived replicates. On 477 Codeforces training queries, ADAPT reached **25.74 NDCG@10** versus **14.36** for K50, a **+11.38** point gain with a paired 95% interval of **[8.65, 14.23]**. It captured 95.8% of the K200 gain with 15,150 fewer attempts. Its 133/79,650 non-gold passes measure agreement with the designated training relevance label. The semantic correctness of those candidates remains unadjudicated. The only gold-rank regression under ADAPT was q2323, rank 75 to 76. The shared K200 batch provides prefix timing and leaves standalone ADAPT latency unmeasured. The q2286/d843 Windows cleanup error remains unresolved. K50 remains the production default. ADAPT remains a recommendation for architectural review. [Archived results](../artifacts/verification_depth_v3_run/results.json)
+
+To repeat only the post-stop audit, choose a fresh receipt path outside the archive.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/verification_depth_post_stop_audit.py --receipt artifacts/verification_depth_v3_post_stop_audit_repeat.json
+```
+
+### Step 3 closure
+
+The archived v3 evidence and the separate post-stop audit support closing Step 3. The original registered execution remains stopped at its reporting-script error. The closure uses the saved results and the post-stop audit receipt. [Post-stop audit receipt](../artifacts/verification_depth_v3_post_stop_audit.json)
+
+**Decision. ADAPT is approved for Step 5 behind a config flag. K50 stays the default until Step 5 validation.** On the fixed training panel, ADAPT captured 95.8% of K200's NDCG@10 gain with 79,650 versus 94,800 logical attempts and 133 versus 274 non-gold passes. Those pass counts are based on the designated relevance labels. This decision authorizes Step 5 evaluation.
+
+**Open items for Step 5.** Measure standalone ADAPT latency, investigate the Windows cleanup error on q2286/d843 and independently check the semantic correctness of non-gold passes.
+
+**Evaluation proxy correction.** dev-stdin is a **usable directional proxy** for within-panel comparisons of stdin retrieval changes. Its deterministic rankings and fixed training labels support paired comparisons. Its source mix, parser coverage and candidate pool limit generalization to the historical test benchmark and its absolute scores. The earlier invalid-proxy finding applies to using dev-stdin as a substitute for that benchmark.
+
+#### Reproduction dependencies
+
+- The research scripts are artifacts/verification_depth.py, artifacts/verification_depth_v2.py, artifacts/verification_depth_v3.py and artifacts/verification_depth_post_stop_audit.py. They share the tracked artifacts/retrieval_consistency.py and import tracked src/__init__.py, src/config.py, src/cache.py, src/encoder.py, src/execute.py and, on Windows, src/_windows_job.py. The scripts read this log for the registration text. artifacts/verification_depth_cases.py is a standalone list of proposed counterexamples. It imports and reads no files, and the published v3 gates do not depend on adjudicating those examples.
+- The tracked input ledgers under artifacts/ are dev_stdin_full_baseline.json, dev_stdin_ab_split.json, retrieval_diagnostic_train.json and query_example_baseline_train.json. The scripts read three external files from the local CoIR APPS snapshot at revision f22508f96b7a36c2415181ed8bb76f76e04ae2d5. The paths relative to the snapshot are queries/queries-00000-of-00001.parquet, data/train-00000-of-00001.parquet and corpus/corpus-00000-of-00001.parquet. The query read filters to training. These dataset files are provisioned in the Hugging Face cache.
+- The retained v2 evidence under artifacts/verification_depth_v2_run/ is tracked. It includes all 477 JSON files in each of control1/ and control2/, plus plan.json, control_shell.json, control_validation.json, noise.json, machine.json and frozen_before_sweep.json. The tracked inconsistency.json, shared/q2111.json and direct/q2111_extension.json preserve the v2 stop evidence.
+- The v3 analysis and audit use the tracked 13-file archive under artifacts/verification_depth_v3_run/. It contains plan.json, machine.json, frozen_before.json, cold1.jsonl.gz, cold2.jsonl.gz, cold1_receipt.json, cold2_receipt.json, rankings1.json.gz, rankings2.json.gz, results.json, bootstrap.npz, noise.json and regression_tests.txt. The audit also compares transient replay outputs in a temporary directory. Its separate closure receipt is artifacts/verification_depth_v3_post_stop_audit.json.
+- The frozen check reads artifacts/baseline_frozen.json and hashes it, artifacts/appsretrieval_results.json, artifacts/exec_results.jsonl, artifacts/doc_ids.npy and artifacts/emb_cache.npz. The first four are tracked. emb_cache.npz is 58,990,966 bytes and already covered by .gitignore. Its SHA-256 is 8c6492d21e5fcbd8e02fb31d82d1575bb2acaa28ec19e386b6b573adafe17790, preserved in both frozen manifests and the audit receipt. Every file in the closure commits is below 20 MB.
+- Other imports are Python standard library modules or installed dependencies. NumPy, PyArrow and PyTorch are directly used. The environment manifest records the package versions, and the legacy v2 control comparison also uses its recorded Windows shell metadata. Research scripts run from the repository root against the saved data. Temporary output paths and user-supplied evidence paths are local runtime inputs.
+- The voided v1 directory and the remaining partial v2 arm files stay local and untracked. They include the old sweep plan and shell metadata, partial shared and direct arm records, and control_review_inputs.json. The legacy v1 and v2 modes can reference those abandoned inputs or optional timing.json and evidence.json files. No completed v2 arm evidence ledger or timing ledger exists. The v3 replay and post-stop audit read the retained v2 K50 controls and do not require the voided arm files.
+
+Step 3 CLOSED 2026-11-27 17:06:49 +05:30 IST

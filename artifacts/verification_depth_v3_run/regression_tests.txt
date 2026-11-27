@@ -1,0 +1,52 @@
+test_ascii_art_and_mixed_content_remain_exact (test_execute.TrailingPaddingTests.test_ascii_art_and_mixed_content_remain_exact) ... ok
+test_crashing_output_is_rejected_with_padding_allowed (test_execute.TrailingPaddingTests.test_crashing_output_is_rejected_with_padding_allowed) ... ok
+test_declared_integer_rows_accept_trailing_spaces_and_tabs (test_execute.TrailingPaddingTests.test_declared_integer_rows_accept_trailing_spaces_and_tabs) ... ok
+test_example_text_does_not_grant_padding_permission (test_execute.TrailingPaddingTests.test_example_text_does_not_grant_padding_permission) ... ok
+test_fixed_width_and_literal_padding_remain_exact (test_execute.TrailingPaddingTests.test_fixed_width_and_literal_padding_remain_exact) ... ok
+test_leading_spacing_internal_spacing_line_order_and_content_are_preserved (test_execute.TrailingPaddingTests.test_leading_spacing_internal_spacing_line_order_and_content_are_preserved) ... ok
+test_version_verdict_cache_keeps_comparison_modes_separate (test_execute.TrailingPaddingTests.test_version_verdict_cache_keeps_comparison_modes_separate) ... ok
+test_crash_after_matching_output_is_rejected (test_execute.VerifyTests.test_crash_after_matching_output_is_rejected) ... ok
+test_explicit_nonzero_exit_rejects_matching_output (test_execute.VerifyTests.test_explicit_nonzero_exit_rejects_matching_output) ... ok
+test_subprocess_launch_error_is_rejected (test_execute.VerifyTests.test_subprocess_launch_error_is_rejected) ... ok
+test_successful_execution_requires_matching_output (test_execute.VerifyTests.test_successful_execution_requires_matching_output) ... ok
+test_timeout_rejects_partial_matching_output (test_execute.VerifyTests.test_timeout_rejects_partial_matching_output) ... ok
+test_handles_standalone_colons_and_separate_sample_headings (test_query_example_preprocessing.ExampleStrippingTests.test_handles_standalone_colons_and_separate_sample_headings) ... ok
+test_leaves_ambiguous_examples_and_specifications_intact (test_query_example_preprocessing.ExampleStrippingTests.test_leaves_ambiguous_examples_and_specifications_intact) ... ok
+test_original_variant_and_document_are_separate_cache_entries (test_query_example_preprocessing.ExampleStrippingTests.test_original_variant_and_document_are_separate_cache_entries) ... ok
+test_removes_only_labelled_examples_with_multiple_pairs (test_query_example_preprocessing.ExampleStrippingTests.test_removes_only_labelled_examples_with_multiple_pairs) ... ok
+test_allocation_failure_does_not_abort_other_candidates (test_verification_completion.CandidateExecutionTests.test_allocation_failure_does_not_abort_other_candidates) ... ok
+test_cleans_candidate_files_after_success_and_timeout (test_verification_completion.CandidateExecutionTests.test_cleans_candidate_files_after_success_and_timeout) ... ok
+test_empty_stdout_requires_success (test_verification_completion.CandidateExecutionTests.test_empty_stdout_requires_success) ... ok
+test_float_and_mixed_output_stay_exact (test_verification_completion.CandidateExecutionTests.test_float_and_mixed_output_stay_exact) ... ok
+test_query_source_and_policy_are_used_without_loading_demo_dataset (test_verification_completion.DemoVerificationTests.test_query_source_and_policy_are_used_without_loading_demo_dataset) ... ok
+test_live_mode_cannot_return_a_preexisting_mteb_score (test_verification_completion.EvaluationModeTests.test_live_mode_cannot_return_a_preexisting_mteb_score) ... C:\CtrlFind\.venv\Lib\site-packages\mteb\models\model_implementations\bmretriever_models.py:6: DeprecationWarning: Importing from 'sentence_transformers.models' is deprecated and will be removed in a future version. Please use 'sentence_transformers.sentence_transformer.modules' instead.
+  from sentence_transformers.models import Pooling, Transformer
+ok
+test_nul_does_not_merge_different_examples_across_versions (test_verification_completion.HistoryCacheTests.test_nul_does_not_merge_different_examples_across_versions) ... ok
+test_legacy_and_interrupted_records_are_ignored_and_new_results_resume (test_verification_completion.LiveCheckpointTests.test_legacy_and_interrupted_records_are_ignored_and_new_results_resume) ... 
+Standardizing text corpus format:   0%|          | 0/2 [00:00<?, ? examples/s]
+Standardizing text corpus format: 100%|██████████| 2/2 [00:00<00:00, 83.32 examples/s]
+
+Standardizing text corpus format:   0%|          | 0/2 [00:00<?, ? examples/s]
+Standardizing text corpus format: 100%|██████████| 2/2 [00:00<00:00, 860.46 examples/s]
+ok
+test_resume_keys_cover_source_examples_timeout_policy_and_top_k (test_verification_completion.LiveCheckpointTests.test_resume_keys_cover_source_examples_timeout_policy_and_top_k) ... ok
+test_windows_runner_change_misses_old_checkpoint_key (test_verification_completion.LiveCheckpointTests.test_windows_runner_change_misses_old_checkpoint_key) ... ok
+test_cancelled_batch_shuts_down_pending_futures (test_windows_job.CandidateIsolationTests.test_cancelled_batch_shuts_down_pending_futures) ... ok
+test_non_windows_dispatch_preserves_stock_subprocess_options (test_windows_job.CandidateIsolationTests.test_non_windows_dispatch_preserves_stock_subprocess_options) ... ok
+test_sequential_candidates_do_not_share_state (test_windows_job.CandidateIsolationTests.test_sequential_candidates_do_not_share_state) ... ok
+test_assignment_failure_never_runs_the_candidate (test_windows_job.WindowsJobTests.test_assignment_failure_never_runs_the_candidate) ... ok
+test_blocked_stdin_still_times_out (test_windows_job.WindowsJobTests.test_blocked_stdin_still_times_out) ... ok
+test_breakaway_request_is_denied (test_windows_job.WindowsJobTests.test_breakaway_request_is_denied) ... ok
+test_exception_and_cancellation_stop_the_tree (test_windows_job.WindowsJobTests.test_exception_and_cancellation_stop_the_tree) ... ok
+test_failed_cleanup_rejects_successful_output (test_windows_job.WindowsJobTests.test_failed_cleanup_rejects_successful_output) ... ok
+test_failed_termination_releases_blocked_stdin_and_stops_tree (test_windows_job.WindowsJobTests.test_failed_termination_releases_blocked_stdin_and_stops_tree) ... ok
+test_job_creation_or_configuration_failure_prevents_launch (test_windows_job.WindowsJobTests.test_job_creation_or_configuration_failure_prevents_launch) ... ok
+test_redirected_descendants_stop_after_both_exit_codes (test_windows_job.WindowsJobTests.test_redirected_descendants_stop_after_both_exit_codes) ... ok
+test_text_streams_environment_and_working_directory (test_windows_job.WindowsJobTests.test_text_streams_environment_and_working_directory) ... ok
+test_timeout_closes_inherited_pipes_and_stops_descendants (test_windows_job.WindowsJobTests.test_timeout_closes_inherited_pipes_and_stops_descendants) ... ok
+
+----------------------------------------------------------------------
+Ran 39 tests in 21.621s
+
+OK
