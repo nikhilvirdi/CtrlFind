@@ -4,7 +4,9 @@ from __future__ import annotations
 import ctypes
 from contextlib import ExitStack
 from ctypes import wintypes as win
+import locale
 import subprocess
+import sys
 import threading
 import time
 
@@ -16,6 +18,7 @@ _KILL_ON_JOB_CLOSE = 0x00002000
 _LIMIT_ACTIVE_PROCESSES = 0x00000008
 _PROCESS_JOB_ACCESS = 0x0101  # PROCESS_SET_QUOTA | PROCESS_TERMINATE
 _SYNCHRONIZE = 0x00100000
+_QUERY_LIMITED_INFORMATION = 0x1000
 _SNAP_THREADS = 0x00000004
 _THREAD_SUSPEND_RESUME = 0x0002
 _INVALID_HANDLE = ctypes.c_void_p(-1).value
@@ -73,6 +76,7 @@ _query_job = _api("QueryInformationJobObject", win.BOOL, win.HANDLE, ctypes.c_in
                   win.DWORD, win.LPDWORD)
 _close = _api("CloseHandle", win.BOOL, win.HANDLE)
 _assign = _api("AssignProcessToJobObject", win.BOOL, win.HANDLE, win.HANDLE)
+_is_member = _api("IsProcessInJob", win.BOOL, win.HANDLE, win.HANDLE, ctypes.POINTER(win.BOOL))
 _kill_job = _api("TerminateJobObject", win.BOOL, win.HANDLE, win.UINT)
 _open_process = _api("OpenProcess", win.HANDLE, win.DWORD, win.BOOL, win.DWORD)
 _snapshot = _api("CreateToolhelp32Snapshot", win.HANDLE, win.DWORD, win.DWORD)
@@ -138,10 +142,14 @@ def _stop_job(job, close_job):
             limits.basic.active_process_limit = 1
             _checked(_set_job_info(job, 9, ctypes.byref(limits), ctypes.sizeof(limits)))
             for pid in _member_ids(job):
-                handle = _open_process(_SYNCHRONIZE, False, pid)
+                handle = _open_process(_SYNCHRONIZE | _QUERY_LIMITED_INFORMATION, False, pid)
                 if handle:
-                    handles.callback(_close, handle)
-                    members.append((pid, handle))
+                    handles.callback(lambda h: _checked(_close(h)), handle)
+                    # The enumerated PID can be recycled before OpenProcess.
+                    member = win.BOOL()
+                    _checked(_is_member(handle, job, ctypes.byref(member)))
+                    if member.value:
+                        members.append((pid, handle))
                 elif ctypes.get_last_error() != _ERROR_INVALID_PARAMETER:
                     _checked(handle)
         finally:
@@ -186,6 +194,8 @@ def _stop_job(job, close_job):
 
 def run(args, *, input, timeout, cwd):
     """Capture text stdio, with a deadline even if the child blocks stdin."""
+    encoding = "utf-8" if sys.flags.utf8_mode else locale.getencoding()
+    stdin = input.replace("\n", "\r\n").encode(encoding)
     job = process = timer = None
     assigned = False
     expired = threading.Event()
@@ -221,21 +231,20 @@ def run(args, *, input, timeout, cwd):
         limits.basic.flags = _KILL_ON_JOB_CLOSE
         _checked(_set_job_info(job, 9, ctypes.byref(limits), ctypes.sizeof(limits)))
         process = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE, text=True, cwd=cwd,
+                                   stderr=subprocess.PIPE, cwd=cwd,
                                    creationflags=_CREATE_SUSPENDED)
         handle = _checked(_open_process(_PROCESS_JOB_ACCESS, False, process.pid))
         try:
             _checked(_assign(job, handle))
             assigned = True
         finally:
-            _close(handle)
+            _checked(_close(handle))
         _resume_primary(process.pid)
         timer = threading.Timer(timeout, expire)
         timer.start()
-        stdout, stderr = process.communicate(input=input, timeout=timeout)
+        stdout, stderr = process.communicate(input=stdin, timeout=timeout)
         if expired.is_set():
             raise subprocess.TimeoutExpired(args, timeout, output=stdout, stderr=stderr)
-        return subprocess.CompletedProcess(args, process.returncode, stdout, stderr)
     finally:
         try:
             if timer is not None:
@@ -253,11 +262,30 @@ def run(args, *, input, timeout, cwd):
                         process.kill()
                 finally:
                     try:
-                        process.wait(timeout=1)
+                        try:
+                            process.wait(timeout=1)
+                        except subprocess.TimeoutExpired as exc:
+                            raise TimeoutError("Windows candidate process did not reap during cleanup") from exc
                     finally:
-                        for pipe in (process.stdin, process.stdout, process.stderr):
-                            if pipe is not None:
-                                pipe.close()
+                        with ExitStack() as resources:
+                            # Release CPython's owned process handle even if a traceback retains Popen.
+                            resources.callback(process._handle.Close)
+                            for pipe in (process.stdin, process.stdout, process.stderr):
+                                if pipe is not None:
+                                    resources.callback(pipe.close)
         finally:
             with job_lock:
                 close_job()
+    if stdout is None or stderr is None:
+        raise PipeCaptureError("A candidate output pipe could not be read")
+    decoded = []
+    for name, stream in (("stdout", stdout), ("stderr", stderr)):
+        try:
+            decoded.append(stream.decode(encoding).replace("\r\n", "\n").replace("\r", "\n"))
+        except UnicodeDecodeError:
+            raise PipeCaptureError(f"Candidate {name} is invalid for the configured encoding") from None
+    return subprocess.CompletedProcess(args, process.returncode, *decoded)
+
+
+class PipeCaptureError(OSError):
+    """An unreliable capture after the candidate job has stopped."""

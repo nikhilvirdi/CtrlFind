@@ -4,18 +4,19 @@
   python evaluate.py --mode full       run stage 2 live (hours on CPU, resumable)
   python evaluate.py --mode baseline   stage 1 only
 
-Writes artifacts/appsretrieval_results.json.
+Writes a new report in artifacts/evaluation_runs/ or at --output.
 """
 from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 import time
 
 import numpy as np
 
-from src.config import (ARTIFACTS, DEFAULT_K, DOC_IDS, EXEC_RESULTS,
-                        RESULTS_JSON)
+from src.config import ADAPT_DEFAULT, ARTIFACTS, DEFAULT_K, DOC_IDS, EXEC_RESULTS
+from src.evaluation_output import evaluation_encoder, report_path, write_report
 
 
 def load_cached_verdicts() -> dict[str, set[str]]:
@@ -41,14 +42,20 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", choices=["cached", "full", "baseline"], required=True)
     ap.add_argument("--k", type=int, default=DEFAULT_K)
+    ap.add_argument("--adapt", action="store_true", default=ADAPT_DEFAULT,
+                    help="Verify ranks 51–200 only when none of the first 50 passes")
+    ap.add_argument("--output", type=Path, help="Path to a new JSON report")
     args = ap.parse_args()
+    if args.adapt and (args.mode != "full" or args.k != DEFAULT_K):
+        ap.error("--adapt requires --mode full and --k 50")
+    policy = "full_adapt" if args.adapt else args.mode
+    output = report_path(ap, args.output, f"appsretrieval_{policy}.json")
 
     import mteb
-    from src.encoder import E5
     from src.mteb_wrappers import (CachedExecReranker, E5Encoder,
                                    LiveExecReranker)
 
-    e5 = E5()
+    e5 = evaluation_encoder()
     print(f"device: {e5.device}, cached embeddings: {len(e5.cache)}")
 
     if args.mode == "baseline":
@@ -58,8 +65,9 @@ def main() -> None:
         print(f"historical replay without exit-code provenance: {len(verdicts)} queries with passing snippets")
         model = CachedExecReranker(E5Encoder(e5, "prism/e5-base-v2-exec-rerank"), verdicts)
     else:
-        model = LiveExecReranker(E5Encoder(e5, "prism/e5-base-v2-exec-rerank-live"),
-                                 ARTIFACTS / "exec_results_live.jsonl", k=args.k)
+        suffix = "-adapt" if args.adapt else ""
+        model = LiveExecReranker(E5Encoder(e5, f"prism/e5-base-v2-exec-rerank-live{suffix}"),
+                                 ARTIFACTS / "exec_results_live.jsonl", k=args.k, adapt=args.adapt)
 
     t0 = time.time()
     # Full mode resumes candidate checks from its own checkpoint, not an old MTEB score.
@@ -72,10 +80,8 @@ def main() -> None:
     s = out["scores"]["test"][0]
     print(f"\nNDCG@10 {s['ndcg_at_10']*100:.2f}   MRR@10 {s['mrr_at_10']*100:.2f}   ({elapsed:.0f}s)")
 
-    RESULTS_JSON.parent.mkdir(parents=True, exist_ok=True)
-    with RESULTS_JSON.open("w", encoding="utf-8") as f:
-        json.dump(out, f, indent=2, default=str)   # results contain datetimes
-    print(f"wrote {RESULTS_JSON}")
+    write_report(output, out)
+    print(f"wrote {output}")
 
 
 if __name__ == "__main__":

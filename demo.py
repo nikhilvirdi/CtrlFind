@@ -19,7 +19,7 @@ from src.config import DEFAULT_K, VERSIONS_DIR
 from src.data import load_apps
 from src.encoder import E5
 from src.evolution import History, rank_verified
-from src.execute import allows_trailing_padding, parse_example, verify
+from src.execute import VerificationOutcome, allows_trailing_padding, parse_example, verify
 from src.versions import VersionStore
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -133,14 +133,21 @@ def search(query: str, scope: str, k: int, do_verify: bool):
         cache_keys = {i: (i, POOL_TEXT[i], *ex_key) for i in cand}
         todo = [i for i in cand if cache_keys[i] not in _VERDICTS]
         reused = len(cand) - len(todo)
+        failed_capture = set()
         if todo:
             t = time.perf_counter()
-            flags = verify([POOL_TEXT[i] for i in todo], example, allow_trailing_padding=padding)
-            for i, ok in zip(todo, flags):
-                _VERDICTS[cache_keys[i]] = ok
+            outcomes = verify([POOL_TEXT[i] for i in todo], example, allow_trailing_padding=padding, detailed=True)
+            for i, outcome in zip(todo, outcomes, strict=True):
+                if outcome is VerificationOutcome.INFRASTRUCTURE_ERROR:
+                    failed_capture.add(i)
+                else:
+                    _VERDICTS[cache_keys[i]] = outcome is VerificationOutcome.PASS
             t_verify = time.perf_counter() - t
-        passed = {i: _VERDICTS[cache_keys[i]] for i in cand}
-        verdicts = {i: ("passed" if ok else "failed") for i, ok in passed.items()}
+        passed = {i: _VERDICTS.get(cache_keys[i], False) for i in cand}
+        verdicts = {i: ("skipped" if i in failed_capture else "passed" if ok else "failed")
+                    for i, ok in passed.items()}
+        if failed_capture:
+            note = f"Execution could not verify {len(failed_capture)} candidate(s). These results were not cached."
         ranked = rank_verified(cand, score, passed)
     else:
         ranked = cand

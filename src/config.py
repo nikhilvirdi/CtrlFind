@@ -14,6 +14,8 @@ DOC_PREFIX = "passage: "
 # Stage 2
 DEFAULT_K = 50          # candidates verified per query
 EXEC_TIMEOUT = 1.0      # seconds per candidate
+ADAPT_DEFAULT = False
+ADAPT_LIMIT = 200
 
 EMB_CACHE = ARTIFACTS / "emb_cache.npz"
 EXEC_RESULTS = ARTIFACTS / "exec_results.jsonl"   # from the original full run

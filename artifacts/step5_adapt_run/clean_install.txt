@@ -1,0 +1,3 @@
+Clean CPython environment, no model or dataset startup
+ERROR: Could not find a version that satisfies the requirement mteb==2.21.0 (from versions: none)
+ERROR: No matching distribution found for mteb==2.21.0

@@ -1,0 +1,449 @@
+{
+  "1": {
+    "q2286_d843": {
+      "K200": {
+        "id": "d843",
+        "phase": "infrastructure",
+        "launched": true,
+        "error": "TimeoutError: Candidate job member PID 36412 did not signal (WAIT_TIMEOUT, 995 ms)",
+        "seconds": 3.028714999993099,
+        "passed": false
+      },
+      "ADAPT": {
+        "id": "d843",
+        "phase": "timeout",
+        "launched": true,
+        "seconds": 1.2272432000027038,
+        "passed": false
+      }
+    },
+    "k50_archive": {
+      "1": {
+        "pairs": 6000,
+        "verdict_differences": [],
+        "timeout_changes": [
+          [
+            "q2096",
+            "d719",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2286",
+            "d5781",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q111",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2175",
+            "d719",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2171",
+            "d5994",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q87",
+            "d5781",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q1606",
+            "d6925",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q72",
+            "d719",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2235",
+            "d6649",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2274",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2274",
+            "d6649",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q19",
+            "d7542",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q19",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2249",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q22",
+            "d827",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2135",
+            "d719",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q76",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q14",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2138",
+            "d7742",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2015",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2015",
+            "d7371",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2323",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2161",
+            "d7371",
+            "nonzero",
+            "timeout"
+          ]
+        ]
+      },
+      "2": {
+        "pairs": 6000,
+        "verdict_differences": [],
+        "timeout_changes": [
+          [
+            "q111",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2171",
+            "d5994",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2235",
+            "d6649",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2274",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2274",
+            "d6649",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q19",
+            "d7542",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q19",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2249",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q22",
+            "d827",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q76",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q14",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2138",
+            "d7742",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2015",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2015",
+            "d7371",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2323",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2161",
+            "d7371",
+            "nonzero",
+            "timeout"
+          ]
+        ]
+      }
+    },
+    "warm_ranking_differences": {
+      "K50": [],
+      "K200": [],
+      "ADAPT": []
+    }
+  },
+  "2": {
+    "q2286_d843": {
+      "K200": {
+        "id": "d843",
+        "phase": "timeout",
+        "launched": true,
+        "seconds": 1.978898500005016,
+        "passed": false
+      },
+      "ADAPT": {
+        "id": "d843",
+        "phase": "timeout",
+        "launched": true,
+        "seconds": 1.3971973999869078,
+        "passed": false
+      }
+    },
+    "k50_archive": {
+      "1": {
+        "pairs": 6000,
+        "verdict_differences": [],
+        "timeout_changes": [
+          [
+            "q2096",
+            "d719",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2286",
+            "d5781",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2175",
+            "d719",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2171",
+            "d5994",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q87",
+            "d5781",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q1606",
+            "d6925",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q72",
+            "d719",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2235",
+            "d6649",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q19",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2135",
+            "d719",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q76",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q14",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2015",
+            "d7371",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2323",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2161",
+            "d7371",
+            "nonzero",
+            "timeout"
+          ]
+        ]
+      },
+      "2": {
+        "pairs": 6000,
+        "verdict_differences": [],
+        "timeout_changes": [
+          [
+            "q2171",
+            "d5994",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2235",
+            "d6649",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q19",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q76",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q14",
+            "d7742",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2015",
+            "d7371",
+            "nonzero",
+            "timeout"
+          ],
+          [
+            "q2323",
+            "d1644",
+            "exit_zero",
+            "timeout"
+          ],
+          [
+            "q2161",
+            "d7371",
+            "nonzero",
+            "timeout"
+          ]
+        ]
+      }
+    },
+    "warm_ranking_differences": {
+      "K50": [],
+      "K200": [],
+      "ADAPT": []
+    }
+  }
+}

@@ -1,7 +1,9 @@
+import os
 import unittest
 from unittest.mock import patch
 
-from src.execute import allows_trailing_padding, parse_example, verify
+from src.execute import (VerificationInfrastructureError, VerificationOutcome,
+                         allows_trailing_padding, parse_example, verify)
 
 
 class VerifyTests(unittest.TestCase):
@@ -29,7 +31,12 @@ class VerifyTests(unittest.TestCase):
 
     def test_subprocess_launch_error_is_rejected(self):
         with patch("src.execute._run_candidate", side_effect=OSError("cannot start interpreter")):
-            self.assertEqual(verify(["print(input())"], self.example, workers=1), [False])
+            if os.name == "nt":
+                with self.assertRaises(VerificationInfrastructureError):
+                    verify(["print(input())"], self.example, workers=1, detailed=True)
+            else:
+                self.assertEqual(verify(["print(input())"], self.example, workers=1, detailed=True),
+                                 [VerificationOutcome.INFRASTRUCTURE_ERROR])
 
 
 class TrailingPaddingTests(unittest.TestCase):

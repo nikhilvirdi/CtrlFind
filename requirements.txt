@@ -1,6 +1,2 @@
 mteb==2.21.0
-sentence-transformers>=3.0
-datasets>=2.19
-numpy>=1.26
-gradio>=6.0
-pygments>=2.14
+-r requirements-demo.txt

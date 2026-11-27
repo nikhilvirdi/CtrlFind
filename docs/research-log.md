@@ -1670,3 +1670,102 @@ Reproduce with a new output directory from the workspace root. The replay comman
 .venv/Scripts/python.exe -B -X utf8 artifacts/step4_version_retrieval.py artifacts/step4_version_repro
 .venv/Scripts/python.exe -B -X utf8 artifacts/step4_version_replay.py artifacts/step4_version_repro
 ```
+
+## Step 5
+
+### Standalone verification preregistration
+
+Registered at **2026-11-27 20:04:47 +05:30 IST**, before implementation measurements. Use the fixed Step 3 CoIR APPS training plan and both cold archives for deterministic replay. The standalone benchmark selects 60 parseable Codeforces queries per archived half by applying random.Random("20261125:step5:HALF").sample to the lexically sorted eligible IDs. Freeze IDs and ordered top 200 before candidate execution. Use only training query text and qrels and the same 8,765 document candidate pool as the depth study. Load candidate code by its archived IDs. Keep the same example, padding rule, one-second execution timeout, Windows Job Objects, default worker count and four Torch threads. Use the archived semantic ordering to isolate verification. No retrieval model run is timed and no test queries or test relevance labels are read.
+
+Run two repeats of K50, fixed K200 and standalone ADAPT, using separate empty checkpoints. Within each repeat rotate arm order by query to distribute host drift. Each ADAPT query waits for ranks 1–50 and only launches ranks 51–200 if no prefix candidate passes. Compare complete top-200 orders and record executable verdicts, execution calls, timeout and infrastructure counts, early stops, extensions, cold and warm end-to-end reranker path timings (mean, median, nearest-rank P95 and sum), and cache hits. Stage-1 responses are injected and queue and embedding overhead are outside this benchmark. Record parent CPU and memory where measurable, with process-scope limits. Warm repeat uses the same checkpoint. Archive replay checks exact attempted IDs, verdict use, and final order on both 477-query ledgers, with zero child launches, and checks the disabled policy against archived K50. Cold data is sampled and standalone runs may expose differences near the timeout.
+
+Each standalone repeat must show a pooled ADAPT NDCG@10 gain of at least 1.0 point against K50, with a positive lower paired 95% bootstrap endpoint (10,000 query draws, seed 20261125) and a positive gain in both halves. The non-gold pass rate must be at most 0.500% and no gold ranked top ten by K50 may leave the top ten under ADAPT. Report all verdict and timing differences. ADAPT's mean and P95 must each be at or below fixed K200 in both repeats. The relative gate compares the two deeper policies. An absolute production latency budget remains an architectural input. Any ADAPT infrastructure failure or evidence of surviving processes fails standalone signoff. Report false outcomes independently of timeout noise. No policy is enabled by default. A frozen hash mismatch, failure of exact archived policy replay, change in disabled K50 semantics, or a demonstrated unresolved critical containment defect stops validation. Keep all recorded gates fixed.
+
+### Integration and archive validation
+
+The live reranker offers ADAPT through an explicit option. The default K50 call keeps the existing verification and reranking path. The demo and version-retrieval verifier retain their existing fixed-depth behavior. ADAPT avoids verification without a parseable example and checkpoints only after every required phase completes. It separates its checkpoint from fixed K50 and includes the ordered candidates, source, example, comparison settings, runner and environment in its cache key. Incompatible fixed-depth keys miss after a verifier-source edit as before. Their record format is unchanged. Resume assumes local, trusted checkpoints and a single writer.
+
+Both v3 ledgers were passed through the live reranker with saved verdicts. For each replicate, K50 matched the full top-200 order on 477 queries, with 23,700 verdicts and 144 passes. ADAPT matched the full top-200 order on the same 477 queries, with 79,650 verdicts and 254 passes. Exact ordered attempt IDs and warm replay also matched. The replay launched zero candidates. The source of the rank and verdict observations remains the original archive. [Replay receipt](../artifacts/step5_adapt_run/archive_replay.json)
+
+The first standalone attempt stopped after its first search, before any measurement was persisted. The research memory sampler treated a Windows process pseudo-handle as a C integer and Win32 rejected it. The partial output directory preserves the plan and archive replay. The sampler now passes a pointer-sized handle. The registered panel and gates were unchanged, and the retry started with fresh checkpoints. [Preflight plan](../artifacts/step5_adapt_preflight/plan.json)
+
+### Security and release scope
+
+Windows launches the candidate suspended, assigns it to a kill-on-close Job Object, and resumes it only after assignment succeeds. The deadline can stop the tree while the parent writes stdin or while a descendant holds inherited pipes. The runner waits for the job and closes pipes and handles during cleanup. ADAPT treats setup, cleanup and pipe capture failures as infrastructure errors, aborts the affected search, and leaves the query uncached. A candidate that times out normally or exits nonzero remains a failed verdict. The one-second limit applies to the candidate run. Scheduling, process creation and cleanup can increase wall time.
+
+The temporary working directory separates relative files between subprocesses. Candidates inherit the verifier's environment, privileges, filesystem and network access. Job Objects contain a Windows process tree. They provide no filesystem, network or privilege isolation. The runner has no explicit output-byte or memory limit, and the non-Windows path times out only the direct process. Transient candidate timeouts can be cached. A shared service needs its own isolation and resource controls before running untrusted code.
+
+The demo and normal evaluation entry points can load held-out data. This validation used the pinned training query and relevance files, the allowed 8,765-document retrieval pool, and archived aggregate scores. The evaluation output changes protect recorded reports and direct writable evaluation embeddings into the run directory. Docker packaging includes the demo and the version-store assets it uses. Those assets remain subject to provenance review. The repository has no project-wide license file. Upstream APPS and E5-base-v2 publish MIT terms. The CoIR APPS dataset card does not establish redistribution rights for each sourced problem or solution. [APPS license](https://github.com/hendrycks/apps/blob/main/LICENSE) · [CoIR APPS dataset card](https://huggingface.co/datasets/CoIR-Retrieval/apps) · [E5-base-v2 model card](https://huggingface.co/intfloat/e5-base-v2)
+
+### Standalone measurements
+
+The fixed panel includes 120 parseable Codeforces training queries (60 per half) from the 8,765-snippet study. The Windows host has an Intel Core i5-13420H and 12 logical processors. CPython 3.13.13 ran with UTF-8 mode and 12 candidate workers. The one-second timeout and separate cold checkpoints were used throughout. The measured path includes checkpoint reads, writes, and staged verification against injected archived rankings. Embedding, similarity search, model startup, and dataset reads are outside the clock. Parent CPU sums and maximum sampled resident memory exclude spawned interpreters. [Fixed panel and candidate ordering](../artifacts/step5_adapt_run/plan.json) · [Measured source hashes](../artifacts/step5_adapt_run/implementation.json)
+
+| Repeat | Policy | Cold mean / P50 / P95 (s) | Cold total (s) | Actual launches | Candidate timeouts | Warm mean / P50 / P95 (ms) | Warm checkpoint queries |
+|---|---|---:|---:|---:|---:|---:|---:|
+| 1 | K50 | 1.391 / 1.338 / 1.986 | 166.94 | 6,000 | 67 | 6.27 / 6.27 / 7.57 | 120/120 |
+| 1 | K200 | 4.554 / 4.376 / 6.217 | 546.44 | 24,000 | 283 | 8.08 / 8.03 / 9.87 | 120/120 |
+| 1 | ADAPT | 4.138 / 4.459 / 6.488 | 496.57 | 20,394 | 230 | 33.25 / 12.45 / 14.85 | 118/120 |
+| 2 | K50 | 1.608 / 1.574 / 2.365 | 192.98 | 6,000 | 75 | 6.24 / 5.93 / 8.77 | 120/120 |
+| 2 | K200 | 5.709 / 5.596 / 7.716 | 685.11 | 24,000 | 296 | 7.86 / 7.62 / 10.51 | 120/120 |
+| 2 | ADAPT | 5.075 / 5.609 / 7.754 | 609.05 | 20,389 | 240 | 30.43 / 11.52 / 16.25 | 118/120 |
+
+Repeat 1 selected 20,550 ADAPT slots and extended 97 times. Two queries failed closed and retried without a checkpoint on the warm pass. K200 reported a job-member wait timeout on q2286/d843, separate from its 283 ordinary timeouts. The same candidate timed out normally under ADAPT. In the failing call, the job closed and the direct child reaped before the error surfaced. The member PID was absent when checked afterward. The observation establishes a cleanup deadline miss under load. Candidate d843 interprets a digit string in the painting task as a row width of 40,425,524,644 and attempts allocations of that scale. This can stress cleanup, but the evidence does not establish the exact cause of the delayed signal or complete process lifetime after the deadline. [Repeat 1 summary](../artifacts/step5_adapt_run/rep1_summary.json) · [Cold candidate evidence](../artifacts/step5_adapt_run/rep1_cold.json.gz) · [Warm candidate evidence](../artifacts/step5_adapt_run/rep1_warm.json.gz)
+
+Repeat 2 had the same slot count and extension frequency. Each repeat completed 22 early stops, entered the second phase on 97 queries and aborted one query during its first phase. The second-phase abort was q2346/d978 after exit zero. The first-phase abort was q1696/d2279 after a nonzero exit. Capture failed during Windows text decoding, with UTF-8 reader-thread errors. Changing encodings or falling back to a partial verification verdict would change experimental conditions. Both repeats instead left the queries uncached. Warm retries launched 83 and 84 candidates respectively. All successful cold rankings were identical to their warm replays. In repeat 2, the q2286/d843 candidate timed out normally under both deeper policies. [Both repetitions and per-candidate noise](../artifacts/step5_adapt_run/results.json) · [Cold and warm comparison](../artifacts/step5_adapt_run/cold_comparison.json)
+
+ADAPT used about 15.0% fewer cold launches than K200, with mean latency 9.1% and 11.1% lower. P95 was 0.270 s and 0.038 s higher, so the registered latency gate failed twice. ADAPT's cold parent CPU totals were 392.38 s and 453.88 s versus K200's 475.44 s and 529.63 s. Sampled parent working sets peaked at about 669 MiB. These timing results neither include the candidate interpreters' CPU/RAM usage nor establish live end-to-end latency with embeddings and retrieval. The live ADAPT path currently asks MTEB for the full score list to resolve ties at the verification boundary. Its live retrieval memory footprint remains unmeasured.
+
+| Policy | NDCG@10 | MRR@10 | Gold in top 10 | Gold rank improved / regressed vs K50 | Δ NDCG@10 [paired 95% CI] |
+|---|---:|---:|---:|---:|---:|
+| K50 | 11.55 | 11.44 | 14/118 | 0 / 0 | — |
+| K200 | 22.32 | 21.89 | 28/118 | 14 / 1 | +10.76 [5.74, 16.70] |
+| ADAPT | 21.72 | 21.61 | 26/118 | 12 / 1 | +10.17 [5.08, 16.10] |
+
+The table reports the identical complete-case results from both repetitions. ADAPT gained 10.00 points on the 60 complete A queries and 10.34 on the 58 complete B queries, with zero top-ten exits. The two missing queries prevent a full-panel gain claim. ADAPT produced 28 non-gold passes per repeat, or 0.136% of 20,550 scheduled slots and approximately 0.137% of actual launches. Both denominators are below the 0.500% threshold. Of 6,000 K50, 24,000 K200 and 20,350 ADAPT candidate pairs with recorded verdicts in both repetitions, zero changed pass/fail. Timeout state changed on 8, 35 and 22 pairs respectively. Each live K50 repeat also had zero verdict differences against either archive on its 6,000 matched pairs. Differences in timeout states ranged from eight to 23 across those comparisons.
+
+**Standalone qualification FAILED.** The positive paired gains and non-gold rate held on the measured complete cases, with zero top-ten exits. The full-panel, P95 and infrastructure gates failed. Retain ADAPT as a default-off evaluation option and keep K50 as the default. Resolve the capture-error policy and investigate the native cleanup deadline under controlled resource load before making a release decision. The Step 3 shared-batch evidence remains unchanged.
+
+### Consequential non-gold passes
+
+Nine non-gold candidates reproduced the first published example and failed a second published example whose answer was independently derived. At q1606, four prefix passers stopped ADAPT and left gold at 85. Fixed K200 promoted gold to 5. The second input `2 2` has only the nice integers 3 and 5, and the four observed answers were 1, 0, 0 and 0 instead of 8. At q2155, four different prefix passers stopped ADAPT and left gold at 85 instead of K200's 8. Two draws cover both kinds with probability one half, so the second case needs the two answers `2` and `2`. The four candidates printed 0 or `Impossible`, or raised an `IndexError`.
+
+At q2323, d7089 printed `1 1 1` on the first example under exit code zero and moved gold from 75 to 76. On the independently checked second example it raised an `IndexError` and printed no answer. The designated gold d2323 itself fails to compile because of a module-level `nonlocal HD`. The other 19 ADAPT non-gold passes per repeat remain semantically unadjudicated. These checks used 18 isolated candidate launches and do not change the scored verdicts. [Fixtures, raw outputs and exit codes](../artifacts/step5_adapt_run/witnesses.json)
+
+### Final verification and reproduction
+
+The timed code used a numeric boost to publish passing scores. Review of the installed scorer found that it breaks equal scores by descending document ID regardless of insertion order. The final ADAPT code publishes unique rank scores after stable stage-1 ordering and partitioning. This preserves ascending document ID for exact cosine ties and leaves the default K50 score path unchanged. The tie correction happened after timing. A no-execution replay through the final code reproduced every stored v3 top-200 order, the measured cold rankings, and both ADAPT query-abort outcomes in each repeat. Timing applies to the measured source snapshot with the same candidate policy and separate score export. [Final archive replay](../artifacts/step5_adapt_final_replay/archive_replay.json) · [Final measured replay](../artifacts/step5_adapt_final_replay/measured_replay.json)
+
+All five frozen input hashes and all 13 v3 archive hashes matched. The frozen held-out aggregate remains **19.96 NDCG@10 and 19.05 MRR@10**. Step 4's stored results replayed before integration with all five gates reproduced and no candidate executions. The version index, store, and demo paths are unchanged. The full regression suite exited 0 and reported **56 tests in 11.546s, OK**, including Windows Job Object assignment, blocked stdin, descendants, cancellation and cleanup errors. Syntax compilation of 56 Python files, parsing the architecture SVG, and matching the 16 Docker COPY sources to the allowlist passed. [Integrity receipt](../artifacts/step5_adapt_final_replay/integrity.json) · [Regression output](../artifacts/step5_adapt_run/regression_tests.txt)
+
+Report protection applies to the two evaluation CLIs. The separate demo and index utilities still use the default writable embedding cache. Run those utilities from a separate checkout when preserving frozen data. Docker Desktop's Linux daemon pipe was unavailable under both ordinary and elevated checks. The build and startup smoke test remain blocked. A real demo startup would also require separate authorization for its held-out inputs. The receipt preserves the build attempt's local Buildx lock-permission error. [Docker build attempt](../artifacts/step5_adapt_run/docker_build.txt)
+
+The sandboxed dependency install could not resolve packages. A retry against the official Python package index in a disposable Windows CPython 3.13 environment installed the declared dependencies, passed `pip check`, imported MTEB, Torch, Gradio and Datasets, and verified a toy subprocess through the Windows runner. It exited zero without loading a model or dataset. This checks the Windows requirements and leaves the Linux/Python 3.11 container runtime unverified. [Release checks](../artifacts/step5_adapt_run/release_checks.json)
+
+Reproduce from the repository root with the pinned training data cached. Use fresh output paths. The replay command checks cold observations and archived ranks without executing candidates.
+
+```powershell
+.venv/Scripts/python.exe -B -X utf8 artifacts/step5_adapt_validation.py artifacts/step5_adapt_repro --benchmark
+.venv/Scripts/python.exe -B -X utf8 artifacts/step5_adapt_validation.py artifacts/step5_adapt_repro_check --replay-measured artifacts/step5_adapt_run
+.venv/Scripts/python.exe -B -X utf8 artifacts/step5_adapt_witnesses.py artifacts/step5_adapt_witnesses_repro.json
+```
+
+### Release assessment
+
+| Area | Status | Evidence |
+|---|---|---|
+| Default K50 | PASSED | Archived orders, preserved default dispatch and zero live K50 verdict differences on the fixed panel. |
+| ADAPT implementation | PASSED | Explicit opt-in, exact archive replay, separate checkpoints and stable final ranks. |
+| Standalone ADAPT validation | FAILED | Repeatable pipe-capture aborts, incomplete panel and two P95 gate misses. |
+| Execution security for public use | BLOCKED | Windows containment tests passed. Native cleanup deadline reliability and OS-level sandboxing remain open. |
+| Version retrieval | PASSED | Stored version results replayed and production version retrieval remains unchanged. |
+| Frozen evaluation | PASSED | Five reference hashes and original aggregate scores verified. Evaluation reports have protected output paths. |
+| Docker | BLOCKED | Static context allowlist passed. Docker Desktop's Linux daemon was unavailable. |
+| Documentation | PASSED | Default and opt-in policies, dataset scopes, evidence and security limits documented. |
+| Repository | PASSED | Local changes and new research evidence are accounted for. The working tree remains uncommitted for review. |
+| Regression tests | PASSED | 56 tests, exit 0, final footer OK. |
+| Reproducibility | PASSED | Both v3 archives and both measured cold ledgers replayed with zero child launches. |
+| Clean Windows installation | PASSED | Dependency resolution, imports and isolated toy verification succeeded. |
+| Licensing and redistribution | BLOCKED | Project license and redistribution provenance for dataset-derived assets require a decision. |
+
+Keep K50 as the default. Before architectural signoff, resolve the repeatable capture errors and investigate the Windows cleanup deadline, then reassess the registered gates and the full-list retrieval cost. Validate the container with training or synthetic startup data and resolve redistribution requirements before release. Require separate authorization before running a fresh held-out evaluation.

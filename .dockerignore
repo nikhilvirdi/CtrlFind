@@ -1,7 +1,18 @@
-venv/
-.venv/
-__pycache__/
-*.pyc
-artifacts/emb_cache.npz
-artifacts/exec_results_live.jsonl
-.git/
+# Allow only files used by the demo image.
+**
+!requirements-demo.txt
+!demo.py
+!src/__init__.py
+!src/cache.py
+!src/config.py
+!src/data.py
+!src/encoder.py
+!src/evolution.py
+!src/execute.py
+!src/versions.py
+!artifacts/versions/bugs.json
+!artifacts/versions/log.json
+!artifacts/versions/objects.jsonl
+!artifacts/versions/refs/v1.json
+!artifacts/versions/refs/v2.json
+!artifacts/versions/refs/v3.json

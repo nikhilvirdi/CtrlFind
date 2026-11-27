@@ -13,6 +13,8 @@ __pycache__/
 *.tmp
 *.tmp.*
 artifacts/exec_results_live.jsonl
+artifacts/exec_results_live.adapt.jsonl
+/artifacts/evaluation_runs/
 
 # Large local caches
 artifacts/emb_cache.npz

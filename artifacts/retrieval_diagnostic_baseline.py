@@ -38,7 +38,8 @@ def main(output):
             "    raise SystemExit(f'Cannot install cache-only guard: {error}')\n",
             encoding="utf-8",
         )
-        command = [sys.executable, "evaluate.py", "--mode", "cached"]
+        report = "cached_replay.json"
+        command = [sys.executable, "evaluate.py", "--mode", "cached", "--output", report]
         completed = subprocess.run(
             command, cwd=scratch, check=True, capture_output=True, text=True, encoding="utf-8",
             env={**os.environ, "PYTHONPATH": str(scratch), "MTEB_CACHE": str(scratch / "mteb"),
@@ -46,10 +47,10 @@ def main(output):
                  "PYTHONDONTWRITEBYTECODE": "1"},
         )
         print(completed.stdout, end="")
-        result = (inputs / "appsretrieval_results.json").read_bytes()
+        result = (scratch / report).read_bytes()
         score = json.loads(result)["scores"]["test"][0]
         summary = {
-            "command": "python evaluate.py --mode cached",
+            "command": f"python evaluate.py --mode cached --output {report}",
             "mteb_overwrite_strategy": "only-cache",
             "cached_result_sha256": hashlib.sha256(cache.read_bytes()).hexdigest(),
             "replayed_result_sha256": hashlib.sha256(result).hexdigest(),

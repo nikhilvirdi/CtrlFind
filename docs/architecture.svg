@@ -85,7 +85,8 @@
     <path class="flow" d="M755 495H790"/>
     <rect class="box" x="790" y="450" width="204" height="90" rx="10"/>
     <text class="heading" x="892" y="487" text-anchor="middle">Top-K candidates</text>
-    <text x="892" y="515" text-anchor="middle">K=50 by default</text>
+    <text x="892" y="512" text-anchor="middle">K50 by default</text>
+    <text x="892" y="532" text-anchor="middle">Live ADAPT: up to 200</text>
   </g>
 
   <g id="verification">
@@ -113,7 +114,7 @@
     <text x="720" y="761">Otherwise unverified</text>
     <text x="720" y="788">Trim eligible trailing padding</text>
 
-    <text x="384" y="830">An example can expose bugs that change its result.</text>
+    <text x="384" y="830">ADAPT checks ranks 51–200 only when the first 50 have no pass.</text>
 
     <path class="flow storage exchange" d="M315 883H402V845"/>
     <rect class="box" x="34" y="865" width="281" height="168" rx="10"/>

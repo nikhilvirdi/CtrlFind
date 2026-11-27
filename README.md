@@ -2,7 +2,27 @@
 
 CtrlFind takes a programming problem written in English and searches for the Python code most likely to solve it. It starts with semantic search, then runs the strongest candidates against an example from the problem statement to check whether their output matches.
 
-The project focuses on code retrieval, not code generation. It uses a small embedding model and local execution rather than a generative model or a hosted AI API. CtrlFind is still being developed; the results below distinguish the frozen benchmark baseline from later experiments on training data.
+CtrlFind uses an embedding model and local execution to retrieve and rank existing code. The published benchmark and the training experiments use separate query sets.
+
+## Quickstart
+
+Use Python 3.11, the version used by the Docker image. Create a virtual environment with `python -m venv .venv`. Activate it with `.\.venv\Scripts\Activate.ps1` in PowerShell or `source .venv/bin/activate` in a POSIX shell.
+
+```sh
+python -m pip install -r requirements.txt
+python demo.py
+```
+
+Open [the local demo](http://127.0.0.1:7860). On first launch, it downloads the dataset and model from Hugging Face and builds an embedding cache. The demo uses the benchmark's held-out problem list and relevance mappings. Use the training-only research scripts for development measurements. The repository includes three synthetic versions that you can search individually or together.
+
+Use a separate checkout or the container for interactive use when preserving a frozen baseline. The demo and index utilities can refresh the checkout's default embedding cache.
+
+Keep the demo local and use a disposable environment for execution checks. Leave **Run candidates on the example** unchecked for similarity-only search. The Docker image also runs the demo locally when you bind its port to loopback.
+
+```sh
+docker build -t ctrlfind .
+docker run --rm -p 127.0.0.1:7860:7860 ctrlfind
+```
 
 ## The problem
 
@@ -10,13 +30,11 @@ Searching code by keywords works poorly when the question and the implementation
 
 The task is to take a natural-language query and rank a large collection of code snippets so that the relevant ones appear first. A useful retrieval system also has to keep working as code changes.
 
-CtrlFind addresses three related problems:
+CtrlFind supports three related searches.
 
-- **Retrieval accuracy (P0).** Find the relevant code and put it as high in the results as possible.
-- **Retrieval across versions (P1).** Search a particular version of a code collection without rebuilding everything from scratch after every change.
+- **Code retrieval.** Rank Python snippets by relevance to a problem statement.
+- **Version-scoped retrieval.** Search a particular version and reuse embeddings for unchanged snippets.
 - **Evolutionary retrieval.** Search several versions together and distinguish very similar implementations, including working code and versions with small bugs.
-
-The original task is about retrieval. Generating a written answer or explaining the retrieved code is outside its scope.
 
 ## The approach
 
@@ -30,7 +48,7 @@ Passing one example is evidence, not proof of correctness. An unrelated program 
 
 ### Semantic retrieval
 
-CtrlFind uses [E5-base-v2](https://huggingface.co/intfloat/e5-base-v2) to turn the query and Python snippets into vector embeddings. Cosine similarity gives an initial ranking, and the current retrieval configuration keeps the top 50 candidates for verification.
+CtrlFind uses E5-base-v2 to turn the query and Python snippets into vector embeddings. Cosine similarity gives an initial ranking. By default, execution verification checks at most the first 50 candidates (K50). The live ADAPT option considers the first 200 candidates and can return a different number of results. [E5-base-v2 model card](https://huggingface.co/intfloat/e5-base-v2)
 
 The code embeddings are reused across queries. This first pass is important because execution can only help a correct snippet that made it into the candidate set.
 
@@ -46,13 +64,13 @@ Programs that crash, time out, or produce different output do not receive a veri
 
 Candidates that pass verification move above candidates that do not. Within both groups, CtrlFind preserves their original semantic-similarity order.
 
-It checks all selected candidates rather than stopping at the first match. This matters because unrelated programs sometimes share the same sample input format and produce the same small answer. Verification is a reranking signal, not a replacement for retrieval.
+With K50, the verifier checks all 50 selected candidates when an example and enough candidates are available. Opt-in ADAPT checks ranks 1–50 first and checks ranks 51–200 only if the first batch produces no pass. ADAPT uses a separate checkpoint and reports an infrastructure failure without recording a verdict for that query. The demo and version retrieval keep their existing fixed-depth policy.
 
 ## System architecture
 
 ![CtrlFind architecture](docs/architecture.svg)
 
-The main path is query → embedding search → top-K candidates → example-based verification → ranked snippets. A versioned snippet store supplies the searchable code, while embedding and verification caches avoid repeating work when their inputs have not changed. The MTEB integration runs this same retrieval and reranking logic during evaluation.
+The main path is query → embedding search → example-based verification → ranked snippets. The versioned snippet store supplies code for version-scoped and cross-version search. Embedding and verification caches reuse compatible results. The MTEB integration exposes the optional ADAPT policy in live evaluation.
 
 ## Retrieval across versions
 
@@ -126,15 +144,9 @@ The frozen result is saved in [`artifacts/baseline_frozen.json`](artifacts/basel
 
 ### Version retrieval results
 
-An earlier experiment searched the three synthetic versions together: **10,819 distinct snippet contents** across **191 problems** with usable examples. Only **22** of those problems had a buggy version competing in the top 50.
+An earlier experiment searched **10,819 distinct snippet contents** across **191 problems** with usable examples. In the 22 cases with a buggy version competing in the top 50, similarity placed an example-passing sibling first in 16 cases and K50 did so in 22.
 
-| Ranking method | Working version first (22 contested problems) | NDCG@10 (191 problems) |
-|---|---:|---:|
-| Similarity only | 72.7% | 11.88 |
-| Similarity, newest version preferred | 68.2% | 11.83 |
-| Similarity + execution | **100%** | **23.03** |
-
-The 100% figure means **22 out of 22 contested cases**, not 191 out of 191. Also, NDCG@10 measures the full retrieval improvement, not just how well the system chooses between versions. A larger version experiment is still needed.
+A larger training-only experiment used **326 Codeforces queries** and **5,899 logical-document/body entries** across its synthetic versions. Every analyzed gold family had an example-passing original and an example-failing blind mutation. The example-passing sibling ranked above all failing siblings on **122/326** queries with similarity alone and **173/326** with fixed K50. The paired gain was **15.64 points** (95% CI **11.66–19.63**); NDCG@10 rose from **5.19 to 24.52** using example-passing gold siblings as relevant. [Per-query version results](artifacts/step4_version_run/bonus.json)
 
 ## Performance
 
@@ -148,7 +160,7 @@ Execution is the expensive part of the current pipeline. Embedding lookup and co
 | Incremental build, `v1` → `v2` | 20 s for 1,353 changed snippets | Historical T4 GPU measurement |
 | Incremental build, `v2` → `v3` | 11 s for 701 changed snippets | Historical T4 GPU measurement |
 
-The execution measurements come from different runs and should not be read as a controlled speedup. The next performance work targets subprocess overhead, caching, and candidate handling, with correctness checked before accepting an optimization. The intended retrieval and verification runtime is CPU-based; the historical T4 figures describe indexing experiments only.
+The execution measurements come from separate runs under different conditions. The Docker demo uses CPU inference. The T4 figures describe historical indexing experiments.
 
 ## Research and experiments
 
@@ -163,7 +175,9 @@ Several findings have already changed the verifier:
 
 In a paired training audit, the retained verifier passed **393/511 (76.91%)** gold snippets with parseable examples, up from 390/511 under the original rule. Passes among the 2,555 sampled unrelated snippets fell from three to two. Repeat counts varied slightly with nondeterministic outputs and timeouts. These figures describe the sampled training candidates. [Paired verifier audit](docs/research-log.md#2026-11-24-verifier-audit-and-execution-performance-reference)
 
-The v3 verification-depth study used 477 Codeforces training queries. K100, K200 and ADAPT met the registered research thresholds in both cold replicates. ADAPT reached **25.74 NDCG@10** versus **14.36** for K50, a gain of **11.38 points** (paired 95% CI **8.65–14.23**). It used 79,650 logical attempts versus 94,800 for K200. The study used a shared K200 execution batch, so standalone ADAPT latency remains unmeasured. Its non-gold pass count tracks disagreement with the designated relevance label and leaves semantic correctness undetermined. K50 remains the production default. [Depth study](docs/research-log.md#registration-v3-results)
+The verification-depth study used **477 Codeforces training queries** and **8,765 candidate snippets**. ADAPT reached **25.74 NDCG@10** versus **14.36** for K50, a gain of **11.38 points** (paired 95% CI **8.65–14.23**). It used **79,650** logical attempts versus **94,800** for K200. The study derived all policies from shared K200 batches.
+
+A separate standalone study used **120 Codeforces training queries** from the same candidate corpus. ADAPT was faster on average than K200, with higher P95 in both repeats. It left two queries without results after Windows output-capture errors. On the 118 complete queries it gained **10.17 NDCG@10** over K50 (paired 95% CI **5.08–16.10**). It failed standalone validation and remains an opt-in research policy. Independent follow-up examples confirmed nine consequential non-gold passes were incorrect. [Depth study](docs/research-log.md#registration-v3-results) · [Standalone results](docs/research-log.md#standalone-measurements)
 
 ## Tech stack
 
@@ -180,25 +194,37 @@ The v3 verification-depth study used 477 Codeforces training queries. K100, K200
 | Versioning and caching | Content hashes, local cached artifacts |
 | Packaging | Docker |
 
-The retrieval pipeline does not call a generative LLM or require an external model API key.
-
 ## Testing and reproducibility
+
+```sh
+python -m unittest discover -s tests -v
+```
+
+Windows process-tree tests run on Windows. Evaluation commands write new reports under `artifacts/evaluation_runs/` by default. Use `--output` with an unused JSON path for another run. The `cached` mode replays the original verdict ledger. See the [research log](docs/research-log.md#2026-11-25-e5-retrieval-and-live-verification-funnel) for the cache-only procedure and its required inputs.
+
+The normal evaluator targets the held-out benchmark. If you are authorized to run it, use `python evaluate.py --mode full --output path/to/new-report.json` for live K50 and add `--adapt` to opt in. For training-only ADAPT validation, run the following from the repository root with the pinned dataset cached locally. Omit `--benchmark` to replay archived rankings without launching candidates.
+
+```sh
+python -B -X utf8 artifacts/step5_adapt_validation.py artifacts/step5_adapt_repro --benchmark
+```
 
 The frozen benchmark result is kept separately from experimental training runs. Research scripts and audit artifacts record the candidate samples, settings, and observed verification outcomes, while [`docs/research-log.md`](docs/research-log.md) explains why changes were retained or reverted.
 
-The archived v3 regression run reported **39 passing tests**, including Windows process-tree containment, output comparison and checkpoint recovery. A reporting-script error stopped the original registered closing procedure. A separate post-stop audit verified the suite footer, reproduced the saved rankings, bootstrap draws and noise ledger, and matched all five frozen hashes. Step 3 closed on that audited evidence. ADAPT is approved for Step 5 evaluation behind a config flag, with K50 as the default until Step 5 validation. The frozen scores still describe the historical evaluation. [Step 3 closure](docs/research-log.md#step-3-closure)
+The archived verification-depth replay reproduced the saved rankings, bootstrap draws, and noise ledger and matched the five frozen input hashes. K50 remains the default. [Replay receipt](artifacts/verification_depth_v3_post_stop_audit.json)
 
-## Limitations and future work
+## Limitations
 
-- **First-stage recall is the main ceiling.** In the earlier analysis, the relevant snippet reached the top 50 for roughly 31% of queries. Verification cannot recover snippets that were never retrieved.
+- **Verification depends on first-stage recall.** The historical Recall@50 of **31.29%** used **3,765 candidates**. The full MTEB benchmark used **8,765 candidates**. Verification can only promote snippets in the retrieved set.
 - **Example coverage is limited.** The retained parser extracted a usable example for **511/5,000 training problems (10.22%)** in the audit. Earlier notebook figures used a different split and parsing method, so they are not interchangeable.
 - **One example is weak evidence.** Incorrect programs can pass by coincidence, and correct programs can emit different valid outputs. General-purpose checking cannot resolve every problem-specific output rule safely.
-- **Execution can be unstable.** CPU contention, timeouts, and randomized programs can change a verdict between runs. Some transient timeout failures can remain cached. One Windows candidate-job cleanup error in v3 remains unresolved.
-- **Executing arbitrary code is risky.** A subprocess timeout and temporary directory are not a hardened sandbox. Docker helps isolate environments, but the execution system still needs stronger controls before handling untrusted code in a publicly accessible service.
+- **Execution can be unstable.** CPU contention, timeouts, and randomized programs can change a verdict between runs. Some transient timeout failures can remain cached. The archived depth study recorded a Windows process cleanup error. A later cleanup fix passed 41 regression tests and matched saved K50 verdicts on a training sample. That sample excluded the original incident. [Windows validation](artifacts/windows_cleanup_k50_validation_train.json)
+- **Execution requires isolation.** Windows Job Objects contain the candidate process tree. Retrieved Python retains the verifier's filesystem, environment, network and privilege access. The non-Windows runner times out the direct child, and output capture has no explicit byte limit. A standard Docker run gives candidates access to anything available to the container. Keep the demo local, keep credentials and sensitive mounts out of the environment, and use similarity-only mode when you cannot isolate candidate code.
 - **Version evaluation is synthetic.** The current history is generated from a static dataset. Real Git histories and a larger contested-version sample have not yet been validated.
 - **Generalization is unproven.** The current system targets Python programming-problem solutions; its performance on large, mixed-language software repositories has not been established.
 
-The remaining work is to improve execution speed without changing verdicts, raise first-stage retrieval coverage, strengthen version experiments, and repeat the final benchmark under a documented configuration.
+## Licensing and data
+
+The project has no repository-wide `LICENSE` file. The original APPS repository publishes an MIT license and E5-base-v2 declares MIT on its model card. The CoIR dataset card does not establish redistribution rights for each underlying problem statement or solution. Review provenance and applicable notices before redistributing dataset-derived bundles, including the version-store assets included in the demo image. [APPS license](https://github.com/hendrycks/apps/blob/main/LICENSE) · [CoIR APPS dataset card](https://huggingface.co/datasets/CoIR-Retrieval/apps) · [E5-base-v2 model card](https://huggingface.co/intfloat/e5-base-v2)
 
 ## References
 

@@ -77,7 +77,8 @@ class LiveCheckpointTests(unittest.TestCase):
             live.checkpoint = Path(directory) / "verdicts.jsonl"
             live.k, live.timeout, live.doc_text = 1, 1, {"a": "print(1)"}
             with patch.object(SearchEncoderWrapper, "search", side_effect=lambda *a, **kw: {"q": {"a": .8}}):
-                with patch.object(Path, "read_bytes", previous_source), patch("src.mteb_wrappers.verify", return_value=[False]):
+                with (patch.object(Path, "read_bytes", previous_source),
+                      patch("src.mteb_wrappers.verify", return_value=[execute.VerificationOutcome.FAIL])):
                     self.assertEqual(live.search(query), {"q": {"a": .8}})
                 current = live.search(query)
                 self.assertGreater(current["q"]["a"], .8)
@@ -180,7 +181,8 @@ class DemoVerificationTests(unittest.TestCase):
             E=SimpleNamespace(encode_queries=lambda _: (np.array([[1.0]]), 0)),
             POOL_EMB=np.array([[0.8], [0.3]]), POOL_TEXT=["print('1 \\n2')", "print('1\\n2')"],
             parse_example=execute.parse_example, allows_trailing_padding=execute.allows_trailing_padding,
-            verify=execute.verify, rank_verified=rank_verified, _VERDICTS={}, QID_BY_TEXT={}, SHOW=2,
+            verify=execute.verify, VerificationOutcome=execute.VerificationOutcome,
+            rank_verified=rank_verified, _VERDICTS={}, QID_BY_TEXT={}, SHOW=2,
             _card=lambda rank, i, score, verdict, was, gold: f"{i}:{verdict} ",
         )
         exec(compile(ast.Module(body=[search], type_ignores=[]), demo, "exec"), scope)
@@ -207,7 +209,7 @@ class EvaluationModeTests(unittest.TestCase):
         fake_encoder = SimpleNamespace(device="cpu", cache={}, batch_size=2)
         with (
             patch.object(sys, "argv", ["evaluate.py", "--mode", "full"]),
-            patch("src.encoder.E5", return_value=fake_encoder),
+            patch.object(evaluate, "evaluation_encoder", return_value=fake_encoder),
             patch("src.mteb_wrappers.E5Encoder"),
             patch("src.mteb_wrappers.LiveExecReranker"),
             patch.object(mteb, "get_task"),

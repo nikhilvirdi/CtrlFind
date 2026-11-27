@@ -1,21 +1,22 @@
-"""Measure retrieval across versions (P1) and across all versions at once (bonus).
+"""Measure retrieval within individual versions and across their combined corpus.
 
-  python evaluate_versions.py            run both, write artifacts/versions_report.json
-  python evaluate_versions.py --n 100    fewer queries for the bonus test
+  python evaluate_versions.py            write artifacts/evaluation_runs/versions_report.json
+  python evaluate_versions.py --n 100    use fewer queries for cross-version search
 
-Needs: python versions.py build
+Uses the version store in artifacts/versions/.
 """
 from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 import time
 
 import numpy as np
 
-from src.config import DEFAULT_K, VERSIONS_DIR, VERSIONS_REPORT
+from src.config import DEFAULT_K, VERSIONS_DIR
 from src.data import load_apps
-from src.encoder import E5
+from src.evaluation_output import evaluation_encoder, report_path, write_report
 from src.evolution import History, rank_newest, rank_similarity, rank_verified
 from src.execute import allows_trailing_padding, parse_example, verify
 from src.versions import VersionStore
@@ -33,7 +34,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=200)
     ap.add_argument("--k", type=int, default=DEFAULT_K)
+    ap.add_argument("--output", type=Path, help="Path to a new JSON report")
     args = ap.parse_args()
+    output = report_path(ap, args.output, "versions_report.json")
 
     store = VersionStore(VERSIONS_DIR)
     if not store.exists():
@@ -42,7 +45,7 @@ def main() -> None:
     tracked = json.loads((VERSIONS_DIR / "tracked.json").read_text())
 
     apps = load_apps()
-    e5 = E5()
+    e5 = evaluation_encoder()
     hist = History(store, e5)
     print(f"{len(hist.entries)} entries across {len(hist.names)} versions, "
           f"{hist.encoded} newly encoded, {hist.build_seconds:.1f}s")
@@ -58,8 +61,7 @@ def main() -> None:
 
     report: dict = {"entries": len(hist.entries), "p1": {}, "bonus": {}}
 
-    # P1: retrieval on each version, stage 1 only ------------------------
-    print("\nP1, retrieval on each version (stage 1, all test queries)")
+    print("\nRetrieval within each version (similarity only, all test queries)")
     for name in hist.names:
         rows = hist.rows[name]
         pos = {hist.entries[i].doc_id: j for j, i in enumerate(rows)}
@@ -76,8 +78,7 @@ def main() -> None:
                               "search_seconds": round(time.perf_counter() - t0, 2)}
         print(f"   {name}: NDCG@10 {val:.2f}")
 
-    # Bonus: all versions at once ----------------------------------------
-    print("\nBonus, searching all versions at once")
+    print("\nRetrieval across all versions")
     usable = []
     for q in tracked:
         ex = parse_example(q_text[q])
@@ -132,8 +133,8 @@ def main() -> None:
     print(f"\n   contested problems (a buggy version was in the top {args.k}): {contested}")
     print(f"   buggy versions that failed the example: {detected}/{total_bug}")
 
-    VERSIONS_REPORT.write_text(json.dumps(report, indent=2))
-    print(f"\nwrote {VERSIONS_REPORT}")
+    write_report(output, report)
+    print(f"\nwrote {output}")
 
 
 if __name__ == "__main__":

@@ -3,3 +3,8 @@
 /artifacts/verification_depth_v3_post_stop_audit.json -text
 # Preserve the runner's interrupted progress line and original CRLF endings.
 /artifacts/verification_depth_v3_run/regression_tests.txt whitespace=cr-at-eol,-blank-at-eol
+# Keep the exact evidence bytes referenced by the Step 5 release receipt.
+/artifacts/step5_adapt_run/** -text
+/artifacts/step5_adapt_final_replay/** -text
+/artifacts/step5_adapt_preflight/** -text
+/artifacts/step5_adapt_run/regression_tests.txt whitespace=cr-at-eol,-blank-at-eol

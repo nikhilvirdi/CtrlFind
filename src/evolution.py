@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from .execute import verify
+from .execute import VerificationOutcome, verify
 from .versions import VersionStore, content_hash
 
 
@@ -67,12 +67,15 @@ class History:
         ex_key = (*example, allow_trailing_padding)
         keys = {i: (content_hash(self.entries[i].text), *ex_key) for i in cands}
         todo = [i for i in cands if keys[i] not in self._verdicts]
+        observed = {}
         if todo:
-            flags = verify([self.entries[i].text for i in todo], example,
-                           allow_trailing_padding=allow_trailing_padding)
-            for i, ok in zip(todo, flags):
-                self._verdicts[keys[i]] = ok
-        return {i: self._verdicts[keys[i]] for i in cands}
+            outcomes = verify([self.entries[i].text for i in todo], example,
+                              allow_trailing_padding=allow_trailing_padding, detailed=True)
+            for i, outcome in zip(todo, outcomes, strict=True):
+                observed[i] = outcome is VerificationOutcome.PASS
+                if outcome is not VerificationOutcome.INFRASTRUCTURE_ERROR:
+                    self._verdicts[keys[i]] = observed[i]
+        return {i: observed[i] if i in observed else self._verdicts[keys[i]] for i in cands}
 
 
 def rank_similarity(cands, scores):

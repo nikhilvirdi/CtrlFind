@@ -1,0 +1,152 @@
+{
+  "completed_ist": "2026-11-27T21:19:06.560940+05:30",
+  "test_egress": {
+    "heldout_queries_accessed": false,
+    "heldout_qrels_accessed": false,
+    "fresh_heldout_evaluation": false
+  },
+  "regression": {
+    "status": "PASSED",
+    "exit_status": 0,
+    "unittest_count": 56,
+    "duration_seconds": 11.546
+  },
+  "static": {
+    "python_files_compiled": 56,
+    "svg_parse": "PASSED",
+    "docker_context_inputs": 16,
+    "git_diff_check": "PASSED"
+  },
+  "integrity": {
+    "frozen_sha256_verified": 5,
+    "archived_v3_sha256_verified": 13,
+    "step4_sources_and_archive_git_diff_empty": true
+  },
+  "clean_install": {
+    "status": "PASSED",
+    "exit_status": 0,
+    "platform": "Windows AMD64",
+    "python": "CPython 3.13.13",
+    "package_index": "https://pypi.org/simple",
+    "requirements": "requirements.txt",
+    "pip_check": "No broken requirements found.",
+    "resolved_versions": {
+      "mteb": "2.21.0",
+      "torch": "2.15.0",
+      "numpy": "2.5.5",
+      "datasets": "5.2.0",
+      "gradio": "6.32.0",
+      "sentence-transformers": "6.3.0",
+      "transformers": "5.24.1"
+    },
+    "imports_passed": [
+      "mteb",
+      "torch",
+      "gradio",
+      "datasets"
+    ],
+    "synthetic_windows_candidate_passed": true
+  },
+  "docker": {
+    "status": "BLOCKED",
+    "client": "29.9.2",
+    "daemon_pipe_found": false,
+    "elevated_check_exit_status": 1,
+    "build_attempt_exit_status": 1,
+    "startup_run": false
+  },
+  "final_source_sha256": {
+    "src/config.py": "e814c06282d182069e338fb547a0ef3d43e974a128f6ba7643caf4f5488c1531",
+    "src/execute.py": "0034bb6005026ba93921f1d28a5e0e1a26defe84da88be4de384c4f5ad51ea79",
+    "src/_windows_job.py": "bfd3f278ef1105594cbf5586849bcad05ec9c18d06880e650fb787cad4fce760",
+    "src/mteb_wrappers.py": "6911e50a2b91a666daee6d9ea7089376dd6736d169e38cd2a03dc9697b275cc6",
+    "artifacts/step5_adapt_validation.py": "94049b26955bcef6e58dca744aaad6a0ca47b5dc0ef96f0a3f3493593cd1b4b8",
+    "artifacts/step5_adapt_witnesses.py": "e239787ef030da8bce39482bc9697a123008564531e2836ef10c09fbb32f8d70"
+  },
+  "new_output_inventory": {
+    "artifacts/step5_adapt_run/archive_replay.json": {
+      "bytes": 264,
+      "sha256": "2d825d4ddb89ec762380f4ce1c82b3743706eafeb20d1dc49046fd31e4e1dd83"
+    },
+    "artifacts/step5_adapt_run/clean_install.txt": {
+      "bytes": 211,
+      "sha256": "f8a005620bf1e92e9d11491bad1b0a042b2a3dd3ffdd5d8725a0576ffc9d3e95"
+    },
+    "artifacts/step5_adapt_run/cold_comparison.json": {
+      "bytes": 8940,
+      "sha256": "cdd950b46390036f8e0ba02ad485132b2374db15aea4373fc7c88303170bb22d"
+    },
+    "artifacts/step5_adapt_run/docker_build.txt": {
+      "bytes": 67,
+      "sha256": "91d3bcb65efff923cfb4334142bf820ce18fc7c399209b91258670de6ba1777b"
+    },
+    "artifacts/step5_adapt_run/implementation.json": {
+      "bytes": 567,
+      "sha256": "862458e4d6e13c47baad26b38783db4ff4f253de5786871a023e7356a87f1f0f"
+    },
+    "artifacts/step5_adapt_run/integrity.json": {
+      "bytes": 2129,
+      "sha256": "2838992121b5a8e49af4c59ef815dd9843388bd955d0ea80faa68b707cd9485e"
+    },
+    "artifacts/step5_adapt_run/plan.json": {
+      "bytes": 218801,
+      "sha256": "0674997c85ea15d5794792fdb0883007b37815814040a0b9adddc07be5f66ef3"
+    },
+    "artifacts/step5_adapt_run/regression_tests.txt": {
+      "bytes": 9532,
+      "sha256": "0313f5f4018a7ec452bda01f1fe55f5968b28af2b2b33adfe6835ba1a1089b75"
+    },
+    "artifacts/step5_adapt_run/rep1_cold.json.gz": {
+      "bytes": 856021,
+      "sha256": "1e86cfc69095d52a84e9712bcea730266bc518ace9c26f00507ef7926dc439c8"
+    },
+    "artifacts/step5_adapt_run/rep1_summary.json": {
+      "bytes": 4231,
+      "sha256": "39827d08b39d8feb68f1570a0d5cde6c4096870b5d22f30fc83e410182c0ccd9"
+    },
+    "artifacts/step5_adapt_run/rep1_warm.json.gz": {
+      "bytes": 69679,
+      "sha256": "4e6b271e6d3eb6f6481fbc49b778cf3d48e88dd4f237258be0f6831fd2ee8b91"
+    },
+    "artifacts/step5_adapt_run/rep2_cold.json.gz": {
+      "bytes": 857636,
+      "sha256": "d612655bc1d80a1e97a5862f6664ad5828962958f631614c94507ad12e6050c7"
+    },
+    "artifacts/step5_adapt_run/rep2_summary.json": {
+      "bytes": 4215,
+      "sha256": "f7a1593b3d4254446e11747ae337d49d73ce4b7f3c3cf744afd2506c6477f17a"
+    },
+    "artifacts/step5_adapt_run/rep2_warm.json.gz": {
+      "bytes": 69873,
+      "sha256": "2832c0d85ab6792233563e7d7fd91db8ef32af4439b1d7c455943f400d8cb0d9"
+    },
+    "artifacts/step5_adapt_run/results.json": {
+      "bytes": 14714,
+      "sha256": "69fcc501ebc009ac23f6e3fcaa9cd89fb9a6bb17bfc57247c3ae283901193863"
+    },
+    "artifacts/step5_adapt_run/witnesses.json": {
+      "bytes": 3991,
+      "sha256": "f692b93db990c838d1519d0e99c0f6d2d019172fbb9d73b8962862775c46a778"
+    },
+    "artifacts/step5_adapt_final_replay/archive_replay.json": {
+      "bytes": 264,
+      "sha256": "2d825d4ddb89ec762380f4ce1c82b3743706eafeb20d1dc49046fd31e4e1dd83"
+    },
+    "artifacts/step5_adapt_final_replay/integrity.json": {
+      "bytes": 2129,
+      "sha256": "2838992121b5a8e49af4c59ef815dd9843388bd955d0ea80faa68b707cd9485e"
+    },
+    "artifacts/step5_adapt_final_replay/measured_replay.json": {
+      "bytes": 434,
+      "sha256": "c367d7a74870b9afbecd20dd718b2b6075f72d34b127817f4e27df4ad5b5db32"
+    },
+    "artifacts/step5_adapt_preflight/archive_replay.json": {
+      "bytes": 264,
+      "sha256": "2d825d4ddb89ec762380f4ce1c82b3743706eafeb20d1dc49046fd31e4e1dd83"
+    },
+    "artifacts/step5_adapt_preflight/plan.json": {
+      "bytes": 218801,
+      "sha256": "3400a8b8caa01b467fa5cab9f7cdcbf1409463551201af067e9fcc69383f11e3"
+    }
+  }
+}
